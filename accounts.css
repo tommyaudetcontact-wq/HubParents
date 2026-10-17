@@ -7,3 +7,4 @@ form[id^="auth-"] details input{margin-top:8px}
 form[id^="auth-"] .notice[hidden]{display:none}
 #auth-code-display{display:block;width:100%;min-height:100px;word-break:break-all;margin:16px 0;font-family:monospace;font-size:18px}
 @media(max-width:600px){form[id^="auth-"]{max-width:none}form[id^="auth-"] button{width:100%}}
+.profile{position:relative}.notification-count{position:absolute;right:-5px;top:-5px;min-width:21px;height:21px;line-height:21px;border-radius:20px;background:#e04462;color:#fff;font-size:12px;font-weight:900;border:2px solid white;text-align:center}.notification-count[hidden]{display:none}.notification-item{padding:16px 0;border-bottom:2px solid #e4eaf0}.notification-item .row{margin-top:12px}.notification-cards{display:flex;align-items:center;justify-content:center;gap:12px;margin:12px 0}.notification-card{width:110px;display:grid;gap:6px;text-align:center;font-size:12px}.notification-card img{width:100%;height:130px;object-fit:contain}
