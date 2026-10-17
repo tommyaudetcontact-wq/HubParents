@@ -1,0 +1,21 @@
+.tactical-arena{background:radial-gradient(ellipse at center,#62448c80 0 15%,transparent 60%),repeating-linear-gradient(135deg,#ffffff03 0 2px,transparent 2px 45px),#1b203e;isolation:isolate}
+.tactical-arena .battle-side{display:grid;grid-template-columns:minmax(65px,1fr) minmax(125px,190px) minmax(65px,1fr);align-items:center;justify-items:center;gap:16px;min-height:255px;margin:10px auto;max-width:650px}
+.tactical-arena .arena-fighter{grid-column:2;grid-row:1;width:100%;max-width:190px;opacity:1;box-shadow:0 0 25px #b39aff40,0 10px 0 #080e2533;transform-origin:center;z-index:4}
+.tactical-arena .arena-fighter .battle-card-image{height:175px}
+.tactical-arena .arena-reserve{grid-row:1;grid-column:1;width:100%;max-width:100px;opacity:.85;padding:8px;align-self:center}
+.tactical-arena .arena-reserve~.arena-reserve{grid-column:3}
+.tactical-arena .arena-reserve .battle-card-image{height:80px}
+.tactical-arena .battle-unit b{display:block;font-size:12px}.tactical-arena .battle-unit small{display:block;font-size:10px}
+.tactical-arena .arena-reserve small{font-size:8px}.tactical-arena .arena-reserve b{font-size:9px}.tactical-arena .arena-ko{filter:grayscale(1);opacity:.35}
+.tactical-arena .battle-actions{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin-top:20px}
+.tactical-arena .battle-actions button{display:flex;flex-direction:column;gap:5px;white-space:normal;padding:12px 8px;min-height:68px}.tactical-arena .battle-actions small{font-size:10px}
+.tactical-arena .card-attack{animation:arena-lunge .85s cubic-bezier(.2,.8,.2,1)!important;z-index:12}
+.tactical-arena .card-hit{animation:card-hit .7s ease .28s!important}.knockout-ghost{animation:arena-ko 1s both!important}
+@keyframes arena-lunge{0%,100%{transform:translate(0,0) rotate(0)}20%{transform:translate(calc(var(--lunge-x,0px)*-.08),calc(var(--lunge-y,0px)*-.08)) scale(1.06)}48%{transform:translate(var(--lunge-x,0px),var(--lunge-y,0px)) rotate(-7deg) scale(1.1)}65%{transform:translate(calc(var(--lunge-x,0px)*.8),calc(var(--lunge-y,0px)*.8)) rotate(5deg)}}
+@keyframes arena-ko{0%,45%{opacity:1;filter:brightness(1)}60%{filter:brightness(2)}100%{opacity:0;transform:scale(.25) rotate(25deg)}}
+@media(max-width:760px){.tactical-arena .battle-side{grid-template-columns:minmax(55px,1fr) minmax(110px,145px) minmax(55px,1fr);gap:8px;min-height:210px}.tactical-arena .arena-fighter .battle-card-image{height:130px}.tactical-arena .arena-reserve{max-width:75px;padding:5px}.tactical-arena .arena-reserve .battle-card-image{height:65px}.tactical-arena .battle-actions{grid-template-columns:repeat(2,minmax(0,1fr))}.tactical-arena .battle-actions button:last-child{grid-column:1/-1}.tactical-arena .vs{font-size:22px;margin:8px}.tactical-arena .arena-fighter b{font-size:10px}.tactical-arena .arena-fighter small{font-size:9px}}
+@media(prefers-reduced-motion:reduce){.tactical-arena .card-attack,.knockout-ghost{animation:none!important}}
+
+.tactical-arena .knockout-ghost.card-hit{animation:arena-ko 1s both!important}.card-focus:after{content:"⚡";position:absolute;inset:0;display:grid;place-items:center;font-size:60px;animation:shield-pop .8s both;pointer-events:none}
+
+.combat-breakdown{padding:14px;margin:15px 0;border-radius:15px;background:#ffffff0a;font-size:12px;line-height:1.8}.combat-breakdown span{display:inline-block;margin:3px 5px}.boost{color:#99e4b6}.penalty{color:#ffb1b0}
