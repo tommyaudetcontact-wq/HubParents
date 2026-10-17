@@ -21,8 +21,8 @@
   for(const side of [-1,1]){
    const swing=g*side*4,x=side*6.6;
    rect(x-4,-45+swing,8.5,40,3.2,grad(skin));
-   const isSkirt=bottom===3||bottomDesign?.gender==='feminine'&&[5,7].includes(bottomDesign.index),end=bottom===2||bottomDesign?.index===4?-25:bottomDesign?.index===8?-17:isSkirt?-30:-7;
-   if(!isSkirt)path([[x-5,-46+swing],[x+5,-46+swing],[x+4,end+swing],[x-3.8,end+swing]],grad(look.bottomColor));
+   const isSkirt=bottomDesign?.cut==='skirt'||bottom===3||bottomDesign?.gender==='feminine'&&[5,7].includes(bottomDesign.index),end=bottomDesign?.cut==='trousers'?bottomDesign.hem:bottom===2||bottomDesign?.index===4?-25:bottomDesign?.index===8?-17:isSkirt?-30:-7;
+   if(!isSkirt){const bw=bottomDesign?.cut==='trousers'?bottomDesign.width:5,flare=bottomDesign?.pattern==='flare'?bw:bottomDesign?.pattern==='taper'?4:bw*.8;path([[x-bw,-46+swing],[x+bw,-46+swing],[x+flare,end+swing],[x-flare,end+swing]],grad(look.bottomColor));}
    if(bottom===4){rect(x-4,end+swing-3,8,3,1,shade(look.bottomColor,-25));line([[x-3,-42+swing],[x-2,-12+swing]],'#f5f3e380',1.5);}
    if(bottom===1)line([[x+2,-43+swing],[x+1,-11+swing]],'#ffffff40',.8);
    const boot=shoes===1||shoes===5,sy=-7+swing;
@@ -35,11 +35,12 @@
   }
   if(bottomDesign){const n=bottomDesign.index;if([0,1,3,7,8].includes(n)){for(const side of [-1,1]){const x=side*6.6;line([[x+(n===3?0:2),-43],[x+(n===3?0:1),n===8?-19:-9]],n===0?'#b8d5e180':shade(look.bottomColor,-25),n===3?2:1);if(n===0)line([[x-3,-42],[x-2,-37],[x+2,-37]],'#b8d5e180',.8);if(n===1)rect(x-2,-43,4,2,0,shade(look.bottomColor,-30));if(n===7)line([[x,-42],[x,-9]],'#ffffff60',.7);if(n===8)rect(x-4,-19,8,2,0,shade(look.bottomColor,-30));}}if(bottomDesign.gender==='feminine'&&[5,7].includes(n)){path([[-12,-48],[12,-48],[n===5?18:15,n===5?-10:-26],[-(n===5?18:15),n===5?-10:-26]],grad(look.bottomColor));if(n===7)for(const x of [-10,-5,0,5,10])line([[x*.7,-45],[x,-27]],'#ffffff60',.8);}if(n===2)for(const x of [-9,4]){rect(x,-32,5,8,1,shade(look.bottomColor,-10));line([[x,-31],[x+5,-31]],'#ffffff50',1);}if(n===5&&bottomDesign.gender==='masculine')for(const x of [-11,2])path([[x,-43],[x+9,-43],[x+10,-7],[x-1,-7]],grad(look.bottomColor));if(n===6)for(const x of [-10,9])line([[x,-43],[x,-10]],'#f7f3e3',1.5);}
   if(bottom===3)path([[-12,-48],[12,-48],[16,-28],[-16,-28]],grad(look.bottomColor));
+  if(bottomDesign?.cut){const d=bottomDesign;if(d.cut==='skirt')path([[-12,-48],[12,-48],[d.width,d.hem],[-d.width,d.hem]],grad(look.bottomColor));garmentPattern(d,look.bottomColor,-44,d.width,d.hem);line([[-11,-47],[11,-47]],shade(look.bottomColor,-35),2);}
   // Forearms swing opposite the legs; sleeves remain separate from skin.
   for(const side of [-1,1]){const swing=g*side*4;line([[side*16,-82],[side*19,-65+swing],[side*17,-47+swing]],grad(skin),6);oval(side*17,-46+swing,3.2,4,grad(skin));}
   rect(-4,-96,8,15,3,grad(skin));
-  const dress=top===7||topDesign?.gender==='feminine'&&[7,8,14].includes(topDesign.index),tunic=topDesign?.gender==='feminine'&&topDesign.index===9,shirt=grad(look.topColor),hem=dress?-24:tunic?-35:topDesign?.gender==='feminine'&&topDesign.index===10?-54:topDesign?.gender==='masculine'&&topDesign.index===12?-43:-47;
-  path([[-5,-91],[-15,-87],[-20,-75],[-14,-72],[-12,-59],[-(dress?20:feminine?11:13),hem],[dress?20:feminine?11:13,hem],[12,-59],[14,-72],[20,-75],[15,-87],[5,-91],[4,-87],[-4,-87]],shirt);
+  const dress=topDesign?.cut==='dress'||top===7||topDesign?.gender==='feminine'&&[7,8,14].includes(topDesign.index),tunic=topDesign?.gender==='feminine'&&topDesign.index===9,shirt=grad(look.topColor),hem=topDesign?.cut?topDesign.hem:dress?-24:tunic?-35:topDesign?.gender==='feminine'&&topDesign.index===10?-54:topDesign?.gender==='masculine'&&topDesign.index===12?-43:-47;
+  if(topDesign?.cut&&['strap','sleeveless'].includes(topDesign.sleeve)){const w=topDesign.width;path([[-9,-84],[-11,-63],[-w,hem],[w,hem],[11,-63],[9,-84]],shirt);if(topDesign.sleeve==='strap')for(const side of [-1,1])line([[side*8,-91],[side*8,-81]],look.topColor,3);else path([[-5,-91],[-12,-87],[-11,-70],[11,-70],[12,-87],[5,-91]],shirt);}else path([[-5,-91],[-15,-87],[-20,-75],[-14,-72],[-12,-59],[-(topDesign?.width|| (dress?20:feminine?11:13)),hem],[topDesign?.width||(dress?20:feminine?11:13),hem],[12,-59],[14,-72],[20,-75],[15,-87],[5,-91],[4,-87],[-4,-87]],shirt);
   line([[-4,-89],[0,-85],[4,-89]],shade(look.topColor,-40),1);
   if(top===1)for(const y of [-78,-71,-64,-57])line([[-12,y],[12,y]],'#f5f3e2',2.3);
   if(top===2){path([[-6,-91],[-12,-86],[-7,-79],[0,-84],[7,-79],[12,-86],[6,-91]],grad(shade(look.topColor,-15)));line([[-5,-82],[-5,-72]],'#f8f3e4',1);line([[5,-82],[5,-72]],'#f8f3e4',1);rect(-8,-60,16,8,2,shade(look.topColor,-18));}
@@ -48,7 +49,7 @@
   if(top===6){line([[-14,-83],[-10,-76]],'#fff4d8',2);line([[14,-83],[10,-76]],'#fff4d8',2);c.fillStyle='#fff4d8';c.font='bold 17px sans-serif';c.textAlign='center';c.fillText('7',0,-63);}
   if(top===7){line([[-12,-58],[12,-58]],shade(look.topColor,-35),2);for(const x of [-10,0,10])line([[x*.7,-54],[x,-28]],'#ffffff25',.7);}
   if(bottom===5){rect(-9,-71,18,25,2,grad(look.bottomColor));line([[-8,-87],[-7,-69]],look.bottomColor,3);line([[8,-87],[7,-69]],look.bottomColor,3);rect(-5,-65,10,7,1,shade(look.bottomColor,-15));for(const x of [-7,7])oval(x,-70,1.3,1.3,'#d5ba71');}
-  if(topDesign){const n=topDesign.index,f=topDesign.gender==='feminine',longSleeve=[2,3,4,5,6,7,8,9,12,14,15].includes(n)&&!(f&&[8,14].includes(n));if(longSleeve)for(const side of [-1,1]){line([[side*15,-82],[side*19,-65+g*side*4],[side*17,-51+g*side*4]],shirt,7);line([[side*14,-51+g*side*4],[side*20,-51+g*side*4]],shade(look.topColor,-30),1);}
+  if(topDesign){const n=topDesign.index,f=topDesign.gender==='feminine',longSleeve=topDesign.sleeve==='long'||[2,3,4,5,6,7,8,9,12,14,15].includes(n)&&!(f&&[8,14].includes(n));if(longSleeve)for(const side of [-1,1]){line([[side*15,-82],[side*19,-65+g*side*4],[side*17,-51+g*side*4]],shirt,7);line([[side*14,-51+g*side*4],[side*20,-51+g*side*4]],shade(look.topColor,-30),1);}
    if([1,2,5,7,9,12,13].includes(n)){path([[-5,-90],[-10,-85],[-4,-79],[0,-85]],shade(look.topColor,25));path([[5,-90],[10,-85],[4,-79],[0,-85]],shade(look.topColor,15));line([[0,-83],[0,hem]],shade(look.topColor,-35),1);for(const y of [-76,-67,-58])oval(1,y,.9,.9,'#f7f3dd');}
    if(n===3&&!f){path([[-6,-88],[0,-77],[6,-88],[3,-88],[0,-82],[-3,-88]],shade(look.topColor,-35));}
    if(n===8&&!f)rect(-5,-96,10,9,2,shirt);
@@ -67,6 +68,21 @@
    if(dress)for(const x of [-12,-6,0,6,12])line([[x*.5,-48],[x,-25]],'#ffffff38',.8);
   }
   if(bottomDesign?.index===9){rect(-9,-70,18,23,2,grad(look.bottomColor));line([[-8,-88],[-7,-68]],look.bottomColor,3);line([[8,-88],[7,-68]],look.bottomColor,3);rect(-5,-64,10,7,1,shade(look.bottomColor,-20));}
+  // Extra garments change the cut, sleeve, hem and construction, independently of their colour.
+  function garmentPattern(design,color,waist,width,hem){const accent=shade(color,-32),light=shade(color,35),p=design.pattern;
+   if(['folds','pleats','rib','knit','denim','panel','wide','flare','taper'].includes(p))for(let j=-2;j<=2;j++){const xx=j*width/3;line([[xx*.6,waist],[xx,hem-1]],j%2?light:accent,p==='rib'?.7:1);if(p==='knit')for(let y=waist+4;y<hem-2;y+=6)line([[xx-2,y],[xx,y+3],[xx+2,y]],light,.8);}
+   if(['belt','empire','sport','contrast','cuff'].includes(p)){const y=p==='empire'?-73:p==='belt'?-57:p==='cuff'?hem-2:waist+8;line([[-width*.6,y],[width*.6,y]],accent,p==='sport'?4:2);if(p==='belt')rect(-2,y-2,4,4,1,'#d9b75d');if(p==='contrast')for(const side of [-1,1])line([[side*14,-82],[side*18,-68],[side*17,-53]],light,3);}
+   if(['buttons','cardigan','vest'].includes(p)){line([[0,waist-4],[0,hem]],accent,1);for(let y=waist;y<hem-3;y+=8)oval(1,y,1,1,'#e9d9ad');if(p==='vest')for(const side of [-1,1])path([[side*5,-88],[side*12,-82],[side*11,-54],[side*2,-54],[side*2,-72]],accent);if(p==='cardigan')for(const x of [-10,5])rect(x,hem-11,5,6,1,accent);}
+   if(p==='ruffles'){for(let y=hem-13;y<=hem;y+=6){const points=[[-width,y-3]];for(let x=-width;x<=width;x+=3)points.push([x,y+(Math.round((x+width)/3)%2?2:0)]);points.push([width,y-3]);path(points,light,false);}}
+   if(p==='dots'||p==='flowers')for(let y=waist+4;y<hem-4;y+=9)for(let x=-width*.6;x<=width*.6;x+=8){if(p==='dots')oval(x,y,1.3,1.3,light);else{for(let j=0;j<5;j++)oval(x+Math.cos(j*1.256)*1.7,y+Math.sin(j*1.256)*1.7,1.2,1.2,light);oval(x,y,.8,.8,'#e7c66c');}}
+   if(p==='wrap'||p==='asymmetric'){path([[-width*.7,waist],[width*.8,waist+4],[-width*.6,hem]],shade(color,12));line([[width*.8,waist+4],[-width*.6,hem]],accent,1.3);}
+   if(p==='sailor'){path([[-10,-87],[0,-76],[10,-87],[6,-86],[0,-81],[-6,-86]],'#ece7db');line([[0,-79],[0,-70]],accent,2);}
+   if(p==='pockets'){for(const x of [-11,4]){rect(x,waist+12,7,7,1,accent);line([[x,waist+12],[x+7,waist+12]],light,1);}for(const side of [-1,1])line([[side*8,-91],[side*7,-70]],accent,3);}
+   if(p==='stripe')line([[-width*.6,waist+12],[width*.6,waist+12]],light,4);
+   if(p==='peplum')path([[-10,-58],[10,-58],[width,hem],[-width,hem]],shade(color,20));
+   if(p==='split')line([[0,waist],[0,hem]],accent,1.5);
+  };
+  if(topDesign?.cut){const d=topDesign;if(d.sleeve==='puff')for(const side of [-1,1]){oval(side*16,-80,6,8,shirt);line([[side*12,-73],[side*20,-73]],shade(look.topColor,-25),1);}garmentPattern(d,look.topColor,d.cut==='dress'?-54:-80,d.width,d.hem);}
   hair(true);
   if(style('hair')===12)for(let j=0;j<7;j++)oval(12+(j%2)*.8,faceY+6+j*4,2.8,2.8,grad(look.hairColor));
   // Ears, jaw, nose and smaller eyes replace the oversized cartoon face.
