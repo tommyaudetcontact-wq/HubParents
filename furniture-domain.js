@@ -1,0 +1,27 @@
+/* Modèles et finitions, partagés avec Apps Script. */
+(function(C){
+ C.furniturePalettes=[{id:'lagon',name:'Lagon',price:1,colors:{body:'#4d9cad',frame:'#ac835e',fabric:'#f1ece0',detail:'#344557',water:'#82c9d8'}},{id:'foret',name:'Forêt',price:1,colors:{body:'#5d8868',frame:'#79563f',fabric:'#e3d8b8',detail:'#314b45',water:'#8ebfc0'}},{id:'arcade',name:'Arcade',price:1,colors:{body:'#8552ae',frame:'#29354c',fabric:'#e3b44e',detail:'#d3739f',water:'#70b9da'}},{id:'scandinave',name:'Scandinave',price:1,colors:{body:'#e4e8e3',frame:'#c7a47c',fabric:'#b2c2b8',detail:'#586775',water:'#a0d5df'}},{id:'volcan',name:'Volcan',price:1,colors:{body:'#c56b4e',frame:'#49464b',fabric:'#e3c28b',detail:'#bd8c40',water:'#77b8cb'}},{id:'nuit',name:'Nuit',price:1,colors:{body:'#3b546c',frame:'#45414b',fabric:'#939ac2',detail:'#dbc386',water:'#6a9db5'}}];
+ C.furnitureDefault={body:'#6e9eaf',frame:'#b68a60',fabric:'#f5f0e5',detail:'#344557',water:'#82c9d8'};
+ C.furnitureColorKeys=['body','frame','fabric','detail','water'];
+ C.validFurnitureColors=colors=>colors&&Object.keys(colors).length===5&&C.furnitureColorKeys.every(k=>/^#[0-9a-f]{6}$/i.test(colors[k]));
+ C.furnitureFinish=(p,id,placed)=>placed||p?.furnitureColors?.[id]||{...C.furnitureDefault,body:C.catalog.find(i=>i.id===id)?.color||C.furnitureDefault.body};
+ const aquariumNames=['Cube sur buffet','Panoramique','Haute vitrine','Double bassin','Colonne octogonale','Bac ouvert','Octogonal bas','Table aquarium','Cube sur piédestal','Aquarium d’angle','Triple module','Pont aquatique','Aquascape rocheux','Mur de bulles','Paludarium','Arche aquatique','Aquarium de bureau','Jardin tropical','Récif corallien','Tour cylindrique','Banc aquarium','Îlot central','Vitrine à gradins','Meuble bibliothèque','Station futuriste'];
+ const bedNames=['Simple','Double','Superposé','Mezzanine','Baldaquin'];
+ const formats=['Compact','Panoramique','Duo','D’angle','Grand format'],structures=['classique','sur piédestal','à rangement','à cadre ouvert','atelier'];
+ const types=new Map();C.catalog.filter(i=>i.generated).forEach(i=>{if(!types.has(i.kind))types.set(i.kind,i);i.legacyFurniture=true;});
+ for(const [kind,base] of types)for(let model=0;model<25;model++)C.catalog.push({id:'model-'+kind+'-'+model,name:base.name.split(' Lavande')[0]+' · '+(kind==='aquarium'?aquariumNames[model]:(kind==='bed'?bedNames[model%5]:formats[model%5])+' '+structures[Math.floor(model/5)]),icon:base.icon,category:'meuble',kind,need:base.need,amount:base.amount,modelIndex:model,generated:false,customizable:true,color:C.furnitureDefault.body,price:1+model%6});
+ const upgrade=C.upgrade;C.upgrade=function(profile){const p=upgrade(profile);p.furnitureColors=p.furnitureColors||{};p.ownedFurniturePalettes=(p.ownedFurniturePalettes||[]).filter(id=>C.furniturePalettes.some(x=>x.id===id));return p;};
+ function finish(spec,item,profile){if(!spec||spec.mode==='default')return {colors:{...C.furnitureDefault,body:item.color||C.furnitureDefault.body},cost:0};if(spec.mode==='palette'){const palette=C.furniturePalettes.find(p=>p.id===spec.palette);if(!palette)throw Error('Palette inconnue.');return {colors:{...palette.colors},cost:profile.ownedFurniturePalettes?.includes(palette.id)?0:palette.price,palette:palette.id};}if(spec.mode==='custom'&&C.validFurnitureColors(spec.colors))return {colors:C.clone(spec.colors),cost:0};throw Error('Choisis cinq couleurs valides pour ce meuble.');}
+ const apply=C.apply;C.apply=function(profile,e,day,parent){
+   const item=C.catalog.find(i=>i.id===e.item),replay=profile.seen.includes(e.id);
+   if(e.type==='furnitureFinish'){
+     const p=C.upgrade(profile);if(typeof e.id!=='string'||e.id.length>99)throw Error('Action invalide.');if(replay)return p;if(!item||item.category!=='meuble'||!p.inventory.includes(item.id))throw Error('Ce meuble ne t’appartient pas.');const selected=finish(e.finish,item,profile);if(p.coins<selected.cost)throw Error('Il faut 1 $ pour acheter cette palette.');p.coins-=selected.cost;p.furnitureColors[item.id]=selected.colors;if(selected.palette&&!p.ownedFurniturePalettes.includes(selected.palette))p.ownedFurniturePalettes.push(selected.palette);p.room.items.forEach(i=>{if(i.id===item.id)i.colors=C.clone(selected.colors);});p.seen.push(e.id);p.seen=p.seen.slice(-500);p.revision++;p.history.unshift({day,label:'Finition · '+item.name,coins:-selected.cost,xp:0});p.history=p.history.slice(0,100);return p;
+   }
+   let selected=null;if(e.type==='buy'&&item?.category==='meuble'){selected=finish(e.finish,item,profile);if(!replay&&profile.coins<item.price+selected.cost)throw Error('Il manque des dollars pour le meuble et sa palette.');}
+   if(e.type==='room'){for(const i of e.room?.items||[])if(i.colors&&!C.validFurnitureColors(i.colors))throw Error('Couleurs du meuble invalides.');}
+   const p=apply(profile,e,day,parent);if(replay)return p;p.furnitureColors=p.furnitureColors||{};
+   if(selected){p.ownedFurniturePalettes=p.ownedFurniturePalettes||[];if(selected.palette&&!p.ownedFurniturePalettes.includes(selected.palette))p.ownedFurniturePalettes.push(selected.palette);p.coins-=selected.cost;p.furnitureColors[item.id]=selected.colors;if(selected.cost)p.history.unshift({day,label:'Palette · '+item.name,coins:-selected.cost,xp:0});}
+   if(e.type==='room')p.room.items.forEach(i=>{const colors=i.colors||p.furnitureColors[i.id];if(colors){i.colors=C.clone(colors);p.furnitureColors[i.id]=C.clone(colors);}});
+   return p;
+ };
+})(typeof BrawlCore!=='undefined'?BrawlCore:require('./domain.js'));
