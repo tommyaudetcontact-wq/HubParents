@@ -29,3 +29,8 @@ body:has(#style-fitting-preview) .shop-card p{display:none}
 @media(max-width:700px){.style-fitting{gap:10px;padding:10px}.style-fitting canvas{width:125px}.style-fitting h2{font-size:19px}.style-fitting p{font-size:12px}.style-fitting .btn{font-size:11px;padding:7px}body:has(#style-fitting-preview) .grid4{grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}body:has(#style-fitting-preview) .shop-card{padding:7px}body:has(#style-fitting-preview) .shop-card .shop-art{height:110px}body:has(#style-fitting-preview) .shop-card h3{font-size:12px}body:has(#style-fitting-preview) .shop-card .row{flex-wrap:wrap}body:has(#style-fitting-preview) .shop-card .btn{font-size:11px;padding:6px}}
 
 .sim-stage .sim-status-rail{width:82px}.sim-stage .sim-status-person.selected>span{font-size:29px}.sim-stage .sim-status-person:not(.selected) .sim-mini-needs{display:none}
+/* House navigation is docked to the visible viewport, including embedded and fullscreen entry. */
+.sim-stage .house-bottom-nav{position:fixed;display:grid!important;visibility:visible!important;opacity:1;pointer-events:auto;left:auto;right:16px;bottom:calc(8px + env(safe-area-inset-bottom,0px));width:min(420px,calc(100vw - 32px));max-width:none;z-index:600}
+.sim-stage .house-bottom-nav .house-tile{pointer-events:auto;min-height:44px}
+.room-wrap.sim-stage .house-mode-nav{display:none!important}
+@media(max-width:700px){.sim-stage .house-bottom-nav{left:8px;right:8px;width:auto;bottom:calc(8px + env(safe-area-inset-bottom,0px))}.sim-stage:not(.immersive-room){margin-bottom:calc(84px + env(safe-area-inset-bottom,0px))}}
