@@ -2,6 +2,8 @@
 window.HouseDraft=(()=>{
  const C=BrawlCore,types=new Set(['room','houseControl','houseMove','houseOrder','houseCare','simOrder','simTick','simMeet','simMoveIn','simCancel','simLight','appearance']);let draft=null,opening=null,flight=null,locked=false,boundary=0;
  const key=id=>'brawl-house-draft-'+id;
+ const conflictKey=id=>'brawl-house-conflict-'+id;
+ function conflict(){try{return JSON.parse(localStorage.getItem(conflictKey(App.profile().id))||'null');}catch{return null;}}
  function store(){if(draft)try{localStorage.setItem(key(draft.player),JSON.stringify(draft));}catch{App.toast('Le stockage local est plein. Enregistre ta maison maintenant.');}paint();}
  function paint(){const n=document.getElementById('house-save-status');if(n)n.textContent=flight?'Enregistrement…':draft?.events.length?'Modifications locales · à enregistrer':'Maison enregistrée';}
  function handles(e){return App.playing?.()&&App.route()==='apartment'&&!App.apartment()?.visitor&&(types.has(e.type)||e.type==='furnitureFinish'&&e.finish?.mode!=='palette');}
@@ -16,15 +18,19 @@ window.HouseDraft=(()=>{
   const packet=draft.pendingPacket||JSON.parse(JSON.stringify({player:draft.player,sessionId:draft.sessionId,revision:draft.revision,requestId:draft.requestId,events:draft.events}));draft.pendingPacket=packet;boundary=packet.events.length;store();
   flight=(async()=>{const r=await App.api('houseBatch',packet);if(App.profile().id!==packet.player)return;const remaining=draft.events.slice(boundary);draft.events=remaining;draft.revision=r.profile.revision;draft.requestId=crypto.randomUUID();delete draft.pendingPacket;let profile=r.profile;for(const e of remaining)profile=C.apply(profile,e,App.today(),false);App.setProfile(profile,true);if(!remaining.length&&Date.now()-draft.created>5400000){localStorage.removeItem(key(draft.player));draft=null;}else store();window.Family?.currentParty()?.sendRoom();return r;})().catch(e=>{store();throw e;}).finally(()=>{flight=null;paint();});paint();return flight;
  }
- async function beforeCritical(){locked=true;try{if(flight)await flight;while(pending())await flush();}catch(e){locked=false;throw e;}}
+ async function beforeCritical(){locked=true;try{if(flight)await flight;while(pending())await flush();}catch(e){
+   if(!/compte a changé|plan a changé|Séance expirée/.test(e.message)){locked=false;throw e;}
+   // Preserve a separate branch; a purchase must never overwrite a conflicting house.
+   try{localStorage.setItem(conflictKey(draft.player)+'-'+draft.requestId,JSON.stringify(draft));localStorage.setItem(conflictKey(draft.player),JSON.stringify(draft));const state=await App.api('state');localStorage.removeItem(key(draft.player));draft=null;App.setProfile(state.profile,true);App.toast('Maison synchronisée. Ton ancien brouillon reste disponible dans Maison → Brouillon conservé.');}catch(err){locked=false;throw err;}
+  }}
  function afterCritical(){locked=false;}
  function profileSaved(p){if(draft?.player===p.id&&!draft.events.length){draft.revision=p.revision;store();}}
 
- async function recover(){if(!draft?.events.length)return;const old=JSON.parse(JSON.stringify(draft)),state=(await App.api('state')).profile,grant=await App.api('houseStart');let events=old.events;if(old.pendingPacket&&state.seen.includes('batch:'+old.pendingPacket.requestId))events=events.slice(old.pendingPacket.events.length);events=events.filter(e=>e.type!=='simTick');let profile=state;for(const e of events)profile=C.apply(profile,e,App.today(),false);draft={player:profile.id,sessionId:grant.sessionId,revision:grant.revision,created:Date.now(),requestId:crypto.randomUUID(),events};App.setProfile(profile,true);store();App.toast('Brouillon repris. Le temps écoulé n’est pas rejoué.');}
+ async function recover(){const saved=draft?.events.length?draft:conflict();if(!saved?.events.length)return;const old=JSON.parse(JSON.stringify(saved)),state=(await App.api('state')).profile,grant=await App.api('houseStart');let events=old.events;if(old.pendingPacket&&state.seen.includes('batch:'+old.pendingPacket.requestId))events=events.slice(old.pendingPacket.events.length);events=events.filter(e=>e.type!=='simTick');let profile=state;for(const e of events)profile=C.apply(profile,e,App.today(),false);draft={player:profile.id,sessionId:grant.sessionId,revision:grant.revision,created:Date.now(),requestId:crypto.randomUUID(),events};App.setProfile(profile,true);localStorage.removeItem(conflictKey(profile.id));store();App.toast('Brouillon repris. Le temps écoulé n’est pas rejoué.');}
  function pending(){return !!draft?.events.length;}
  setInterval(()=>{if(pending()&&App.route()==='apartment')flush().catch(e=>App.toast('Brouillon conservé : '+e.message));},60000);
  document.addEventListener('visibilitychange',()=>{if(document.hidden)flush().catch(()=>{});});window.addEventListener('pagehide',()=>{store();});
- return {recover,ensure,apply,flush,handles,pending,paint,beforeCritical,afterCritical,profileSaved,locked:()=>locked};
+ return {savedDraft:()=>draft?.events.length?JSON.parse(JSON.stringify(draft)):conflict(),conflict,recover,ensure,apply,flush,handles,pending,paint,beforeCritical,afterCritical,profileSaved,locked:()=>locked};
 })();
 window.Learning=(()=>{
  const C=BrawlCore;let session=null,opening=null,flight=null;
