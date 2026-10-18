@@ -1,0 +1,7 @@
+'use strict';
+window.VisitDraft=(()=>{
+ let entries=[],roomId='',player='',flight=null;
+ function record(room,entry){if(roomId&&roomId!==room)throw Error('Enregistre d’abord la visite précédente.');roomId=room;player=App.profile().id;entries.push(entry);try{localStorage.setItem('brawl-visit-'+player,JSON.stringify({roomId,entries}));}catch{}const p=BrawlCore.clone(App.profile()),item=BrawlCore.catalog.find(i=>i.id===entry.item);p.needs[item.need]=Math.min(100,p.needs[item.need]+Math.min(55,item.amount||30));p.revision++;App.setProfile(p);}
+ async function flush(){if(!entries.length&&window.App){try{const saved=JSON.parse(localStorage.getItem('brawl-visit-'+App.profile().id)||'null');if(saved?.entries?.length){entries=saved.entries;roomId=saved.roomId;player=App.profile().id;}}catch{}}if(flight)return flight;if(!entries.length||App.profile().id!==player)return;const batch=entries.slice();flight=App.api('visitBatch',{roomId,entries:batch}).then(r=>{entries=entries.slice(batch.length);if(!entries.length){roomId='';localStorage.removeItem('brawl-visit-'+player);}if(App.profile().id===player)App.setProfile(r.profile,true);}).catch(e=>{App.toast('Besoins de visite à synchroniser : '+e.message);throw e;}).finally(()=>flight=null);return flight;}
+ setInterval(()=>flush().catch(()=>{}),60000);document.addEventListener('visibilitychange',()=>{if(document.hidden)flush().catch(()=>{});});return {record,flush};
+})();
