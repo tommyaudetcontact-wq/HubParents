@@ -8,3 +8,24 @@
 #modal:has(#fashion-preview){width:min(760px,calc(100vw - 16px));padding:16px;max-height:calc(100dvh - 16px)}#modal:has(#fashion-preview) h2{font-size:18px;margin:4px 0}#fashion-preview{height:clamp(130px,25dvh,230px)!important;width:auto!important;max-width:100%;object-fit:contain;background:#edf5ef;border-radius:20px}#fashion-form .fashion-select-hidden{display:none}.fashion-category-tabs{display:flex;gap:5px;overflow-x:auto;padding:8px 0}.fashion-category-tabs button{flex:0 0 68px;display:flex;flex-direction:column;align-items:center;gap:3px;min-height:52px;border-radius:12px;border:1px solid #bbd3b6;background:#edf5e5;color:#315946;font-size:10px}.fashion-category-tabs span{font-size:20px}.fashion-category-tabs [aria-pressed=true]{background:#d6eac4;border-color:#69ac4e}.fashion-choice-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;max-height:29dvh;overflow:auto}.fashion-choice-grid button{position:relative;min-width:0;background:#f5faf4;border:1px solid #bcd2c7;border-radius:12px;padding:4px;color:#31505b}.fashion-choice-grid [aria-pressed=true]{border:2px solid #70b34d;background:#eaf4dd}.fashion-choice-grid canvas{display:block;width:100%;height:auto;aspect-ratio:26/20.5;object-fit:contain}.fashion-choice-grid small{font-size:9px;display:block}.fashion-check{position:absolute;right:4px;top:4px;color:#4d9c31;background:white;border-radius:50%;padding:1px 5px}#fashion-form .settings-grid{margin:8px 0;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}#fashion-form .settings-grid label{font-size:10px}#fashion-form input[type=color]{height:34px;padding:3px;width:100%}#fashion-form>button{width:100%;margin-top:8px}
 @media(min-width:800px){.house-bottom-nav{left:auto;width:360px}.sim-stage .sim-drawer,.sim-stage #room-controls:not([hidden]),.sim-stage .sim-context-sheet{width:420px!important;max-height:50%!important}.sim-stage .sim-status-rail{width:60px}.sim-stage .sim-top #house-save-status{font-size:10px;max-width:170px}.sim-stage .sim-top #house-save-status:before{content:none}}
 @media(max-height:500px){.house-bottom-nav{height:50px}.sim-stage{--house-bottom:64px}.sim-stage .sim-status-rail{top:64px}.sim-stage .sim-drawer{max-height:66%!important}.sim-stage .sim-context-sheet{max-height:44%!important}.house-tile{min-height:58px}.house-tile span{font-size:19px}}
+/* PDF feedback: object actions remain close to the selection. */
+.placement-orbit{position:absolute;width:1px;height:1px;z-index:16;pointer-events:none}
+.placement-orbit[hidden]{display:none}
+.placement-orbit button{position:absolute;width:46px;height:46px;border:3px solid white;border-radius:50%;background:#329bce;color:white;font-size:29px;line-height:1;box-shadow:0 2px 9px #18394945;pointer-events:auto;touch-action:none}
+.placement-orbit [data-place=cancel]{left:-70px;top:-20px;background:#ed4657}
+.placement-orbit [data-place=confirm]{left:-28px;top:-76px;background:#64c942}
+.placement-orbit [data-place=rotate]{left:29px;top:18px}
+.placement-orbit [data-place=move]{left:-25px;top:65px;cursor:grab}
+.placement-orbit button:disabled{background:#b8c1c4;color:#f3f5f6}
+.sim-status-rail .sim-mini-needs{display:grid;grid-template-columns:repeat(3,1fr);gap:3px;width:100%;height:auto}
+.sim-need-tile{display:grid;place-items:center;min-height:24px;background:#65bc51;border:1px solid #fff8;border-radius:5px;color:white}
+.sim-need-tile.orange{background:#e6a347}.sim-need-tile.red{background:#e06467}.sim-need-tile.yellow{background:#b8b64c}
+.sim-status-rail .sim-need-tile b{position:static;background:none;padding:0;font-size:14px;line-height:18px}
+.sim-status-rail .sim-need-tile progress{width:85%;height:3px;display:block}
+.style-fitting{display:flex;align-items:center;gap:20px;background:linear-gradient(135deg,#d8f4fb,#eee5ff);border:2px solid white;border-radius:24px;padding:18px;margin:16px 0}
+.style-fitting canvas{width:180px;max-width:42%;height:auto;filter:drop-shadow(0 9px 8px #626d8033)}
+body:has(#style-fitting-preview) .shop-card .shop-art{height:145px}
+body:has(#style-fitting-preview) .shop-card p{display:none}
+@media(max-width:700px){.style-fitting{gap:10px;padding:10px}.style-fitting canvas{width:125px}.style-fitting h2{font-size:19px}.style-fitting p{font-size:12px}.style-fitting .btn{font-size:11px;padding:7px}body:has(#style-fitting-preview) .grid4{grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}body:has(#style-fitting-preview) .shop-card{padding:7px}body:has(#style-fitting-preview) .shop-card .shop-art{height:110px}body:has(#style-fitting-preview) .shop-card h3{font-size:12px}body:has(#style-fitting-preview) .shop-card .row{flex-wrap:wrap}body:has(#style-fitting-preview) .shop-card .btn{font-size:11px;padding:6px}}
+
+.sim-stage .sim-status-rail{width:82px}.sim-stage .sim-status-person.selected>span{font-size:29px}.sim-stage .sim-status-person:not(.selected) .sim-mini-needs{display:none}
