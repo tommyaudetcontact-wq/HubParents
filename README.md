@@ -1,3 +1,7 @@
+## Rendu uniforme et hitboxes corrigées
+
+Éclairage dynamique supprimé, couleurs stables et zones de clic des personnages ajustées à leurs silhouettes. Les meubles restent prioritaires. Voir **RENDU-UNIFORME-HITBOX.md**. Le serveur API 16 actuel reste compatible.
+
 ## Quatre nouveaux skins — API 16
 
 Cavalière Grenadine, Virtuose Pastel, Hurleur Carmin et Spectre de Minuit, à 50 $ chacun. Voir **NOUVEAUX-SKINS-COLLECTION.md**. Cette archive contient aussi toutes les corrections de fluidité et de contrôle ci-dessous. Installer le site et le serveur API 16 ensemble.

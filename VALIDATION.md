@@ -1,3 +1,7 @@
+## Rendu uniforme et interactions — 19 octobre 2026
+
+45 suites et 409 groupes réussis. Les nouvelles vérifications chargent le vrai menu qui surchargeait la hitbox, testent la priorité des meubles, la conversion au zoom, les couleurs indépendantes des sources et la conservation des caches. Canvas natif et services simulés, sans mesure de téléphone réel. Voir **RENDU-UNIFORME-HITBOX.md**.
+
 ## Nouveaux skins — 19 octobre 2026
 
 44 suites et 405 groupes réussis. Catalogue, achats idempotents, équipements et silhouettes sur Canvas natif vérifiés pour les quatre nouveaux skins. Tests locaux et services simulés ; aucun téléphone réel.

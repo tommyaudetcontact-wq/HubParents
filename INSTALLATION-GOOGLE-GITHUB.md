@@ -1,3 +1,7 @@
+## Rendu uniforme et sélection des personnages
+
+Cette mise à jour du site supprime l’éclairage dynamique et corrige la hitbox du menu d’interaction. Le serveur Apps Script API 16 reste compatible. Voir **RENDU-UNIFORME-HITBOX.md**.
+
 ## Appartement : fluidité et marche — API 16
 
 Installer le site et Apps Script actuels ensemble : la vitesse de déplacement automatique a changé dans la simulation partagée. Remplacer Code.gs par le Code-complet.gs fourni, puis publier une nouvelle version du déploiement existant, en gardant sa même URL. Les archives incluent tous les changements précédents. Voir **APPARTEMENT-FLUIDITE.md**.
