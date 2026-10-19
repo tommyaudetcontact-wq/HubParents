@@ -1,3 +1,11 @@
+## Quatre nouveaux skins — API 16
+
+Cavalière Grenadine, Virtuose Pastel, Hurleur Carmin et Spectre de Minuit, à 50 $ chacun. Voir **NOUVEAUX-SKINS-COLLECTION.md**. Cette archive contient aussi toutes les corrections de fluidité et de contrôle ci-dessous. Installer le site et le serveur API 16 ensemble.
+
+## Appartement : fluidité, précision et marche — API 16
+
+Rendu haute densité, couches fixes du décor mémorisées, clics sur les faces des meubles, rotations de 90° stables, indicateur réseau, Boutique en bas et marche accélérée. Voir **APPARTEMENT-FLUIDITE.md**. Installer le site et le serveur API 16 ensemble ; les archives sont cumulatives.
+
 ## Finitions appartement et placement — API 15
 
 Fond au zoom mémorisé, diamant proportionnel, portes sans poignées, motifs verticaux raccordés aux fenêtres, sol sans joints artificiels marqués, menus regroupés et commandes autour du meuble avec empreinte discrète. Voir **APPARTEMENT-FINITIONS.md**. Correctif du site uniquement si le serveur est déjà en API 15.

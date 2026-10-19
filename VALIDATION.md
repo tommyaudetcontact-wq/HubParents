@@ -1,3 +1,11 @@
+## Nouveaux skins — 19 octobre 2026
+
+44 suites et 405 groupes réussis. Catalogue, achats idempotents, équipements et silhouettes sur Canvas natif vérifiés pour les quatre nouveaux skins. Tests locaux et services simulés ; aucun téléphone réel.
+
+## Appartement : fluidité et précision — 19 octobre 2026
+
+44 suites et 405 groupes réussis, dont 11 nouveaux groupes sur le rendu réel des rotations, la sélection, la haute densité, les couches fixes comparées au dessin direct, les vitesses et les attentes réseau. Canvas natif et interfaces/services simulés ; pas de mesure sur téléphone réel. Voir **APPARTEMENT-FLUIDITE.md**.
+
 ## Finitions appartement — 19 octobre 2026
 
 42 suites et 391 groupes réussis. Huit nouveaux groupes couvrent les commandes sans recouvrement du meuble, le diamant, la continuité des motifs, les raccords de dalles, les menus et le fond de gros plan réutilisé. Canvas natif et interfaces simulées ; aucune mesure sur téléphone réel. Voir **APPARTEMENT-FINITIONS.md**.

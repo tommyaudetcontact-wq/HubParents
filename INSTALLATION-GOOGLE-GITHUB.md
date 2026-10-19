@@ -1,3 +1,7 @@
+## Appartement : fluidité et marche — API 16
+
+Installer le site et Apps Script actuels ensemble : la vitesse de déplacement automatique a changé dans la simulation partagée. Remplacer Code.gs par le Code-complet.gs fourni, puis publier une nouvelle version du déploiement existant, en gardant sa même URL. Les archives incluent tous les changements précédents. Voir **APPARTEMENT-FLUIDITE.md**.
+
 ## Finitions de l’appartement et placement
 
 Les archives actuelles incluent les optimisations du fond au zoom, les motifs muraux raccordés, les menus réorganisés et les commandes autour des meubles. Remplacer le site ; si le serveur est déjà en API 15, son code reste compatible. Sinon, installer aussi le Code-complet.gs actuel et publier une nouvelle version du déploiement existant. Voir **APPARTEMENT-FINITIONS.md**.
