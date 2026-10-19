@@ -1,6 +1,6 @@
 'use strict';
 window.HouseDraft=(()=>{
- const C=BrawlCore,types=new Set(['roomDimensions','room','houseControl','houseMove','houseOrder','houseCare','simOrder','simTick','simMeet','simMoveIn','simCancel','simLight','appearance']);let draft=null,opening=null,flight=null,locked=false,boundary=0;
+ const C=BrawlCore,types=new Set(['roomTerrain','houseTranslate','roomDimensions','room','houseControl','houseMove','houseOrder','houseCare','simOrder','simTick','simMeet','simMoveIn','simCancel','simLight','appearance']);let draft=null,opening=null,flight=null,locked=false,boundary=0;
  const key=id=>'brawl-house-draft-'+id;
  const conflictKey=id=>'brawl-house-conflict-'+id;
  function conflict(){try{return JSON.parse(localStorage.getItem(conflictKey(App.profile().id))||'null');}catch{return null;}}
