@@ -81,3 +81,14 @@ body.house-apartment-view #toast.show{transform:translate(-50%,0)}
 .network-progress{position:fixed;left:50%;top:calc(10px + env(safe-area-inset-top,0px));transform:translateX(-50%);z-index:2200;display:flex;align-items:center;gap:9px;background:#f8fff8f5;border:1px solid #bad9c2;border-radius:24px;padding:9px 15px;box-shadow:0 3px 12px #1b3e5426;color:#24495b;font-weight:800;font-size:13px;pointer-events:none;max-width:calc(100vw - 24px)}.network-progress[hidden]{display:none}.network-spinner{width:16px;height:16px;border:3px solid #c1dace;border-top-color:#329b68;border-radius:50%;animation:network-spin .8s linear infinite;flex:none}@keyframes network-spin{to{transform:rotate(360deg)}}@media(prefers-reduced-motion:reduce){.network-spinner{animation:none;border-color:#329b68}}
 
 body.network-busy .sim-top #house-save-status:before{content:"";display:inline-block;width:11px;height:11px;vertical-align:middle;margin-right:5px;border:2px solid #b8d7c5;border-top-color:#26845a;border-radius:50%;animation:network-spin .8s linear infinite}.sim-top #house-save-status{min-width:0;overflow:hidden;text-overflow:ellipsis}
+
+/* Compact texture samples, independent of global canvas sizing. */
+.surface-color-editor .surface-selection{display:flex;align-items:center;flex-wrap:wrap}
+.surface-color-editor .surface-selection canvas{flex:0 0 120px!important;width:120px!important;height:90px!important;min-height:0!important;max-height:90px!important;aspect-ratio:4/3;object-fit:fill;background:none}
+.surface-color-editor .motif-choice-grid,.surface-color-editor .surface-presets{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;align-items:start}
+.surface-color-editor .motif-choice-grid button,.surface-color-editor .surface-presets button{display:block;height:auto!important;min-height:0!important;max-height:none;min-width:0;padding:4px;align-self:start;background:#f5faf1;text-shadow:none;border:2px solid #bfd3c8;border-radius:9px}
+.surface-color-editor .motif-choice-grid canvas,.surface-color-editor .surface-presets canvas{display:block;width:100%!important;height:auto!important;min-height:0!important;max-height:none!important;aspect-ratio:4/3;object-fit:fill;background:none}
+.surface-color-editor .surface-presets span{display:block;font-size:10px;line-height:1.2;margin-top:4px}
+.surface-color-editor .surface-options{min-width:0}
+
+.sim-current-action{pointer-events:auto}.sim-task-queue{margin:4px 0 0;padding-left:18px;font-size:11px}.sim-task-queue button{border:0;background:transparent;color:#945852;padding:3px 8px;min-width:30px}

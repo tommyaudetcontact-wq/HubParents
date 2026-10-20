@@ -1850,9 +1850,10 @@ async function handleCityActivities(req) {
     if (active && now < active.expires) return await result();
     if (!['taxi', 'delivery'].includes(req.kind) || typeof req.requestId !== 'string' || req.requestId.length < 8 || req.requestId.length > 100) throw Error('Mission invalide.');
     await authThrottle('city-work:' + req.player, 120);
-    const place = BrawlCore.cityPlaces.find(s => s.job === req.kind), rental = p.cityWork.rental, nearPlace = Math.hypot(point.x - place.x, point.y - place.y) < 150, continuing = req.kind === 'taxi' && rental?.kind === 'taxi' && now < rental.expires && Math.hypot(point.x - rental.position.x, point.y - rental.position.y) < 100;
+    const place = BrawlCore.cityPlaces.find(s => s.job === req.kind), rental = p.cityWork.rental, nearPlace = Math.hypot(point.x - place.x, point.y - place.y) < 150 || Math.hypot(point.x - BrawlCore.cityRoadSnap(place).x, point.y - BrawlCore.cityRoadSnap(place).y) < 100, continuing = req.kind === 'taxi' && rental?.kind === 'taxi' && now < rental.expires && Math.hypot(point.x - rental.position.x, point.y - rental.position.y) < 100;
     if (!nearPlace && !continuing) throw Error('Approche du restaurant ou de la station de taxis.');
     const id = Utilities.getUuid(), origin = BrawlCore.cityRoadSnap(point), job = BrawlCore.cityMakeJob(req.kind, origin, id);
+    if (req.kind === 'delivery') for (let n = 1; n < 32 && p.cityWork.lastDelivery && Math.hypot(job.destination.x - p.cityWork.lastDelivery.x, job.destination.y - p.cityWork.lastDelivery.y) < 1; n++) Object.assign(job, BrawlCore.cityMakeJob(req.kind, origin, id + ':' + n));
     p.cityWork.active = {
       ...job,
       id,
@@ -1877,28 +1878,28 @@ async function handleCityActivities(req) {
   if (req.index !== active.index) throw Error('Suis les points dans l’ordre.');
   const target = active.points[active.index], distance = Math.hypot(target.x - active.lastPoint.x, target.y - active.lastPoint.y);
   if (Math.hypot(point.x - target.x, point.y - target.y) > 60) throw Error('Approche du point de mission.');
-  if (now - active.lastAt < Math.max(600, distance / 330 * 1000 * .8)) throw Error('Trajet trop rapide.');
+  if (now - active.lastAt < Math.max(250, distance / 330 * 1000 * .8)) throw Error('Trajet trop rapide.');
   if (active.kind === 'taxi' && Math.hypot(target.x - active.pickup.x, target.y - active.pickup.y) < 1) active.hasPassenger = true;
   active.index++;
   active.lastAt = now;
   active.lastPoint = target;
-  if (active.index === active.points.length) {
-    if (now - active.started < 12000) throw Error('Termine le trajet avant de demander le paiement.');
-    const id = active.id, kind = active.kind;
+  const final = active.index === active.points.length, drop = active.kind === 'delivery' && active.drops?.find(d => d.index === req.index), reward = active.kind === 'taxi' && final || !!drop || active.kind === 'delivery' && !active.drops && final, id = active.id, kind = active.kind;
+  if (final) {
     p.cityWork.rental = {
       kind,
       position: target,
       vehicle: active.vehicle,
       expires: now + 1800000
     };
+    if (kind === 'delivery') p.cityWork.lastDelivery = active.destination;
     delete p.cityWork.active;
     p.cityWork.recent = [...p.cityWork.recent || [], id].slice(-30);
-    record.profile = BrawlCore.apply(p, {
-      type: 'cityWorkReward',
-      id: 'work:' + id,
-      kind
-    }, day, false);
-  } else p.revision++;
+  }
+  if (reward) record.profile = BrawlCore.apply(p, {
+    type: 'cityWorkReward',
+    id: 'work:' + id + (drop ? ':' + req.index : ''),
+    kind
+  }, day, false); else p.revision++;
   await saveRecord(record);
   return await result();
 }

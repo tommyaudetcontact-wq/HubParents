@@ -15,10 +15,10 @@ window.FurnitureModels=(()=>{
   return out;
  }
  if(['sofa','lounge','bench','chair'].includes(k)){
-  const single=k==='chair',w=single?[.52,.58,.6,.56,.66][a]:[.72,.86,.93,.9,.95][a],x=(1-w)/2,d=k==='lounge'?.84:.62,y=.15,z=10,arm=single?.045:[.07,.09,.055,.11,.075][a],seats=single?1:a===0?2:3,back=single?28+v*3:20+v*2;feet(x,y,w,d,13);b(x,y,w,d,9,5,c.frame);b(x,y,w,.075,14,back,c.body,1,v===1?8:0);
+  const single=k==='chair',w=.9+a*.02,x=(1-w)/2,d=k==='sofa'&&a===4?.44:.82+a*.025,y=.03,z=10,arm=single?.045:[.07,.09,.055,.11,.075][a],seats=single?1:a===0?2:3,back=single?28+v*3:20+v*2;feet(x,y,w,d,13);b(x,y,w,d,9,5,c.frame);b(x,y,w,.075,14,back,c.body,1,v===1?8:0);
   if(k==='bench'){for(let j=0;j<5;j++)b(x+.035,y+.07+j*.105,w-.07,.075,14,2,c.frame);if(v%2)for(let j=0;j<3;j++)b(x+.06+j*(w-.12)/2,y,.025,.04,17,back-3,c.frame);}
   else{for(let j=0;j<seats;j++){const sw=(w-arm*2-.03)/seats;b(x+arm+.012+j*sw,y+.1,sw-.015,d-.12,14,6,c.body,1,v===2?8:0);b(x+arm+.014+j*sw,y+.076,sw-.02,.07,22,back-9,c.body,1,v===2?8:0);}for(const xx of [x,x+w-arm]){b(xx,y+.035,arm,d-.055,13,14,c.body,1,v===2?8:0);b(xx,y+.035,arm,d-.055,27,1,c.fabric);}if(v===3||v===4)b(x+arm+.04,y+.16,.13,.1,20,8,c.fabric,1,8);if(v===4)b(x+w-arm-.17,y+.19,.12,.12,20,7,c.fabric,1,8);}
-  if(a===4&&!single&&k!=='bench'){b(x+w*.56,y+.45,w*.4,.34,9,5,c.frame);b(x+w*.59,y+.45,w*.33,.34,14,6,c.body);feet(x+w*.56,y+.45,w*.4,.34,12);}
+  if(a===4&&!single&&k!=='bench'){b(x+w*.56,y+.43,w*.4,.5,9,5,c.frame);b(x+w*.59,y+.43,w*.33,.5,14,6,c.body);feet(x+w*.56,y+.43,w*.4,.5,12);}
   return out;
  }
  if(k==='aquarium'){
