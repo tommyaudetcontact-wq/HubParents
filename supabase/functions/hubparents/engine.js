@@ -354,7 +354,7 @@ async function doPost(e) {
     }
     if (req.action === 'event') {
       const ev = req.event;
-      if (ev?.type === 'carUse') throw Error('Utilise la séance de conduite.');
+      if (['carUse', 'cityWorkReward'].includes(ev?.type)) throw Error('Utilise la séance de conduite.');
       if (!ev || typeof ev.id !== 'string') throw Error('Action invalide.');
       if (ev.type === 'study') throw Error('Les récompenses de pratique sont calculées par le serveur.');
       const privileged = ['reviewTask', 'addTask', 'dictationList'].includes(ev.type);
@@ -1697,6 +1697,7 @@ async function cityPublicMember(req) {
     id: p.id,
     name: p.name,
     skin: p.skin,
+    useCustomAppearance: p.useCustomAppearance,
     appearance: BrawlCore.effectiveAppearance(p),
     publicKey: {
       kty: 'EC',
@@ -1713,6 +1714,8 @@ async function cityPublicMember(req) {
 async function handleCityAction(req) {
   if (!String(req.action).startsWith('city')) return null;
   if (requestParent) throw Error('Choisis un profil enfant.');
+  const activity = typeof handleCityActivities === 'function' ? await handleCityActivities(req) : null;
+  if (activity) return activity;
   const cache = CacheService.getScriptCache(), now = Date.now();
   if (req.action === 'cityDriveStart') {
     const p = (await profileRecord(req.player)).profile;
@@ -1804,6 +1807,10 @@ async function handleCityAction(req) {
       if (req.player === room.host) room.members = [];
     } else if (req.action === 'cityPartyPulse') {
       const p = (await profileRecord(req.player)).profile;
+      member.name = p.name;
+      member.skin = p.skin;
+      member.appearance = BrawlCore.effectiveAppearance(p);
+      member.useCustomAppearance = p.useCustomAppearance;
       member.vehicle = p.garage?.selected || '';
       member.cars = p.garage?.cars || ({});
     } else throw Error('Action de partie inconnue.');
@@ -1814,6 +1821,86 @@ async function handleCityAction(req) {
     ok: true,
     room
   };
+}
+async function handleCityActivities(req) {
+  if (!['cityJobStart', 'cityJobStatus', 'cityJobCheckpoint', 'cityJobCancel'].includes(req.action)) return null;
+  const record = await profileRecord(req.player), p = record.profile, now = Date.now(), day = Utilities.formatDate(new Date(), TZ, 'yyyy-MM-dd');
+  p.cityWork = p.cityWork || ({
+    halves: 0,
+    completed: 0
+  });
+  let active = p.cityWork.active;
+  const result = async () => ({
+    ok: true,
+    profile: await publicProfile(record.profile),
+    job: record.profile.cityWork?.active || null
+  });
+  if (req.action === 'cityJobStatus') return await result();
+  if (req.action === 'cityJobCancel') {
+    if (active && active.id === req.jobId) {
+      delete p.cityWork.active;
+      p.revision++;
+      await saveRecord(record);
+    }
+    return await result();
+  }
+  const point = req.position;
+  if (!point || ![point.x, point.y].every(Number.isFinite) || point.x < 0 || point.y < 0 || point.x > 1300 || point.y > 1100) throw Error('Position de mission invalide.');
+  if (req.action === 'cityJobStart') {
+    if (active && now < active.expires) return await result();
+    if (!['taxi', 'delivery'].includes(req.kind) || typeof req.requestId !== 'string' || req.requestId.length < 8 || req.requestId.length > 100) throw Error('Mission invalide.');
+    await authThrottle('city-work:' + req.player, 120);
+    const place = BrawlCore.cityPlaces.find(s => s.job === req.kind), rental = p.cityWork.rental, nearPlace = Math.hypot(point.x - place.x, point.y - place.y) < 150, continuing = req.kind === 'taxi' && rental?.kind === 'taxi' && now < rental.expires && Math.hypot(point.x - rental.position.x, point.y - rental.position.y) < 100;
+    if (!nearPlace && !continuing) throw Error('Approche du restaurant ou de la station de taxis.');
+    const id = Utilities.getUuid(), origin = BrawlCore.cityRoadSnap(point), job = BrawlCore.cityMakeJob(req.kind, origin, id);
+    p.cityWork.active = {
+      ...job,
+      id,
+      requestId: req.requestId,
+      index: 0,
+      started: now,
+      lastAt: now,
+      lastPoint: origin,
+      expires: now + 1800000
+    };
+    p.revision++;
+    await saveRecord(record);
+    return await result();
+  }
+  if (!active || active.id !== req.jobId) {
+    if ((p.cityWork.recent || []).includes(req.jobId)) return await result();
+    throw Error('Mission introuvable.');
+  }
+  if (now > active.expires) throw Error('Mission expirée. Reprends une commande.');
+  if (!Number.isInteger(req.index) || req.index < 0 || req.index >= active.points.length) throw Error('Étape invalide.');
+  if (req.index < active.index) return await result();
+  if (req.index !== active.index) throw Error('Suis les points dans l’ordre.');
+  const target = active.points[active.index], distance = Math.hypot(target.x - active.lastPoint.x, target.y - active.lastPoint.y);
+  if (Math.hypot(point.x - target.x, point.y - target.y) > 60) throw Error('Approche du point de mission.');
+  if (now - active.lastAt < Math.max(600, distance / 330 * 1000 * .8)) throw Error('Trajet trop rapide.');
+  if (active.kind === 'taxi' && Math.hypot(target.x - active.pickup.x, target.y - active.pickup.y) < 1) active.hasPassenger = true;
+  active.index++;
+  active.lastAt = now;
+  active.lastPoint = target;
+  if (active.index === active.points.length) {
+    if (now - active.started < 12000) throw Error('Termine le trajet avant de demander le paiement.');
+    const id = active.id, kind = active.kind;
+    p.cityWork.rental = {
+      kind,
+      position: target,
+      vehicle: active.vehicle,
+      expires: now + 1800000
+    };
+    delete p.cityWork.active;
+    p.cityWork.recent = [...p.cityWork.recent || [], id].slice(-30);
+    record.profile = BrawlCore.apply(p, {
+      type: 'cityWorkReward',
+      id: 'work:' + id,
+      kind
+    }, day, false);
+  } else p.revision++;
+  await saveRecord(record);
+  return await result();
 }
 async function handleWordLists(req) {
   if (!['wordLists', 'wordListSave', 'wordListArchive', 'wordListMerge', 'wordListApply', 'wordListUnassign'].includes(req.action)) return null;

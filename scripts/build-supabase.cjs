@@ -10,7 +10,7 @@ const domain=read('Domain');
 fs.writeFileSync(path.join(out,'domain.js'),domain+'\nexport { BrawlCore };\n');
 const handwriting=read('Handwriting'),handlerStart=handwriting.indexOf('function handleWritingCheck');
 if(handlerStart<0)throw Error('Missing handwriting handler');
-const source=['Code','Auth','Accounts','Lobby','Stats','Trades','City','WordLists'].map(read).join('\n')+'\n'+handwriting.slice(handlerStart);
+const source=['Code','Auth','Accounts','Lobby','Stats','Trades','City','CityActivities','WordLists'].map(read).join('\n')+'\n'+handwriting.slice(handlerStart);
 const ast=parse(source,{ecmaVersion:'latest',sourceType:'script'});
 // Installation helpers remain in GAS. They cannot be called by an API action.
 const skip=new Set(['initializeBrawl','createPlayer','rotateParentKey','rotatePlayerKey','archiveLegacyWorkbook']);

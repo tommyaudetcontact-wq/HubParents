@@ -212,3 +212,14 @@ Les skins possédés sont sélectionnables directement dans Mon personnage. Le c
 L’entrée dans le quartier navigue immédiatement ; la sauvegarde de l’appartement continue en arrière-plan. Les scripts de conduite et de dessin portent une version dans leur URL pour éviter un mélange de fichiers en cache. Le rendu utilise une vue du dessus inclinée : façades et vitrines, toitures, véhicules avec panneaux de carrosserie, vitres, roues et éclairage dessiné. Les boutons de volant gauche/droite fonctionnent simultanément avec le gaz, le frein et la marche arrière. Les voitures stationnées sont des obstacles solides.
 
 Validation : clic sur le vrai bouton Ville dans l’interface assemblée avec une sauvegarde suspendue, commandes tactiles simultanées avec relâchement indépendant des doigts, virages, freinage et recul. Aperçus Canvas natifs inspectés pour plusieurs orientations et modèles. Les 45 suites de régression passent ; aucun essai physique sur téléphone n’est revendiqué.
+
+
+## Quartier vivant — circulation, courses, rabais et métiers
+
+Trois véhicules de circulation suivent leurs voies, tournent aux intersections et s’arrêtent aux feux. La conduite tactile utilise un unique curseur : maintenir pour avancer, glisser latéralement pour tourner, relâcher pour ralentir et recentrer ; glisser vers le bas pour reculer. Descendre se trouve au-dessus du curseur à droite. Le personnage reprend le rendu et le skin du mode appartement ; ses images sont mises en cache.
+
+Le bouton Course propose un parcours entre amis, avec acceptation, grille de départ, décompte de cinq secondes, points ordonnés dans les rues, flèche et classement. Les propositions signées sont transmises à l’hôte ; la course reste amicale, sans mise d’argent.
+
+Les bâtiments identifiés proposent six offres hebdomadaires par boutique (skins, salle de bain, mobilier). Prix et rotation sont calculés par le serveur. Le restaurant fournit un véhicule de livraison et la centrale de taxis fournit un taxi. Les trajets suivent des étapes contrôlées par le serveur avec une durée minimum. Chaque trajet ajoute un demi-dollar en progression : seuls les dollars complets sont crédités, et le demi-dollar restant est conservé entre missions, même entre taxi et livraison. Le garage permet de sélectionner et recolorer une voiture personnelle.
+
+Les déplacements circulent en Realtime ; les points de mission et les achats sont les seuls échanges de sauvegarde supplémentaires, sans écriture à chaque image. Tests : routes, feux, renouvellement des six offres, prix imposés, paiements entiers et répétitions réseau, parcours de course et propositions signées, curseur tactile et identité du rendu du personnage. Les essais restent locaux et simulés pour le jeu complet ; un essai physique multijoueur sur téléphones reste à faire.

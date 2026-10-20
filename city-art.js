@@ -16,7 +16,8 @@ window.CityArt=(()=>{
  {x:390,y:840,w:140,d:100,h:83,color:'#c48973',roof:'#788995'},
  {x:845,y:705,w:235,d:100,h:48,color:'#eee0ba',roof:'#b74848',name:'STATION • OCTANE',fuel:true}
  ];
- let ground=null,sprites=new Map();
+ for(const p of BrawlCore.cityPlaces||[]){const b=buildings[p.building];if(b)b.name=({'sale-skins':'STUDIO SIGNATURE','sale-bath':'BAIN & COMPAGNIE','sale-furniture':'LE SALON',restaurant:'LE RELAIS · RESTO',taxi:'CENTRALE TAXIS',garage:'GARAGE COULEURS',fuel:'STATION OCTANE'}[p.id]);}
+ let ground=null,sprites=new Map(),avatars=new Map();
  function poly(c,points,color){c.fillStyle=color;c.beginPath();points.forEach((p,n)=>n?c.lineTo(p.x,p.y):c.moveTo(p.x,p.y));c.closePath();c.fill();}
  function plane(c,x,y,w,d,z,color){poly(c,[[x,y],[x+w,y],[x+w,y+d],[x,y+d]].map(p=>project(...p,z)),color);}
  function wall(c,x,y,w,d,z,h,color){poly(c,[project(x,y,z),project(x+w,y+d,z),project(x+w,y+d,z+h),project(x,y,z+h)],color);c.strokeStyle='#38443d88';c.lineWidth=.65;c.stroke();}
@@ -57,10 +58,12 @@ window.CityArt=(()=>{
  for(const x of [-w*.75,w*.4]){shape([[x,-l+.7,h],[x+w*.35,-l+.7,h],[x+w*.35,-l*.87,h],[x,-l*.87,h]],'#f3e9bb');shape([[x,l*.86,h],[x+w*.35,l*.86,h],[x+w*.35,l-.7,h],[x,l-.7,h]],'#bb433b');}
  line([[-w*.68,-l,4],[w*.68,-l,4]],'#c2c6bb',1.3);line([[-w*.7,l,4],[w*.7,l,4]],'#b2b6b0',1.2);
  for(const side of [-1,1]){shape([[side*w*.85,cabinFront+3,h],[side*(w+3),cabinFront+3,h],[side*(w+3),cabinFront+7,h],[side*w*.85,cabinFront+7,h]],tint(bodyColor,-20));line([[side*w*.97,2,h],[side*w*.97,8,h]],'#d6d6c6',.9);}
+ if(a.taxi){shape([[-w*.45,-2,roofH+2],[w*.45,-2,roofH+2],[w*.45,5,roofH+2],[-w*.45,5,roofH+2]],'#fff5c5');line([[-w*.2,0,roofH+2],[w*.2,0,roofH+2]],'#303f3e',2);}
  if(sport)shape([[-w*.9,l*.76,h+2],[w*.9,l*.76,h+2],[w*.9,l*.86,h+2],[-w*.9,l*.86,h+2]],tint(bodyColor,-25));
  }
+ function avatar(c,a,m,create){if(typeof Apartment==='undefined')return;const phase=Math.floor(((a.walkPhase||0)%(Math.PI*2))/(Math.PI/2)),key=JSON.stringify([m.skin,m.appearance,m.useCustomAppearance,phase]);let canvas=avatars.get(key);if(!canvas){canvas=create();canvas.width=220;canvas.height=190;const apt=Object.create(Apartment.prototype);apt.ctx=canvas.getContext('2d');apt.iso=()=>({x:110,y:170});apt.profile={appearance:m.appearance,useCustomAppearance:m.useCustomAppearance??true,household:{player:{dead:false}}};apt.character({x:0,y:0},m.skin||'skin-neutral','',phase*Math.PI/2,m.useCustomAppearance===false?null:m.appearance);avatars.set(key,canvas);if(avatars.size>64)avatars.delete(avatars.keys().next().value);}const p=project(a.x,a.y);c.drawImage(canvas,p.x-44,p.y-68,88,76);}
  function preview(canvas,v,color){canvas.width=340;canvas.height=220;const c=canvas.getContext('2d');c.fillStyle='#ded9ca';c.fillRect(0,0,340,220);c.translate(170,115);c.scale(2.4,2.4);car(c,{x:0,y:0,angle:Math.PI/2},v,color||v.color);}
  const parked=[{x:390,y:515,angle:Math.PI/2,model:6},{x:820,y:585,angle:-Math.PI/2,model:8},{x:685,y:285,angle:0,model:2},{x:1050,y:870,angle:0,model:4}];
  const obstacles=parked.map(a=>{const v=BrawlCore.vehicles[a.model],w=Math.abs(Math.cos(a.angle))*v.width*1.4+Math.abs(Math.sin(a.angle))*v.length*1.6,d=Math.abs(Math.sin(a.angle))*v.width*1.4+Math.abs(Math.cos(a.angle))*v.length*1.6;return {x:a.x-w/2,y:a.y-d/2,w,d};});
- return {obstacles,parked,size,buildings,project,background,drawBuilding,car,preview,clear:()=>{ground=null;sprites.clear();}};
+ return {avatar,obstacles,parked,size,buildings,project,background,drawBuilding,car,preview,clear:()=>{ground=null;sprites.clear();avatars.clear();}};
 })();
