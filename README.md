@@ -205,3 +205,10 @@ L’appartement regroupe les sauvegardes silencieuses, évite les réécritures 
 Validation : 45 suites historiques, tests supplémentaires de ville/économie/listes, backend asynchrone, messages multijoueurs signés et redimensionnement. Transport Realtime vérifié entre deux connexions réelles. Les tests Canvas et DOM locaux ne constituent pas un essai sur téléphone ni un match complet sur plusieurs appareils.
 
 Les skins possédés sont sélectionnables directement dans Mon personnage. Le conjoint ou la conjointe possède sa propre apparence, ses vêtements et son skin, sauvegardés indépendamment. Les listes de mots sont présentées en haut de l’espace parent : reprise d’une semaine existante, copie, édition, mise de côté/restauration, fusion et attribution modifiable par enfant et semaine.
+
+
+## Conduite et accès au quartier — correction
+
+L’entrée dans le quartier navigue immédiatement ; la sauvegarde de l’appartement continue en arrière-plan. Les scripts de conduite et de dessin portent une version dans leur URL pour éviter un mélange de fichiers en cache. Le rendu utilise une vue du dessus inclinée : façades et vitrines, toitures, véhicules avec panneaux de carrosserie, vitres, roues et éclairage dessiné. Les boutons de volant gauche/droite fonctionnent simultanément avec le gaz, le frein et la marche arrière. Les voitures stationnées sont des obstacles solides.
+
+Validation : clic sur le vrai bouton Ville dans l’interface assemblée avec une sauvegarde suspendue, commandes tactiles simultanées avec relâchement indépendant des doigts, virages, freinage et recul. Aperçus Canvas natifs inspectés pour plusieurs orientations et modèles. Les 45 suites de régression passent ; aucun essai physique sur téléphone n’est revendiqué.
