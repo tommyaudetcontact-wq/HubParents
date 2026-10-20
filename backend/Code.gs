@@ -35,6 +35,8 @@ function doPost(e) {
     lock.waitLock(15000);
     const auth=handleAuthAction(req);if(auth)return jsonResponse(auth);
     authScope(req);
+    const city=typeof handleCityAction==='function'?handleCityAction(req):null;if(city)return jsonResponse(city);
+    const wordLists=typeof handleWordLists==='function'?handleWordLists(req):null;if(wordLists)return jsonResponse(wordLists);
     if(req.action==='statsDirectory')return jsonResponse(statsDirectory(req));
     if(req.action==='parentCheck'){if(!isParent(req.parentToken))throw Error('Clé parent incorrecte.');return jsonResponse({ok:true});}
     const family=handleFamilyAction(req);if(family)return jsonResponse(family);
@@ -72,7 +74,7 @@ function doPost(e) {
       q.done=true;if(q.skill==='dictation')p=BrawlCore.advanceDictation(p,day,q.dictationIndex,true);record.profile=p;saveRecord(record);return jsonResponse({ok:true,explanation:q.explanation});
     }
     if(req.action==='event') {
-      const ev=req.event;if(!ev||typeof ev.id!=='string')throw Error('Action invalide.');
+      const ev=req.event;if(ev?.type==='carUse')throw Error('Utilise la séance de conduite.');if(!ev||typeof ev.id!=='string')throw Error('Action invalide.');
       if(ev.type==='study')throw Error('Les récompenses de pratique sont calculées par le serveur.');
       const privileged=['reviewTask','addTask','dictationList'].includes(ev.type);if(privileged&&!isParent(req.parentToken))throw Error('Clé parent nécessaire.');
       if(ev.type==='writing')throw Error('La récompense d’écriture exige la reconnaissance du tracé par le serveur.');

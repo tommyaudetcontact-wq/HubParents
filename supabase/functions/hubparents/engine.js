@@ -198,6 +198,10 @@ async function doPost(e) {
     const auth = await handleAuthAction(req);
     if (auth) return await jsonResponse(auth);
     await authScope(req);
+    const city = typeof handleCityAction === 'function' ? await handleCityAction(req) : null;
+    if (city) return await jsonResponse(city);
+    const wordLists = typeof handleWordLists === 'function' ? await handleWordLists(req) : null;
+    if (wordLists) return await jsonResponse(wordLists);
     if (req.action === 'statsDirectory') return await jsonResponse(await statsDirectory(req));
     if (req.action === 'parentCheck') {
       if (!await isParent(req.parentToken)) throw Error('Clé parent incorrecte.');
@@ -350,6 +354,7 @@ async function doPost(e) {
     }
     if (req.action === 'event') {
       const ev = req.event;
+      if (ev?.type === 'carUse') throw Error('Utilise la séance de conduite.');
       if (!ev || typeof ev.id !== 'string') throw Error('Action invalide.');
       if (ev.type === 'study') throw Error('Les récompenses de pratique sont calculées par le serveur.');
       const privileged = ['reviewTask', 'addTask', 'dictationList'].includes(ev.type);
@@ -1675,6 +1680,211 @@ async function handleTradeAction(req, record) {
   return {
     ok: true,
     profile: await publicProfile(p)
+  };
+}
+async function cityPublicMember(req) {
+  const p = (await profileRecord(req.player)).profile;
+  const key = req.publicKey;
+  if (!key || key.kty !== 'EC' || key.crv !== 'P-256' || !(/^[\w-]{43}$/).test(key.x) || !(/^[\w-]{43}$/).test(key.y)) throw Error('Clé de partie invalide.');
+  const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_', decode = s => {
+    let n = 0n;
+    for (const c of s) n = n * 64n + BigInt(alphabet.indexOf(c));
+    if (n % 4n) throw Error('Clé non canonique.');
+    return n / 4n;
+  }, x = await decode(key.x), y = await decode(key.y), prime = 0xffffffff00000001000000000000000000000000ffffffffffffffffffffffffn, b = 0x5ac635d8aa3a93e7b3ebbd55769886bc651d06b0cc53b0f63bce3c3e27d2604bn;
+  if (x >= prime || y >= prime || (y * y - (x * x * x - 3n * x + b)) % prime !== 0n) throw Error('Clé de partie invalide.');
+  return {
+    id: p.id,
+    name: p.name,
+    skin: p.skin,
+    appearance: BrawlCore.effectiveAppearance(p),
+    publicKey: {
+      kty: 'EC',
+      crv: 'P-256',
+      x: key.x,
+      y: key.y,
+      ext: true
+    },
+    seen: Date.now(),
+    vehicle: p.garage?.selected || '',
+    cars: p.garage?.cars || ({})
+  };
+}
+async function handleCityAction(req) {
+  if (!String(req.action).startsWith('city')) return null;
+  if (requestParent) throw Error('Choisis un profil enfant.');
+  const cache = CacheService.getScriptCache(), now = Date.now();
+  if (req.action === 'cityDriveStart') {
+    const p = (await profileRecord(req.player)).profile;
+    if (!p.garage?.cars[req.car]) throw Error('Voiture indisponible.');
+    const id = Utilities.getUuid();
+    await cache.put('drive:' + req.player, JSON.stringify({
+      id,
+      car: req.car,
+      started: now,
+      used: 0
+    }), 7200);
+    return {
+      ok: true,
+      driveId: id
+    };
+  }
+  if (req.action === 'cityDriveSave') {
+    const grant = JSON.parse(await cache.get('drive:' + req.player) || 'null');
+    if (!grant || grant.id !== req.driveId || !Number.isFinite(req.seconds) || req.seconds < 0 || req.seconds > 120 || typeof req.requestId !== 'string' || req.requestId.length > 100) throw Error('Séance de conduite invalide.');
+    const record = await profileRecord(req.player);
+    if (record.profile.seen.includes(req.requestId)) return {
+      ok: true,
+      profile: await publicProfile(record.profile)
+    };
+    if (grant.used + req.seconds > (now - grant.started) / 1000 + 2) throw Error('Durée de conduite invalide.');
+    const event = {
+      type: 'carUse',
+      car: grant.car,
+      seconds: req.seconds,
+      id: req.requestId
+    };
+    if (!record.profile.seen.includes(event.id)) {
+      record.profile = BrawlCore.apply(record.profile, event, Utilities.formatDate(new Date(), TZ, 'yyyy-MM-dd'), false);
+      await saveRecord(record);
+      grant.used += req.seconds;
+      await cache.put('drive:' + req.player, JSON.stringify(grant), 7200);
+    }
+    return {
+      ok: true,
+      profile: await publicProfile(record.profile)
+    };
+  }
+  if (req.action === 'cityPartyCreate') {
+    await authThrottle('city-create:' + req.player, 12);
+    const member = await cityPublicMember(req), id = Utilities.getUuid();
+    let code = null;
+    for (let i = 0; i < 20; i++) {
+      const c = String(parseInt(Utilities.getUuid().replace(/-/g, '').slice(0, 8), 16) % 1000000).padStart(6, '0');
+      if (!await cache.get('city-code:' + c)) {
+        code = c;
+        break;
+      }
+    }
+    if (!code) throw Error('Réessaie dans quelques instants.');
+    const room = {
+      id,
+      code,
+      host: req.player,
+      created: now,
+      members: [member]
+    };
+    await cache.put('city:' + id, JSON.stringify(room), 120);
+    await cache.put('city-code:' + code, id, 120);
+    return {
+      ok: true,
+      room
+    };
+  }
+  let id = req.roomId;
+  if (req.action === 'cityPartyJoin') {
+    await authThrottle('city-join:' + req.player, 20);
+    if (!(/^\d{6}$/).test(req.code || '')) throw Error('Entre les 6 chiffres du code.');
+    id = await cache.get('city-code:' + req.code);
+  }
+  if (typeof id !== 'string' || id.length > 60) throw Error('Partie introuvable.');
+  const room = JSON.parse(await cache.get('city:' + id) || 'null');
+  if (!room || !room.members.some(m => m.id === room.host && now - m.seen < 45000)) throw Error('L’hôte a quitté la partie.');
+  room.members = room.members.filter(m => now - m.seen < 45000);
+  if (req.action === 'cityPartyJoin') {
+    const member = await cityPublicMember(req), old = room.members.findIndex(m => m.id === req.player);
+    if (old < 0 && room.members.length >= 6) throw Error('Cette partie est complète (6 joueurs).');
+    if (old < 0) room.members.push(member); else room.members[old] = member;
+  } else {
+    const member = room.members.find(m => m.id === req.player);
+    if (!member) throw Error('Tu ne fais pas partie de cette partie.');
+    member.seen = now;
+    if (req.action === 'cityPartyLeave') {
+      room.members = room.members.filter(m => m.id !== req.player);
+      if (req.player === room.host) room.members = [];
+    } else if (req.action === 'cityPartyPulse') {
+      const p = (await profileRecord(req.player)).profile;
+      member.vehicle = p.garage?.selected || '';
+      member.cars = p.garage?.cars || ({});
+    } else throw Error('Action de partie inconnue.');
+  }
+  await cache.put('city:' + id, JSON.stringify(room), 120);
+  await cache.put('city-code:' + room.code, id, 120);
+  return {
+    ok: true,
+    room
+  };
+}
+async function handleWordLists(req) {
+  if (!['wordLists', 'wordListSave', 'wordListArchive', 'wordListMerge', 'wordListApply'].includes(req.action)) return null;
+  if (!requestParent || requestParent === 'legacy') throw Error('Connecte un compte parent.');
+  const key = 'WORD_LISTS_' + requestFamily, props = await properties(), library = JSON.parse(props.getProperty(key) || '{"version":0,"lists":[]}');
+  if (req.action === 'wordLists') return {
+    ok: true,
+    library
+  };
+  if (req.version !== library.version) throw Error('Les listes ont changé. Actualise la bibliothèque.');
+  const words = values => {
+    if (!Array.isArray(values) || values.length > 100) throw Error('Maximum 100 mots par liste.');
+    const seen = new Set(), out = [];
+    for (const value of values) {
+      if (typeof value !== 'string' || !value.trim() || value.trim().length > 60) throw Error('Mot invalide (60 caractères maximum).');
+      const word = value.trim().normalize('NFC'), stamp = word.toLocaleLowerCase('fr-CA');
+      if (!seen.has(stamp)) {
+        seen.add(stamp);
+        out.push(word);
+      }
+    }
+    return out;
+  };
+  if (req.action === 'wordListSave') {
+    const name = String(req.name || '').trim().slice(0, 80);
+    if (!name) throw Error('Nomme ta liste.');
+    const existing = library.lists.find(l => l.id === req.listId);
+    if (existing) {
+      existing.name = name;
+      existing.words = await words(req.words);
+    } else {
+      if (library.lists.length >= 100) throw Error('Maximum 100 listes.');
+      library.lists.push({
+        id: Utilities.getUuid(),
+        name,
+        words: await words(req.words),
+        archived: false
+      });
+    }
+  }
+  if (req.action === 'wordListArchive') {
+    const list = library.lists.find(l => l.id === req.listId);
+    if (!list) throw Error('Liste introuvable.');
+    list.archived = req.archived === true;
+  }
+  if (req.action === 'wordListMerge') {
+    const target = library.lists.find(l => l.id === req.target), source = library.lists.find(l => l.id === req.source);
+    if (!target || !source || target.id === source.id) throw Error('Choisis deux listes différentes.');
+    target.words = await words(target.words.concat(source.words));
+  }
+  if (req.action === 'wordListApply') {
+    const list = library.lists.find(l => l.id === req.listId);
+    if (!list || !Array.isArray(req.children) || !req.children.length || req.children.length > 30) throw Error('Choisis une liste et au moins un enfant.');
+    if (typeof req.week !== 'string' || !(/^\d{4}-\d{2}-\d{2}$/).test(req.week) || BrawlCore.weekOf(req.week) !== req.week) throw Error('Choisis le lundi de la semaine.');
+    if (list.words.length > 50) throw Error('Une dictée hebdomadaire peut contenir au maximum 50 mots.');
+    for (const id of [...new Set(req.children)]) {
+      const record = await profileRecord(id);
+      record.profile = BrawlCore.apply(record.profile, {
+        type: 'dictationList',
+        id: Utilities.getUuid(),
+        week: req.week,
+        words: list.words
+      }, Utilities.formatDate(new Date(), TZ, 'yyyy-MM-dd'), true);
+      await saveRecord(record);
+    }
+  }
+  library.version++;
+  await props.setProperty(key, JSON.stringify(library));
+  return {
+    ok: true,
+    library
   };
 }
 async function handleWritingCheck(req, record, day) {

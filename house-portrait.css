@@ -76,7 +76,7 @@ body.house-apartment-view #toast.show{transform:translate(-50%,0)}
 
 .placement-ring{position:absolute;display:block;border:3px solid #ffffffb3;border-radius:50%;box-shadow:0 0 0 1px #395d7030;pointer-events:none}.placement-orbit button[hidden]{display:none}
 
-.sim-stage .house-bottom-nav{grid-template-columns:repeat(5,minmax(0,1fr))}.sim-stage .house-bottom-nav .house-tile{min-width:0;padding:4px 2px}.sim-stage .house-bottom-nav .house-tile small{font-size:10px}
+.sim-stage .house-bottom-nav{grid-template-columns:repeat(6,minmax(0,1fr))}.sim-stage .house-bottom-nav .house-tile{min-width:0;padding:4px 2px}.sim-stage .house-bottom-nav .house-tile small{font-size:10px}
 
 .network-progress{position:fixed;left:50%;top:calc(10px + env(safe-area-inset-top,0px));transform:translateX(-50%);z-index:2200;display:flex;align-items:center;gap:9px;background:#f8fff8f5;border:1px solid #bad9c2;border-radius:24px;padding:9px 15px;box-shadow:0 3px 12px #1b3e5426;color:#24495b;font-weight:800;font-size:13px;pointer-events:none;max-width:calc(100vw - 24px)}.network-progress[hidden]{display:none}.network-spinner{width:16px;height:16px;border:3px solid #c1dace;border-top-color:#329b68;border-radius:50%;animation:network-spin .8s linear infinite;flex:none}@keyframes network-spin{to{transform:rotate(360deg)}}@media(prefers-reduced-motion:reduce){.network-spinner{animation:none;border-color:#329b68}}
 

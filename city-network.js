@@ -1,0 +1,23 @@
+'use strict';
+window.CityNetwork=(()=>{
+ let room=null,keys=null,socket=null,pulseTimer=null,heartbeat=null,ref=0,joined=false,seq=0,closed=false;
+ const known=new Map(),last=new Map(),encoder={encode:s=>new TextEncoder().encode(s)};
+ const bytes=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0)),base64=a=>btoa(String.fromCharCode(...new Uint8Array(a)));
+ const api=(action,payload={})=>App.api(action,payload);
+ function wire(event,payload,topic='realtime:city-'+room.id){if(socket?.readyState===1)socket.send(JSON.stringify({topic,event,payload,ref:String(++ref),join_ref:'1'}));}
+ async function pulse(){if(!room)return;try{const r=await api('cityPartyPulse',{roomId:room.id});room=r.room;await publicKeys();window.City?.rosterChanged();}catch(e){close();App.toast(e.message);window.City?.hostGone();}}
+ async function publicKeys(){for(const m of room.members)if(!known.has(m.id)||known.get(m.id).stamp!==JSON.stringify(m.publicKey))known.set(m.id,{stamp:JSON.stringify(m.publicKey),key:await crypto.subtle.importKey('jwk',m.publicKey,{name:'ECDSA',namedCurve:'P-256'},false,['verify'])});}
+ async function setup(action,code){await close();closed=false;keys=await crypto.subtle.generateKey({name:'ECDSA',namedCurve:'P-256'},true,['sign','verify']);const publicKey=await crypto.subtle.exportKey('jwk',keys.publicKey);const r=await api(action,{publicKey,code});room=r.room;await publicKeys();
+  return new Promise((resolve,reject)=>{const timeout=setTimeout(()=>{close();reject(Error('Connexion multijoueur trop longue.'));},12000);socket=new WebSocket('wss://wodtiksnxpeqiipvpbdv.supabase.co/realtime/v1/websocket?apikey='+encodeURIComponent(BRAWL_CONFIG.realtimeKey)+'&vsn=1.0.0');
+   socket.onopen=()=>wire('phx_join',{config:{broadcast:{ack:false,self:false},presence:{enabled:false},private:false}});
+   socket.onmessage=async e=>{try{if(typeof e.data!=='string'||e.data.length>30000)return;const packet=JSON.parse(e.data);if(packet.event==='phx_reply'&&packet.ref==='1'){if(packet.payload?.status!=='ok'){clearTimeout(timeout);reject(Error('Le service multijoueur a refusé la connexion.'));close();return;}joined=true;clearTimeout(timeout);heartbeat=setInterval(()=>wire('heartbeat',{},'phoenix'),25000);pulseTimer=setInterval(pulse,15000);resolve(room);return;}if(packet.event!=='broadcast'||packet.payload?.event!=='game')return;const m=packet.payload.payload;if(!m||typeof m.body!=='string'||m.body.length>24000||typeof m.signature!=='string')return;const data=JSON.parse(m.body),member=room.members.find(x=>x.id===data.from);if(!member||!Number.isInteger(data.seq)||data.seq<=(last.get(data.from)||0))return;const key=known.get(member.id)?.key;if(!key||!await crypto.subtle.verify({name:'ECDSA',hash:'SHA-256'},key,bytes(m.signature),encoder.encode(m.body)))return;if(data.seq<=(last.get(data.from)||0))return;last.set(data.from,data.seq);if(data.kind==='state'&&data.from===room.host)City.receiveState(data.data);if(data.kind==='input'&&isHost())City.receiveInput(data.from,data.data);
+   }catch{/* Discard malformed or unsigned packets. */}};
+   socket.onerror=()=>{clearTimeout(timeout);reject(Error('Connexion temps réel indisponible.'));};socket.onclose=()=>{clearTimeout(timeout);joined=false;if(!closed){clearInterval(pulseTimer);clearInterval(heartbeat);App.toast('Connexion multijoueur interrompue.');City.hostGone();}};
+  });
+ }
+ let signing=false;
+ async function send(kind,data){if(!joined||signing||!room||!keys)return;signing=true;try{const body=JSON.stringify({from:App.profile().id,seq:++seq,kind,data});const signature=base64(await crypto.subtle.sign({name:'ECDSA',hash:'SHA-256'},keys.privateKey,encoder.encode(body)));if(joined)wire('broadcast',{type:'broadcast',event:'game',payload:{body,signature}});}finally{signing=false;}}
+ async function close(){closed=true;joined=false;clearInterval(pulseTimer);clearInterval(heartbeat);const old=room;room=null;const s=socket;socket=null;s?.close();known.clear();last.clear();ref=0;seq=0;if(old)api('cityPartyLeave',{roomId:old.id}).catch(()=>{});}
+ function isHost(){return !room||room.host===App.profile().id;}
+ return {create:()=>setup('cityPartyCreate'),join:code=>setup('cityPartyJoin',code),send,close,pulse,isHost,room:()=>room,connected:()=>joined};
+})();

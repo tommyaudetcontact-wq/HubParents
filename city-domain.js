@@ -1,0 +1,34 @@
+'use strict';
+(function(C){
+ const rows=[
+ ['veloce','Véloce GT','sport',true,34,17],['fulgura','Fulgura Spider','sport',true,33,18],
+ ['atlas','Atlas Pickup','pickup',false,39,20],['bison','Bison Double Cab','pickup',false,42,21],
+ ['tribu','Tribu Familiale','minivan',false,39,20],['escapade','Escapade XL','minivan',false,42,21],
+ ['pulse','Pulse Compacte','compact',false,27,16],['mistral','Mistral Citadine','compact',false,29,17],
+ ['horizon','Horizon Berline','sedan',false,35,18],['equinoxe','Équinoxe Confort','sedan',false,37,19],
+ ['summit','Summit SUV','suv',false,37,21],['roc','Roc Tout-Terrain','suv',false,35,22],
+ ['comete','Comète Coupé','coupe',false,32,18],['sprint','Sprint RS','coupe',false,30,18],
+ ['riviera','Riviera Cabriolet','convertible',false,34,18],['azur','Azur Roadster','convertible',false,30,17],
+ ['volt','Volt Électrique','electric',false,32,18],['nova','Nova Électrique','electric',false,35,19],
+ ['nomade','Nomade Break','wagon',false,38,18],['sierra','Sierra Aventure','wagon',false,40,19],
+ ['retro','Rétro 60','classic',false,34,19],['heritage','Héritage 80','classic',false,37,19],
+ ['cargo','Cargo Utilitaire','van',false,43,21],['campus','Campus Microbus','bus',false,46,22],
+ ['rallye','Rallye Piste','rally',false,31,18]
+ ];
+ C.vehicles=rows.map(([key,name,body,luxury,length,width],index)=>({id:'car-'+key,name,body,luxury,length,width,price:luxury?200:100,speed:luxury?240:180+index%4*8,color:['#df534c','#447fbd','#e5b84b','#55a288','#ab78c2'][index%5],category:'voiture',icon:'🚗',desc:'Voiture personnelle · conduite en ville'}));
+ for(const v of C.vehicles)if(!C.catalog.some(i=>i.id===v.id))C.catalog.push(v);
+ const upgrade=C.upgrade;C.upgrade=function(profile){const p=upgrade(profile);p.garage=p.garage||{selected:'',cars:{}};for(const car of C.vehicles)if(p.inventory.includes(car.id)&&!p.garage.cars[car.id])p.garage.cars[car.id]={color:car.color,boost:0};if(!p.garage.cars[p.garage.selected])p.garage.selected=Object.keys(p.garage.cars)[0]||'';return p;};
+ const apply=C.apply;C.apply=function(profile,e,day,parent){if(!['carSelect','carPaint','carBoost','carFuel','carUse'].includes(e.type))return apply(profile,e,day,parent);const p=C.upgrade(profile);if(typeof e.id!=='string'||e.id.length>100)throw Error('Action invalide.');if(p.seen.includes(e.id))return p;const car=p.garage.cars[e.car];if(!car)throw Error('Cette voiture ne t’appartient pas.');if(e.type==='carSelect')p.garage.selected=e.car;
+ if(e.type==='carFuel'){if(![1,2].includes(e.amount))throw Error('Choisis un demi-plein ou un plein.');if((car.fuel||0)>=600)throw Error('Le réservoir est plein.');if(p.coins<e.amount)throw Error('Pas assez de pièces.');p.coins-=e.amount;car.fuel=Math.min(600,(car.fuel||0)+(e.amount===1?300:600));p.history.unshift({day,label:'Carburant',coins:-e.amount,xp:0});}
+ if(e.type==='carUse'){if(!Number.isFinite(e.seconds)||e.seconds<0||e.seconds>120)throw Error('Durée de conduite invalide.');car.fuel=Math.max(0,(car.fuel||0)-e.seconds);}
+ if(e.type==='carPaint'){if(!/^#[a-f0-9]{6}$/i.test(e.color))throw Error('Couleur invalide.');car.color=e.color;}
+ if(e.type==='carBoost'){if(car.boost>=3)throw Error('Moteur déjà au maximum.');const price=25*(car.boost+1);if(p.coins<price)throw Error('Pas assez de pièces.');p.coins-=price;car.boost++;p.history.unshift({day,label:'Amélioration moteur',coins:-price,xp:0});}
+ p.seen.push(e.id);p.seen=p.seen.slice(-500);p.revision++;return p;};
+ C.cityStores=[['bath','Bain & Compagnie','#7eb8c6'],['kitchen','La Cuisine','#e7ac69'],['living','Salon & Loisirs','#ab9cc7'],['bedroom','Douce Nuit','#bba9ce'],['garden','Jardin & Déco','#8ab893'],['clothes','L’Atelier du Style','#dc94af'],['care','Famille & Soins','#e5bf7d']].map(([id,name,color],i)=>({id,name,color,x:150+(i%4)*430,y:i<4?140:860,w:320,h:260}));
+ C.cityDepartment=i=>{if(['skin','look','cheveux','haut','bas','chaussures','accessoire','style'].includes(i.category)||/^(skin|hair|top|bottom|shoe|accessory)-/.test(i.id))return 'clothes';if(i.category==='carte')return 'cards';if(i.category!=='meuble')return i.category==='door'?'garden':i.category==='voiture'?'cars':'care';const k=C.simKind(i.id);if(['toilet','bath','shower','sink','washing','dryer'].includes(k))return 'bath';if(['fridge','stove','microwave','counter','coffee','dishwasher','trash','table'].includes(k))return 'kitchen';if(['bed','dresser','wardrobe','crib','changing'].includes(k))return 'bedroom';if(['garden','tree','bench','fountain','plant','fence'].includes(k))return 'garden';return 'living';};
+ const aisleCache=new Map(),layoutCache=new Map();C.cityAisles=id=>{const key=id+':'+C.catalog.length;if(aisleCache.has(key))return aisleCache.get(key);const groups=new Map();for(const item of C.catalog){if(C.cityDepartment(item)!==id)continue;const kind=item.category==='meuble'?C.simKind(item.id):item.category;if(!groups.has(kind))groups.set(kind,[]);groups.get(kind).push(item);}const result=[...groups].map(([kind,items],column)=>({kind,items,column}));aisleCache.set(key,result);return result;};
+ C.cityLayout=id=>{if(layoutCache.has(id))return layoutCache.get(id);const aisles=C.cityAisles(id),columns=Math.max(1,aisles.length),height=Math.max(650,...aisles.map(a=>Math.ceil(a.items.length/2)*100+250));const result={aisles,width:columns*220+220,height};layoutCache.set(id,result);return result;};
+ const clamp=(n,a,b)=>Math.max(a,Math.min(b,n));
+ C.driveStep=(actor,input,dt,car,boost=0)=>{dt=clamp(dt,0,1/30);let speed=actor.speed||0;const throttle=clamp(input.y||0,-1,1),steer=clamp(input.x||0,-1,1),max=car.speed*(1+.12*clamp(boost,0,3));speed+=(-throttle*200-speed*(input.brake?7:1.25))*dt;speed=clamp(speed,-max*.4,max);const angle=(actor.angle||0)+steer*2.4*dt*clamp(Math.abs(speed)/65,0,1)*(speed<0?-1:1);return {...actor,speed,angle,x:actor.x+Math.sin(angle)*speed*dt,y:actor.y-Math.cos(angle)*speed*dt};};
+ C.soccerStep=(ball,players,dt)=>{dt=clamp(dt,0,1/30);let b={...ball},goal=null;b.x+=b.vx*dt;b.y+=b.vy*dt;b.vx*=Math.exp(-1.6*dt);b.vy*=Math.exp(-1.6*dt);if(b.y<35||b.y>565){b.y=clamp(b.y,35,565);b.vy*=-.7;}if(b.x<35||b.x>965){if(b.y>230&&b.y<370)goal=b.x<35?1:0;else{b.x=clamp(b.x,35,965);b.vx*=-.7;}}for(const p of players){const dx=b.x-p.x,dy=b.y-p.y,d=Math.hypot(dx,dy);if(d<26&&d>0){b.x=p.x+dx/d*26;b.y=p.y+dy/d*26;b.vx+=dx/d*45;b.vy+=dy/d*45;}}return {ball:b,goal};};
+})(typeof BrawlCore!=='undefined'?BrawlCore:require('./domain.js'));
