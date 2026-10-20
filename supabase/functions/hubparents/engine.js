@@ -1845,7 +1845,7 @@ async function handleCityActivities(req) {
     return await result();
   }
   const point = req.position;
-  if (!point || ![point.x, point.y].every(Number.isFinite) || point.x < 0 || point.y < 0 || point.x > 1300 || point.y > 1100) throw Error('Position de mission invalide.');
+  if (!point || ![point.x, point.y].every(Number.isFinite) || point.x < 0 || point.y < 0 || point.x > BrawlCore.cityMap.width || point.y > BrawlCore.cityMap.height) throw Error('Position de mission invalide.');
   if (req.action === 'cityJobStart') {
     if (active && now < active.expires) return await result();
     if (!['taxi', 'delivery'].includes(req.kind) || typeof req.requestId !== 'string' || req.requestId.length < 8 || req.requestId.length > 100) throw Error('Mission invalide.');
@@ -1878,7 +1878,16 @@ async function handleCityActivities(req) {
   if (req.index !== active.index) throw Error('Suis les points dans l’ordre.');
   const target = active.points[active.index], distance = Math.hypot(target.x - active.lastPoint.x, target.y - active.lastPoint.y);
   if (Math.hypot(point.x - target.x, point.y - target.y) > 60) throw Error('Approche du point de mission.');
-  if (now - active.lastAt < Math.max(250, distance / 330 * 1000 * .8)) throw Error('Trajet trop rapide.');
+  if (!Number.isFinite(active.travelDistance)) {
+    let previous = active.origin;
+    active.travelDistance = active.points.slice(0, active.index).reduce((total, p) => {
+      const d = Math.hypot(p.x - previous.x, p.y - previous.y);
+      previous = p;
+      return total + d;
+    }, 0);
+  }
+  if (now - active.started < Math.max((active.index + 1) * 180, (active.travelDistance + distance) / 330 * 1000 * .8)) throw Error('Trajet trop rapide.');
+  active.travelDistance += distance;
   if (active.kind === 'taxi' && Math.hypot(target.x - active.pickup.x, target.y - active.pickup.y) < 1) active.hasPassenger = true;
   active.index++;
   active.lastAt = now;
