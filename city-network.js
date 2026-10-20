@@ -15,9 +15,9 @@ window.CityNetwork=(()=>{
    socket.onerror=()=>{clearTimeout(timeout);reject(Error('Connexion temps réel indisponible.'));};socket.onclose=()=>{clearTimeout(timeout);joined=false;if(!closed){clearInterval(pulseTimer);clearInterval(heartbeat);App.toast('Connexion multijoueur interrompue.');City.hostGone();}};
   });
  }
- let signing=false;const critical=[];
- async function send(kind,data){if(!joined||!room||!keys)return;if(signing){if(kind==='activity'&&critical.length<20)critical.push({kind,data});return;}signing=true;try{const body=JSON.stringify({from:App.profile().id,seq:++seq,kind,data});const signature=base64(await crypto.subtle.sign({name:'ECDSA',hash:'SHA-256'},keys.privateKey,encoder.encode(body)));if(joined)wire('broadcast',{type:'broadcast',event:'game',payload:{body,signature}});}finally{signing=false;const next=critical.shift();if(next)send(next.kind,next.data);}}
- async function close(){closed=true;joined=false;critical.length=0;clearInterval(pulseTimer);clearInterval(heartbeat);const old=room;room=null;const s=socket;socket=null;s?.close();known.clear();last.clear();ref=0;seq=0;if(old)api('cityPartyLeave',{roomId:old.id}).catch(()=>{});}
+ let signing=false;const critical=[];let latestMotion=null;
+ async function send(kind,data){if(!joined||!room||!keys)return;if(signing){if(kind==='activity'&&critical.length<20)critical.push({kind,data});else if(kind==='input'||kind==='state')latestMotion={kind,data};return;}signing=true;try{const body=JSON.stringify({from:App.profile().id,seq:++seq,kind,data});const signature=base64(await crypto.subtle.sign({name:'ECDSA',hash:'SHA-256'},keys.privateKey,encoder.encode(body)));if(joined)wire('broadcast',{type:'broadcast',event:'game',payload:{body,signature}});}finally{signing=false;const next=critical.shift()||latestMotion;if(next===latestMotion)latestMotion=null;if(next)send(next.kind,next.data);}}
+ async function close(){closed=true;joined=false;critical.length=0;latestMotion=null;clearInterval(pulseTimer);clearInterval(heartbeat);const old=room;room=null;const s=socket;socket=null;s?.close();known.clear();last.clear();ref=0;seq=0;if(old)api('cityPartyLeave',{roomId:old.id}).catch(()=>{});}
  function isHost(){return !room||room.host===App.profile().id;}
  return {create:()=>setup('cityPartyCreate'),join:code=>setup('cityPartyJoin',code),send,close,pulse,isHost,room:()=>room,connected:()=>joined};
 })();
