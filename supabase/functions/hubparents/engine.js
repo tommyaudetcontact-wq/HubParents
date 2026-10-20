@@ -1816,7 +1816,7 @@ async function handleCityAction(req) {
   };
 }
 async function handleWordLists(req) {
-  if (!['wordLists', 'wordListSave', 'wordListArchive', 'wordListMerge', 'wordListApply'].includes(req.action)) return null;
+  if (!['wordLists', 'wordListSave', 'wordListArchive', 'wordListMerge', 'wordListApply', 'wordListUnassign'].includes(req.action)) return null;
   if (!requestParent || requestParent === 'legacy') throw Error('Connecte un compte parent.');
   const key = 'WORD_LISTS_' + requestFamily, props = await properties(), library = JSON.parse(props.getProperty(key) || '{"version":0,"lists":[]}');
   if (req.action === 'wordLists') return {
@@ -1864,11 +1864,39 @@ async function handleWordLists(req) {
     if (!target || !source || target.id === source.id) throw Error('Choisis deux listes différentes.');
     target.words = await words(target.words.concat(source.words));
   }
+  if (req.action === 'wordListUnassign') {
+    if (!Array.isArray(req.children) || !req.children.length && !req.replaceChildren || req.children.length > 30 || typeof req.week !== 'string' || BrawlCore.weekOf(req.week) !== req.week) throw Error('Choisis une semaine et un enfant.');
+    for (const id of [...new Set(req.children)]) {
+      const record = await profileRecord(id);
+      record.profile = BrawlCore.apply(record.profile, {
+        type: 'dictationList',
+        id: Utilities.getUuid(),
+        week: req.week,
+        words: []
+      }, Utilities.formatDate(new Date(), TZ, 'yyyy-MM-dd'), true);
+      await saveRecord(record);
+      if (library.assignments?.[req.week]) delete library.assignments[req.week][id];
+    }
+  }
   if (req.action === 'wordListApply') {
     const list = library.lists.find(l => l.id === req.listId);
-    if (!list || !Array.isArray(req.children) || !req.children.length || req.children.length > 30) throw Error('Choisis une liste et au moins un enfant.');
+    if (!list || !Array.isArray(req.children) || !req.children.length && !req.replaceChildren || req.children.length > 30) throw Error('Choisis une liste et au moins un enfant.');
     if (typeof req.week !== 'string' || !(/^\d{4}-\d{2}-\d{2}$/).test(req.week) || BrawlCore.weekOf(req.week) !== req.week) throw Error('Choisis le lundi de la semaine.');
     if (list.words.length > 50) throw Error('Une dictée hebdomadaire peut contenir au maximum 50 mots.');
+    library.assignments = library.assignments || ({});
+    const assigned = library.assignments[req.week] || (library.assignments[req.week] = {});
+    if (req.replaceChildren) for (const id of Object.keys(assigned)) {
+      if (assigned[id] !== list.id || req.children.includes(id)) continue;
+      const record = await profileRecord(id);
+      record.profile = BrawlCore.apply(record.profile, {
+        type: 'dictationList',
+        id: Utilities.getUuid(),
+        week: req.week,
+        words: []
+      }, Utilities.formatDate(new Date(), TZ, 'yyyy-MM-dd'), true);
+      await saveRecord(record);
+      delete assigned[id];
+    }
     for (const id of [...new Set(req.children)]) {
       const record = await profileRecord(id);
       record.profile = BrawlCore.apply(record.profile, {
@@ -1878,6 +1906,7 @@ async function handleWordLists(req) {
         words: list.words
       }, Utilities.formatDate(new Date(), TZ, 'yyyy-MM-dd'), true);
       await saveRecord(record);
+      assigned[id] = list.id;
     }
   }
   library.version++;

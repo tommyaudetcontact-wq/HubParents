@@ -196,10 +196,12 @@ Lire CONNEXION-GARDE-ROBE-MOBILIER.md : connexion persistante, accès enfant par
 
 ## Ville, dictées et appartement — 20 octobre 2026
 
-La ville propose sept magasins avec allées adaptées au catalogue, 25 voitures (100 $, luxe 200 $), un garage, une station-service et un terrain de soccer. Déplacements, conduite et soccer utilisent le joystick ou le clavier. Les parties Supabase Realtime accueillent six joueurs, hôte compris ; les changements de lieu suivent l’hôte. L’école prévient avant de fermer la partie pour les cours individuels. Le carburant coûte 1 $ pour 5 minutes ou 2 $ pour 10 minutes de conduite ; le réservoir contient au maximum dix minutes.
+Le petit quartier remplace la ville à magasins : bâtiments décoratifs en perspective, voitures en volume et une seule station-service interactive. Les 25 voitures sont dans la boutique principale (100 $, luxe 200 $), avec deux articles par rangée sur mobile. La conduite propose accélération, marche arrière, frein à main, inertie et collisions ; les commandes tactiles permettent de tenir le gaz et de tourner en même temps. Les parties Supabase Realtime accueillent six joueurs, hôte compris. Le carburant coûte 1 $ pour 5 minutes ou 2 $ pour 10 minutes de conduite ; le réservoir contient au maximum dix minutes.
 
 Les parents disposent d’une bibliothèque de mots modifiable, archivable et fusionnable, applicable à plusieurs enfants. La dictée prononce chaque mot, donne progressivement ses premières lettres après les erreurs et avance à la réussite. Les majuscules sont acceptées ; les accents restent vérifiés.
 
 L’appartement regroupe les sauvegardes silencieuses, évite les réécritures complètes à chaque seconde et conserve les couches statiques dans des caches recadrés. La cuisine nourrit directement après sa progression. Les poignées de pièce capturent le geste sans déplacer la caméra ; les agrandissements et réductions conservent les finitions des murs et du sol.
 
 Validation : 45 suites historiques, tests supplémentaires de ville/économie/listes, backend asynchrone, messages multijoueurs signés et redimensionnement. Transport Realtime vérifié entre deux connexions réelles. Les tests Canvas et DOM locaux ne constituent pas un essai sur téléphone ni un match complet sur plusieurs appareils.
+
+Les skins possédés sont sélectionnables directement dans Mon personnage. Le conjoint ou la conjointe possède sa propre apparence, ses vêtements et son skin, sauvegardés indépendamment. Les listes de mots sont présentées en haut de l’espace parent : reprise d’une semaine existante, copie, édition, mise de côté/restauration, fusion et attribution modifiable par enfant et semaine.
