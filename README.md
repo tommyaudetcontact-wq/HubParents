@@ -1,9 +1,10 @@
-## Migration Supabase — préparation API 17
+## Backend Supabase — API 17
 
 Le backend `hubparents` est déployé dans le projet `wodtiksnxpeqiipvpbdv`.
 L'export XLSX a été importé dans le schéma privé `brawl_private`, inaccessible
-aux rôles clients. Le site continue d'utiliser Apps Script jusqu'au transfert
-des secrets de connexion et à la validation de la bascule.
+aux rôles clients. Le transfert des secrets est terminé et le site utilise
+directement Supabase. L'ancien /exec redirige les clients déjà ouverts.
+Sheets et Apps Script sont conservés uniquement comme archives de migration.
 
 Le moteur conserve le protocole parent/enfant et les règles du jeu existants.
 L'adaptateur utilise des lignes PostgreSQL indexées et des lectures par plage.
