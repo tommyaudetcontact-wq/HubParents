@@ -49,7 +49,7 @@ window.CityArt=(()=>{
  const tint=(hex,n)=>'#'+hex.replace('#','').match(/../g).map(v=>Math.max(0,Math.min(255,parseInt(v,16)+n)).toString(16).padStart(2,'0')).join('');
  function car(c,a,v,color){
  const w=v.width*.7,l=v.length*.8,sport=['sport','coupe','rally'].includes(v.body),tall=['suv','van','minivan','bus'].includes(v.body),h=sport?7:tall?13:10,roofH=h+(tall?9:6),pickup=v.body==='pickup',open=v.body==='convertible';
- const local=(x,y,z=0)=>project(a.x+Math.cos(a.angle)*x-Math.sin(a.angle)*y,a.y+Math.sin(a.angle)*x+Math.cos(a.angle)*y,z),shape=(points,fill,stroke='#253335',line=.65)=>{const ps=points.map(p=>local(...p));poly(c,ps,fill);if(stroke){c.strokeStyle=stroke;c.lineWidth=line;c.stroke();}},line=(ps,col,width=1)=>{c.beginPath();ps.map(p=>local(...p)).forEach((p,n)=>n?c.lineTo(p.x,p.y):c.moveTo(p.x,p.y));c.strokeStyle=col;c.lineWidth=width;c.stroke();};
+ const cos=Math.cos(a.angle),sin=Math.sin(a.angle),local=(x,y,z=0)=>project(a.x+cos*x-sin*y,a.y+sin*x+cos*y,z),shape=(points,fill,stroke='#253335',line=.65)=>{const ps=points.map(p=>local(...p));poly(c,ps,fill);if(stroke){c.strokeStyle=stroke;c.lineWidth=line;c.stroke();}},line=(ps,col,width=1)=>{c.beginPath();ps.map(p=>local(...p)).forEach((p,n)=>n?c.lineTo(p.x,p.y):c.moveTo(p.x,p.y));c.strokeStyle=col;c.lineWidth=width;c.stroke();};
  const outline=[[-w*.8,-l],[-w,-l*.78],[-w,l*.8],[-w*.8,l],[w*.8,l],[w,l*.8],[w,-l*.78],[w*.8,-l]],bodyColor=color||v.color||'#ae443e';
  shape(outline.map(([x,y])=>[x+6,y+6,0]),'#172b3038',null);
  for(const x of [-w-2,w-1])for(const y of [-l*.65,l*.45]){shape([[x,y,0],[x+3,y,0],[x+3,y+9,0],[x,y+9,0]],'#1d2429');shape([[x,y,1],[x,y+9,1],[x,y+9,6],[x,y,6]],'#111e24');}
