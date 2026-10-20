@@ -1,0 +1,40 @@
+/** Dernier transfert Apps Script -> Supabase. Ne pas publier ce fichier sur GitHub
+ * après remplacement du jeton. Il est à usage unique et expire automatiquement.
+ * Le fichier complet fourni inclut également la redirection du déploiement /exec.
+ */
+function forwardMigrated(e, endpoint) {
+  const result=UrlFetchApp.fetch(endpoint,{method:'post',contentType:'text/plain;charset=utf-8',payload:e.postData.contents,muteHttpExceptions:true});
+  const json=JSON.parse(result.getContentText());
+  return ContentService.createTextOutput(JSON.stringify(json)).setMimeType(ContentService.MimeType.JSON);
+}
+function migrerVersSupabase() {
+  const endpoint='https://wodtiksnxpeqiipvpbdv.supabase.co/functions/v1/hubparents';
+  const token='__MIGRATION_TOKEN__';
+  const lock=LockService.getScriptLock();lock.waitLock(30000);
+  try {
+    const props=PropertiesService.getScriptProperties();
+    if(props.getProperty('MIGRATED_ENDPOINT')){console.log('Le transfert est déjà terminé.');return;}
+    if(props.getProperty('SUPABASE_EXPORT_ATTEMPT')){
+      const status=JSON.parse(UrlFetchApp.fetch(endpoint).getContentText());
+      if(status.installed){props.setProperty('MIGRATED_ENDPOINT',endpoint);console.log('Transfert confirmé. Redirection vers Supabase activée.');return;}
+    }
+    const all=props.getProperties(),secrets={};
+    Object.keys(all).forEach(k=>{if(/^(AUTH_PEPPER|CHILD_LOGIN_SALT|PARENT_HASH|PLAYER_[a-zA-Z0-9_-]{1,60})$/.test(k))secrets[k]=all[k];});
+    if(!secrets.AUTH_PEPPER||!secrets.CHILD_LOGIN_SALT)throw Error('Secrets de connexion manquants. Aucun transfert effectué.');
+    const db=SpreadsheetApp.openById(props.getProperty('DB_ID'));
+    const names=['Profils','AccesEnfants','Duels','Parents','Familles','ParentsFamilles','EnfantsFamilles','Sessions','InvitationsParents','ConnexionsEnfants','Journal','EtatsProfils','ProfilsArchives','Echanges_V2','Lobby','Invitations'];
+    const sheets=names.map(name=>{
+      const sheet=db.getSheetByName(name);if(!sheet)throw Error('Onglet manquant : '+name);
+      const values=sheet.getDataRange().getValues().map(row=>row.map(v=>v instanceof Date?v.toISOString():v));
+      return {name:name,headers:values[0],rows:values.slice(1).filter(row=>row.some(v=>v!==''))};
+    });
+    const payload=JSON.stringify({action:'migrationFinalize',migrationToken:token,properties:secrets,sheets:sheets});
+    if(payload.length>2000000)throw Error('Export trop volumineux. Aucun transfert effectué.');
+    props.setProperty('SUPABASE_EXPORT_ATTEMPT','true');
+    const response=UrlFetchApp.fetch(endpoint,{method:'post',contentType:'application/json',payload:payload,muteHttpExceptions:true});
+    const result=JSON.parse(response.getContentText());
+    if(!result.ok)throw Error(result.error||'Le transfert a échoué. Les données Google restent actives.');
+    props.setProperty('MIGRATED_ENDPOINT',endpoint);
+    console.log('Transfert terminé : '+result.profiles+' profils. Les prochaines requêtes sont redirigées vers Supabase.');
+  } finally {lock.releaseLock();}
+}

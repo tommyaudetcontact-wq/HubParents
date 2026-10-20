@@ -1,0 +1,12 @@
+{
+  "name": "hubparents",
+  "private": true,
+  "scripts": {
+    "build:backend": "node scripts/build-supabase.cjs",
+    "test:backend": "node supabase-tests.cjs && node migration-tests.cjs"
+  },
+  "devDependencies": {
+    "acorn": "8.19.0",
+    "astring": "1.9.0"
+  }
+}

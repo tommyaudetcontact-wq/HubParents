@@ -1,0 +1,5 @@
+project_id = "wodtiksnxpeqiipvpbdv"
+
+[functions.hubparents]
+# The existing parent/child protocol authenticates every operation in the handler.
+verify_jwt = false

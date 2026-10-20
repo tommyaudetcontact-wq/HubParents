@@ -1,3 +1,38 @@
+## Migration Supabase — préparation API 17
+
+Le backend `hubparents` est déployé dans le projet `wodtiksnxpeqiipvpbdv`.
+L'export XLSX a été importé dans le schéma privé `brawl_private`, inaccessible
+aux rôles clients. Le site continue d'utiliser Apps Script jusqu'au transfert
+des secrets de connexion et à la validation de la bascule.
+
+Le moteur conserve le protocole parent/enfant et les règles du jeu existants.
+L'adaptateur utilise des lignes PostgreSQL indexées et des lectures par plage.
+Les écritures d'une action et des échanges sont transactionnelles. Un verrou
+transactionnel conserve la sérialisation du backend précédent pendant cette
+première migration. Les données restent dans un format compatible avec
+l'export Sheets, plutôt qu'un nouveau modèle relationnel métier.
+
+Sources : `supabase/functions/hubparents/`, migrations : `supabase/migrations/`.
+Reconstruction : `npm install`, puis `npm run build:backend` et
+`npm run test:backend`. Le frontend reste statique, sans compilation.
+Le backend peut être déployé avec le connecteur Supabase ou la CLI :
+`supabase functions deploy hubparents --project-ref wodtiksnxpeqiipvpbdv`.
+La vérification JWT de la passerelle est désactivée car le moteur valide ses
+propres sessions parent/enfant avant les actions. Aucune clé administrative
+ne doit être placée dans le site.
+
+Le transfert final exige `AUTH_PEPPER` et `CHILD_LOGIN_SALT`, conservés dans
+ScriptProperties, absents du XLSX. Le fichier privé produit par
+`scripts/prepare-migration-file.py` transfère ces secrets et un export frais,
+puis redirige l'ancien `/exec`. Il faut publier cette version Apps Script avant
+d'exécuter `migrerVersSupabase`. Le jeton de transfert expire et ne peut servir
+qu'une fois. Les exports, jetons et fichiers `.private/` ne sont pas versionnés.
+
+Le contrôle `migrationCheck`, réservé au jeton de transfert avant la bascule,
+teste la vraie base dans une transaction toujours annulée. La clé de transfert
+est supprimée après finalisation. Les prochaines mises à jour du backend
+peuvent se faire directement via Supabase, sans copier du code Apps Script.
+
 ## Rendu uniforme et hitboxes corrigées
 
 Éclairage dynamique supprimé, couleurs stables et zones de clic des personnages ajustées à leurs silhouettes. Les meubles restent prioritaires. Voir **RENDU-UNIFORME-HITBOX.md**. Le serveur API 16 actuel reste compatible.
