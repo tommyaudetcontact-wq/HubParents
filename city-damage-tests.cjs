@@ -26,3 +26,11 @@ function client(host=true){const s={Math,Date,Map,Set,BrawlCore:C};s.window=s;vm
  for(let i=0;i<4;i++)d.impact(a,300,-1,0);for(let n=0;n<30;n++)d.tick(.02);g.save();g.translate(-440,140);d.draw(g,s.CityArt.project);g.restore();fs.writeFileSync('../vehicle-damage-preview.png',canvas.toBuffer('image/png'));assert(s.CityArt.cacheStats().carPixels<=4000000);
  console.log('Native Canvas damage stages and detached panels rendered; vehicle sprites retain their bounded cache.');
 }
+{
+ const {createCanvas}=require('C:/Users/recto/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/@napi-rs/canvas'),{s,v}=client();
+ const render=(angle,parts)=>{const canvas=createCanvas(260,260),g=canvas.getContext('2d');g.translate(130,130);g.scale(2,2);s.CityArt.car(g,{x:0,y:0,angle,damage:{parts},noShadow:true},v,'#ad78ce');return g.getImageData(0,0,260,260).data;};
+ // An opened far-side door may protrude outside the silhouette, but cannot repaint opaque body pixels.
+ for(let n=0;n<24;n++){const angle=n*Math.PI/12,near=Math.sin(angle)*.94-Math.cos(angle)*.342>=0?1:-1,parts=[0,0,0,0,0,0];parts[near>0?2:3]=70;const base=render(angle,[0,0,0,0,0,0]),damaged=render(angle,parts);let changed=0;for(let i=0;i<base.length;i+=4)if(base[i+3]===255&&(base[i]!==damaged[i]||base[i+1]!==damaged[i+1]||base[i+2]!==damaged[i+2]))changed++;assert.equal(changed,0,'Far door must stay behind the opaque body at heading '+n*15);}
+ const {d,a,members}=client();members[0].cars[v.id].color='#ed2424';d.bind(a,v);for(let i=0;i<3;i++)d.impact(a,300,0,-1);assert.equal(d.inspect()[0].color,'#ed2424');members[0].cars[v.id].color='#2463eb';assert.equal(d.inspect()[0].color,'#ed2424','Detached paint is frozen at impact time');a.loanVehicle='car-horizon';a.loanId='taxi';d.bind(a,C.vehicles.find(v=>v.id===a.loanVehicle));for(let i=0;i<3;i++)d.impact(a,300,0,-1);assert.equal(d.inspect().at(-1).color,'#edbd43');a.police=true;a.loanId='police';d.bind(a,C.vehicles.find(v=>v.id===a.loanVehicle));for(let i=0;i<3;i++)d.impact(a,300,0,-1);assert.equal(d.inspect().at(-1).color,'#e5e9e6');
+ console.log('Far doors are masked by the body across 24 headings; detached custom-painted, taxi and police panels retain the vehicle paint at impact time.');
+}

@@ -58,11 +58,18 @@ window.CityArt=(()=>{
  const damage=window.CityDamage?.stages(a.damage)||[],w=v.width*.7,l=v.length*.8,sport=['sport','coupe','rally'].includes(v.body),tall=['suv','van','minivan','bus'].includes(v.body),h=sport?7:tall?13:10,roofH=h+(tall?9:6),pickup=v.body==='pickup',open=v.body==='convertible';
  const cos=Math.cos(a.angle),sin=Math.sin(a.angle),local=(x,y,z=0)=>project(a.x+cos*x-sin*y,a.y+sin*x+cos*y,z),shape=(points,fill,stroke='#253335',line=.65)=>{const ps=points.map(p=>local(...p));poly(c,ps,fill);if(stroke){c.strokeStyle=stroke;c.lineWidth=line;c.stroke();}},line=(ps,col,width=1)=>{c.beginPath();ps.map(p=>local(...p)).forEach((p,n)=>n?c.lineTo(p.x,p.y):c.moveTo(p.x,p.y));c.strokeStyle=col;c.lineWidth=width;c.stroke();};
  const outline=[[-w*.8,-l],[-w,-l*.78],[-w,l*.8],[-w*.8,l],[w*.8,l],[w,l*.8],[w,-l*.78],[w*.8,-l]],bodyColor=color||v.color||'#ae443e';
+ const cabinFront=-l*(tall?.47:.25),cabinBack=pickup?l*.1:tall?l*.66:l*.47,roofFront=cabinFront+l*.16,roofBack=cabinBack-l*.13,cw=w*.82,rw=w*.67;
+ const nearSide=(sin*.94-cos*.342)>=0?1:-1;
+ const drawDamagedDoor=side=>{const stage=damage[side<0?2:3]||0;if(!stage)return;const xx=side*w,front=cabinFront,back=cabinBack;
+ shape([[xx,front,3],[xx,back,3],[xx,back,h],[xx,front,h]],'#23333a');
+ if(stage<3){const dx=side*(stage===2?11:3);shape([[xx,front,3],[xx+dx,back,3],[xx+dx,back,h],[xx,front,h]],tint(bodyColor,-22));shape([[xx,front,h],[xx+dx,back,h],[side*rw+dx,roofBack,roofH],[side*rw,roofFront,roofH]],'#36525a');line([[xx+dx,back-4,5],[xx+dx*.5,(front+back)/2,8],[xx,front+4,5]],'#1d3038',1.2);}
+ };
+ // The far door is painted before the opaque body; the near door follows it.
  if(!a.noShadow)shape(outline.map(([x,y])=>[x+6,y+6,0]),'#172b3038',null);
+ drawDamagedDoor(-nearSide);
  for(const x of [-w-2,w-1])for(const y of [-l*.65,l*.45]){shape([[x,y,0],[x+3,y,0],[x+3,y+9,0],[x,y+9,0]],'#1d2429');shape([[x,y,1],[x,y+9,1],[x,y+9,6],[x,y,6]],'#111e24');}
  const faces=outline.map(([x,y],n)=>{const [u,t]=outline[(n+1)%outline.length];return {p:[[x,y,2],[u,t,2],[u,t,h],[x,y,h]],depth:(local(x,y).y+local(u,t).y)/2,fill:n<3?tint(bodyColor,-36):tint(bodyColor,-20)};}).sort((a,b)=>a.depth-b.depth);for(const f of faces)shape(f.p,f.fill);
  shape(outline.map(([x,y])=>[x,y,h]),tint(bodyColor,6));
- const cabinFront=-l*(tall?.47:.25),cabinBack=pickup?l*.1:tall?l*.66:l*.47,roofFront=cabinFront+l*.16,roofBack=cabinBack-l*.13,cw=w*.82,rw=w*.67;
  shape([[-cw,cabinFront,h],[cw,cabinFront,h],[rw,roofFront,roofH],[-rw,roofFront,roofH]],'#4b6772');
  shape([[-rw,roofBack,roofH],[rw,roofBack,roofH],[cw,cabinBack,h],[-cw,cabinBack,h]],'#324b59');
  for(const side of [-1,1]){const d=damage[side<0?2:3]||0;if(d===3){shape([[side*w,cabinFront,3],[side*w,cabinBack,3],[side*rw,roofBack,roofH],[side*rw,roofFront,roofH]],'#1e3037');continue;}shape([[side*cw,cabinFront,h],[side*cw,cabinBack,h],[side*rw,roofBack,roofH],[side*rw,roofFront,roofH]],'#33515c');line([[side*cw,0,h],[side*rw,0,roofH]],tint(bodyColor,20),1.4);}
@@ -84,10 +91,7 @@ window.CityArt=(()=>{
  for(let n=-1;n<=1;n++)line([[n*w*.38,y1+3,h+.7],[n*w*.38,y2-3,h+.7]],'#667779',2);
  if(stage<3){const lift=stage===2?8:3,mid=(y1+y2)/2;shape([[-w*.82,y1,h+lift],[w*.82,y1+2,h+lift*.7],[w*.78,mid,h-2],[w*.82,y2,h+1],[-w*.82,y2,h+1],[-w*.7,mid,h-1]],tint(bodyColor,-stage*12));line([[-w*.65,mid-3,h+1],[0,mid+1,h-1],[w*.6,mid-2,h+1]],'#39454b',1.4);}
  }
- for(const side of [-1,1]){const stage=damage[side<0?2:3]||0;if(!stage)continue;const xx=side*w,front=cabinFront,back=cabinBack;
- shape([[xx,front,3],[xx,back,3],[xx,back,h],[xx,front,h]],'#23333a');
- if(stage<3){const dx=side*(stage===2?11:3);shape([[xx,front,3],[xx+dx,back,3],[xx+dx,back,h],[xx,front,h]],tint(bodyColor,-22));shape([[xx,front,h],[xx+dx,back,h],[side*rw+dx,roofBack,roofH],[side*rw,roofFront,roofH]],'#36525a');line([[xx+dx,back-4,5],[xx+dx*.5,(front+back)/2,8],[xx,front+4,5]],'#1d3038',1.2);}
- }
+ drawDamagedDoor(nearSide);
  if(sport&&damage[1]!==3)shape([[-w*.9,l*.76,h+2],[w*.9,l*.76,h+2],[w*.9,l*.86,h+2],[-w*.9,l*.86,h+2]],tint(bodyColor,-25));
  }
  function avatar(c,a,m,create){if(typeof Apartment==='undefined')return;const phase=Math.floor(((a.walkPhase||0)%(Math.PI*2))/(Math.PI/2)),key=JSON.stringify([m.skin,m.appearance,m.useCustomAppearance,phase]);let canvas=avatars.get(key);if(!canvas){canvas=create();canvas.width=220;canvas.height=190;const apt=Object.create(Apartment.prototype);apt.ctx=canvas.getContext('2d');apt.iso=()=>({x:110,y:170});apt.profile={appearance:m.appearance,useCustomAppearance:m.useCustomAppearance??true,household:{player:{dead:false}}};apt.character({x:0,y:0},m.skin||'skin-neutral','',phase*Math.PI/2,m.useCustomAppearance===false?null:m.appearance);avatars.set(key,canvas);if(avatars.size>64)avatars.delete(avatars.keys().next().value);}const p=project(a.x,a.y);if(a.ragdoll>0||a.arrested){c.save();const fall=Math.min(1,(1.5-(a.ragdoll||0))/.2);c.translate(p.x,p.y-Math.sin(fall*Math.PI)*9);c.rotate(-Math.PI*.43*fall);c.drawImage(canvas,-44,-45,88,76);c.restore();}else c.drawImage(canvas,p.x-44,p.y-68,88,76);}
