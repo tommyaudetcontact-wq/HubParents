@@ -1,7 +1,7 @@
 'use strict';
 const assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm'),C=require('./domain'),K=require('./city-carnage'),G=require('./city-games'),D=require('./city-driving'),V=require('./city-damage');
 globalThis.CityDamage=V;
-for(const kind of K.kinds.filter(k=>k!=='carnage-ville-ultime')){
+for(const kind of K.kinds.filter(k=>!K.ultimate(k))){
  const actor={id:'p',x:650,y:550,angle:0},actors={p:actor},s=G.create(kind,'p');G.start(s,actors);s.countdown=0;s.elapsed=4;actor.angle=Math.PI/2;V.reset();V.mount({host:()=>true,members:()=>[]});const model=C.vehicles[0],command={x:0,y:0,brake:true,carnageBoost:1},normalSpeed=actor.speed;
  const burst=K.drive(s,actor,command,1/60,model);assert.equal(actor.carnageBoostCooldown,6);assert.equal(actor.carnageBoostTime,.7);assert(actor.speed>normalSpeed+130);assert.equal(burst.input.brake,false);assert.equal(burst.input.y,-1);assert(burst.vehicle.speed>model.speed);const durationProbe=structuredClone(actor);K.drive(s,durationProbe,command,.5,model);assert(durationProbe.carnageBoostTime>.19);K.drive(s,durationProbe,command,.21,model);assert.equal(durationProbe.carnageBoostTime,0);
  const victim=s.bots[0];V.bind(victim,C.vehicles[victim.model]);const color=victim.damageColor;G.contact(s,{a:actor,b:victim,av:270,bv:20,closing:250,nx:1,ny:0});assert.equal(victim.hp,0);assert.equal(s.players.p.score,1);assert.equal(s.players.p.hp,100);assert(victim.vx>200);assert(victim.damage.parts.every(n=>n===100));assert.equal(V.inspect().length,6);assert(V.inspect().every(p=>p.color===color&&p.life===60&&p.vz>60));assert.equal(actor.carnageBoostTime,0);assert.equal(s.effects.length,1);assert.equal(s.effects[0].kind,'carnage-smash');

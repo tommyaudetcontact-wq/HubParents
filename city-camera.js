@@ -3,7 +3,7 @@
  const C=root.BrawlCore,A=root.CityArt,clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
  let mode='classic',pose=null,last=0,terrain=null,models=new Map(),buildings=new Map(),propSprites=new Map(),signs=new Map(),glows=new Map(),glowMask=null,drag=null,stats={faces:0,models:0};
  const delta=(a,b)=>Math.atan2(Math.sin(a-b),Math.cos(a-b));
- function eligible(id){if(root.CityGames?.overlayActive()||root.CitySoccer?.current(id))return false;return !root.CityGames?.current(id)||['drift','jumps','derby','carnage-drift','carnage-derby','carnage-course','carnage-ville','carnage-ville-ultime'].includes(root.CityGames.kind());}
+ function eligible(id){if(root.CityGames?.overlayActive()||root.CitySoccer?.current(id))return false;return !root.CityGames?.current(id)||['drift','jumps','derby','carnage-drift','carnage-derby','carnage-course','carnage-ville','carnage-ville-ultime','carnage-drift-ultime','carnage-derby-ultime','carnage-course-ultime'].includes(root.CityGames.kind());}
  function enabled(id){return mode==='third'&&eligible(id);}
  function select(value){if(!['classic','third'].includes(value))return false;mode=value;pose=null;last=0;drag=null;return true;}
  function menu(){root.App.popup('<h2>Caméra</h2><p>Choisis ta vue. Ce réglage s’applique uniquement à ton écran.</p><div class="city-camera-options"><button class="btn '+(mode==='classic'?'purple':'secondary')+'" data-camera="classic">Vue du dessus'+(mode==='classic'?' ✓':'')+'</button><button class="btn '+(mode==='third'?'purple':'secondary')+'" data-camera="third">Troisième personne · essai'+(mode==='third'?' ✓':'')+'</button></div><p>Mode libre, drift, course, sauts, poursuite et derby. À pied : glisse sur le décor pour tourner la caméra. Retourne ici pour revenir à la vue du dessus.</p>');}
