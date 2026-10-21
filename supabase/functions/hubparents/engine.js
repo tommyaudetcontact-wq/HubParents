@@ -1758,6 +1758,39 @@ async function handleCityAction(req) {
       profile: await publicProfile(record.profile)
     };
   }
+  const family = await authFamilyOf(req.player), familyKey = 'city-family:' + (family === 'legacy' ? 'player:' + req.player : family);
+  if (req.action === 'cityPartyAuto') {
+    const member = await cityPublicMember(req);
+    let id = await cache.get(familyKey), room = id ? JSON.parse(await cache.get('city:' + id) || 'null') : null;
+    if (room) {
+      room.members = room.members.filter(m => now - m.seen < 24000);
+      if (!room.members.some(m => m.id === room.host)) {
+        room.host = room.members[0]?.id;
+        room.term = (room.term || 0) + 1;
+      }
+    }
+    if (!room || !room.members.length) {
+      const created = await handleCityAction({
+        ...req,
+        action: 'cityPartyCreate'
+      });
+      room = created.room;
+      room.family = family;
+      room.automatic = true;
+      room.term = 1;
+      id = room.id;
+    }
+    const old = room.members.findIndex(m => m.id === req.player);
+    if (old < 0 && room.members.length >= 6) throw Error('Le quartier familial est complet (6 joueurs).');
+    if (old < 0) room.members.push(member); else room.members[old] = member;
+    await cache.put('city:' + id, JSON.stringify(room), 120);
+    await cache.put('city-code:' + room.code, id, 120);
+    await cache.put(familyKey, id, 120);
+    return {
+      ok: true,
+      room
+    };
+  }
   if (req.action === 'cityPartyCreate') {
     await authThrottle('city-create:' + req.player, 12);
     const member = await cityPublicMember(req), id = Utilities.getUuid();
@@ -1792,8 +1825,15 @@ async function handleCityAction(req) {
   }
   if (typeof id !== 'string' || id.length > 60) throw Error('Partie introuvable.');
   const room = JSON.parse(await cache.get('city:' + id) || 'null');
-  if (!room || !room.members.some(m => m.id === room.host && now - m.seen < 45000)) throw Error('L’hôte a quitté la partie.');
-  room.members = room.members.filter(m => now - m.seen < 45000);
+  if (!room) throw Error('Partie introuvable.');
+  const timeout = room.automatic ? 24000 : 45000;
+  room.members = room.members.filter(m => now - m.seen < timeout);
+  if (!room.members.some(m => m.id === room.host)) {
+    if (!room.automatic) throw Error('L’hôte a quitté la partie.');
+    room.host = room.members[0]?.id;
+    room.term = (room.term || 0) + 1;
+  }
+  if (room.automatic && room.family !== family) throw Error('Ce quartier appartient à une autre famille.');
   if (req.action === 'cityPartyJoin') {
     const member = await cityPublicMember(req), old = room.members.findIndex(m => m.id === req.player);
     if (old < 0 && room.members.length >= 6) throw Error('Cette partie est complète (6 joueurs).');
@@ -1804,7 +1844,12 @@ async function handleCityAction(req) {
     member.seen = now;
     if (req.action === 'cityPartyLeave') {
       room.members = room.members.filter(m => m.id !== req.player);
-      if (req.player === room.host) room.members = [];
+      if (req.player === room.host) {
+        if (room.automatic) {
+          room.host = room.members[0]?.id || null;
+          room.term = (room.term || 0) + 1;
+        } else room.members = [];
+      }
     } else if (req.action === 'cityPartyPulse') {
       const p = (await profileRecord(req.player)).profile;
       member.name = p.name;
@@ -1817,6 +1862,7 @@ async function handleCityAction(req) {
   }
   await cache.put('city:' + id, JSON.stringify(room), 120);
   await cache.put('city-code:' + room.code, id, 120);
+  if (room.automatic) await cache.put(familyKey, id, 120);
   return {
     ok: true,
     room
