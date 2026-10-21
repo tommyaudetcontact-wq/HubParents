@@ -4,7 +4,7 @@ const C=require('./domain.js'),D=require('./city-driving.js'),Combat=require('./
 globalThis.CityStunts=Stunts;
 function game(kind){const actors={a:{id:'a',x:650,y:550},b:{id:'b',x:750,y:550}},s=G.create(kind,'a');s.accepted=['a','b'];assert(G.start(s,actors,['a','b'].map(id=>({id,vehicle:'car-pulse',cars:{'car-pulse':{fuel:600}}}))));return {s,actors};}
 {
- const car=C.vehicles.find(v=>v.id==='car-horizon');let a={x:650,y:550,angle:Math.PI/2,speed:0,vx:0,vy:0,driving:true},p={...a,hp:100,riding:true};
+ const car=require('./city-zombie-fx.js').vehicle();let a={x:650,y:550,angle:Math.PI/2,speed:0,vx:0,vy:0,driving:true},p={...a,hp:100,riding:true};
  for(let n=0;n<120;n++){const input={x:n>70?.4:0,y:-.78,brake:false};a=D.collide(D.step(a,input,1/120,car),[],C.cityMap);Combat.move(p,input,1/120,{kind:'zombie'});}
  assert(Math.hypot(a.x-p.x,a.y-p.y)<1e-8);assert(Math.abs(a.angle-p.angle)<1e-8,'Zombie bonus uses the ordinary car steering/acceleration model');
  const impact=(speed,y)=>{const {s,actors}=game('zombie'),p=s.players.a;s.buffs.vehicleUntil=30;p.riding=true;Object.assign(p,{x:650,y:550,angle:Math.PI/2,vx:speed,vy:0,speed});s.wavePause=999;s.zombies=[{id:'contact-'+speed+'-'+y,x:681,y,hp:50,dead:false,phase:0}];G.laser(s,'a',{x:0,y:-.78,ax:0,ay:0,fire:false});G.simulate(s,actors,1/120);return s.zombies[0];};
