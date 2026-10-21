@@ -50,3 +50,5 @@ button.city-mission{border:1px solid #ccdcbe;cursor:pointer;pointer-events:auto;
 .city-camera-options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:18px 0}.city-camera-options .btn{min-height:66px;white-space:normal}
 
 .city-carnage-boost{position:absolute;left:0;top:0;min-height:44px;padding:9px 18px;border:2px solid #ffe8a6;border-radius:15px;background:#dd6f33;color:#fff8df;font-weight:800;box-shadow:0 3px 0 #91492b;touch-action:manipulation}.city-carnage-boost:disabled{background:#637b86;box-shadow:none;color:#e5ecea}.city-carnage-boost[hidden]{display:none}
+
+.city-carnage-boost.boosting{background:#ffb841;color:#322f24;transform:translateY(-2px);box-shadow:0 0 0 3px #fff3b4}
