@@ -1,7 +1,7 @@
 'use strict';
 (function(root){
- const names={race:'Course · 3 tours',chase:'Police contre voleurs',soccer:'Soccer',derby:'Derby',bowling:'Bowling',laser:'Laser tag',zombie:'Survie zombies',fight:'Combat · essai',tennis:'Tennis · 2 ou 4 joueurs',sumo:'Sumo · cages roulantes',tailblazer:'Tailblazer · 2 joueurs',drift:'Défi drift',jumps:'Sauts · piste d’essai'};
- const limits={race:[1,6],chase:[2,6],soccer:[1,6],derby:[2,6],bowling:[1,6],laser:[2,6],zombie:[1,6],fight:[1,6],tennis:[2,4],sumo:[2,6],drift:[1,6],jumps:[1,6],tailblazer:[2,2]};
+ const names={race:'Course · 3 tours',chase:'Police contre voleurs',soccer:'Soccer',derby:'Derby',bowling:'Bowling',laser:'Laser tag',zombie:'Survie zombies',tennis:'Tennis · 2 ou 4 joueurs',sumo:'Sumo · cages roulantes',tailblazer:'Tailblazer · 2 joueurs',drift:'Défi drift',jumps:'Sauts · piste d’essai'};
+ const limits={race:[1,6],chase:[2,6],soccer:[1,6],derby:[2,6],bowling:[1,6],laser:[2,6],zombie:[1,6],tennis:[2,4],sumo:[2,6],drift:[1,6],jumps:[1,6],tailblazer:[2,2]};
  function create(kind,owner,ids){return {id:kind+'-'+Date.now()+'-'+Math.random().toString(36).slice(2,8),kind,owner,phase:'waiting',replies:Object.fromEntries(ids.map(id=>[id,id===owner?'yes':'pending']))};}
  function reply(s,id,value){if(s?.phase!=='waiting'||!(id in s.replies)||!['yes','no'].includes(value))return false;if(value==='yes'&&s.replies[id]!=='yes'&&Object.values(s.replies).filter(v=>v==='yes').length>=(limits[s.kind]?.[1]||6)){value='no';s.full=s.full||[];if(!s.full.includes(id))s.full.push(id);}s.replies[id]=value;return true;}
  function ready(s,ids){if(s?.phase!=='waiting')return false;for(const id of Object.keys(s.replies))if(!ids.includes(id))delete s.replies[id];return !Object.values(s.replies).includes('pending');}
