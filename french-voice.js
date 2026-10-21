@@ -1,7 +1,7 @@
 'use strict';
 window.FrenchVoice=(()=>{
   let generation=0,active=null;
-  const unavailable='Aucune voix française n’est disponible dans ce navigateur. Active une voix française dans les réglages de ton appareil, puis réessaie. Tu peux aussi afficher le mot.';
+  const unavailable='Aucune voix française n’est disponible dans ce navigateur. Active une voix française dans les réglages de ton appareil, puis réessaie.';
   function frenchVoices(){return speechSynthesis.getVoices().filter(v=>/^fr(?:[-_]|$)/i.test(v.lang)).sort((a,b)=>Number(/^fr[-_]CA$/i.test(b.lang))-Number(/^fr[-_]CA$/i.test(a.lang))||Number(b.localService)-Number(a.localService));}
   function stop(){generation++;if(active){active.cancelled=true;active.waitCancel?.();}active=null;if('speechSynthesis'in window)speechSynthesis.cancel();}
   function waitForFrench(job){const ready=frenchVoices()[0];if(ready)return Promise.resolve(ready);return new Promise(resolve=>{let timer;const finish=voice=>{clearTimeout(timer);speechSynthesis.removeEventListener?.('voiceschanged',changed);job.waitCancel=null;resolve(voice);},changed=()=>{const voice=frenchVoices()[0];if(voice)finish(voice);};job.waitCancel=()=>finish(null);speechSynthesis.addEventListener?.('voiceschanged',changed);timer=setTimeout(()=>finish(frenchVoices()[0]||null),1500);changed();});}
@@ -11,5 +11,6 @@ window.FrenchVoice=(()=>{
   }
   function prepare(){if(!('speechSynthesis'in window))return;speechSynthesis.getVoices();speechSynthesis.resume();}
   if('speechSynthesis'in window)speechSynthesis.getVoices();
-  return {speak,prepare,stop};
+  function speakQuestion(q){if(!q||!['dictation','number-dictation'].includes(q.skill))return Promise.resolve();return speak(q.skill==='dictation'?q.answer:q.speech||q.answer);}
+  return {speak,speakQuestion,prepare,stop};
 })();
