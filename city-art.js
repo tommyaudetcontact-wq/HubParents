@@ -1,6 +1,6 @@
 'use strict';
 window.CityArt=(()=>{
- const size={width:BrawlCore.cityMap.width,height:BrawlCore.cityMap.height},project=(x,y,z=0)=>({x:x*.94+y*.342,y:(y*.94-x*.342)*.82-z});
+ const size={width:BrawlCore.cityMap.width,height:BrawlCore.cityMap.height};let projection=null,geometrySink=null;const project=(x,y,z=0)=>projection?projection(x,y,z):({x:x*.94+y*.342,y:(y*.94-x*.342)*.82-z});
  const buildings=[
  {x:185,y:190,w:155,d:110,h:66,color:'#e4c9aa',roof:'#688c8a',name:'RUE DES TILLEULS'},
  {x:380,y:185,w:160,d:125,h:94,color:'#c78467',roof:'#667986',name:'LE COIN'},
@@ -23,7 +23,7 @@ window.CityArt=(()=>{
  buildings.forEach(b=>{b.name=null;b.commerce=false;});
  for(const p of BrawlCore.cityPlaces||[]){const b=buildings[p.building];if(b){b.commerce=true;b.name=({'sale-cars':'HORIZON · AUTOS −50 %',bowling:'BOWLING DES PINS',laser:'LASER ZONE','sale-cards':'LA PIOCHE · CARTES','sale-kitchen':'CUISINE & MAISON','sale-bedroom':'DOUCES NUITS','sale-garden':'CÔTÉ JARDIN','sale-skins':'STUDIO SIGNATURE','sale-bath':'BAIN & COMPAGNIE','sale-furniture':'LE SALON',restaurant:'LE RELAIS · RESTO',taxi:'CENTRALE TAXIS',garage:'GARAGE COULEURS',fuel:'STATION OCTANE'}[p.id]);}}
  let ground=null,sprites=new Map(),avatars=new Map(),carSprites=new Map(),carPixels=0,carHits=0,carMisses=0,groundCommands=null;const carPixelLimit=4000000;
- function poly(c,points,color){c.fillStyle=color;c.beginPath();points.forEach((p,n)=>n?c.lineTo(p.x,p.y):c.moveTo(p.x,p.y));c.closePath();c.fill();}
+ function poly(c,points,color){if(geometrySink){geometrySink.polygon(points,color);return;}c.fillStyle=color;c.beginPath();points.forEach((p,n)=>n?c.lineTo(p.x,p.y):c.moveTo(p.x,p.y));c.closePath();c.fill();}
  function plane(c,x,y,w,d,z,color){poly(c,[[x,y],[x+w,y],[x+w,y+d],[x,y+d]].map(p=>project(...p,z)),color);}
  function wall(c,x,y,w,d,z,h,color){poly(c,[project(x,y,z),project(x+w,y+d,z),project(x+w,y+d,z+h),project(x,y,z+h)],color);c.strokeStyle='#38443d88';c.lineWidth=.65;c.stroke();}
  function box(c,x,y,w,d,z,h,color,side,roof){wall(c,x,y+d,w,0,z,h,color);wall(c,x,y,0,d,z,h,side);plane(c,x,y,w,d,z+h,roof);}
@@ -56,10 +56,10 @@ window.CityArt=(()=>{
  const tint=(hex,n)=>'#'+hex.replace('#','').match(/../g).map(v=>Math.max(0,Math.min(255,parseInt(v,16)+n)).toString(16).padStart(2,'0')).join('');
  function carVector(c,a,v,color){
  const damage=window.CityDamage?.stages(a.damage)||[],w=v.width*.7,l=v.length*.8,sport=['sport','coupe','rally'].includes(v.body),tall=['suv','van','minivan','bus'].includes(v.body),h=sport?7:tall?13:10,roofH=h+(tall?9:6),pickup=v.body==='pickup',open=v.body==='convertible';
- const cos=Math.cos(a.angle),sin=Math.sin(a.angle),local=(x,y,z=0)=>project(a.x+cos*x-sin*y,a.y+sin*x+cos*y,z),shape=(points,fill,stroke='#253335',line=.65)=>{const ps=points.map(p=>local(...p));poly(c,ps,fill);if(stroke){c.strokeStyle=stroke;c.lineWidth=line;c.stroke();}},line=(ps,col,width=1)=>{c.beginPath();ps.map(p=>local(...p)).forEach((p,n)=>n?c.lineTo(p.x,p.y):c.moveTo(p.x,p.y));c.strokeStyle=col;c.lineWidth=width;c.stroke();};
+ const cos=Math.cos(a.angle),sin=Math.sin(a.angle),local=(x,y,z=0)=>project(a.x+cos*x-sin*y,a.y+sin*x+cos*y,z),shape=(points,fill,stroke='#253335',line=.65)=>{const ps=points.map(p=>local(...p));poly(c,ps,fill);if(stroke){c.strokeStyle=stroke;c.lineWidth=line;c.stroke();}},line=(ps,col,width=1)=>{if(geometrySink){geometrySink.line(ps.map(p=>local(...p)),col,width);return;}c.beginPath();ps.map(p=>local(...p)).forEach((p,n)=>n?c.lineTo(p.x,p.y):c.moveTo(p.x,p.y));c.strokeStyle=col;c.lineWidth=width;c.stroke();};
  const outline=[[-w*.8,-l],[-w,-l*.78],[-w,l*.8],[-w*.8,l],[w*.8,l],[w,l*.8],[w,-l*.78],[w*.8,-l]],bodyColor=color||v.color||'#ae443e';
  const cabinFront=-l*(tall?.47:.25),cabinBack=pickup?l*.1:tall?l*.66:l*.47,roofFront=cabinFront+l*.16,roofBack=cabinBack-l*.13,cw=w*.82,rw=w*.67;
- const nearSide=(sin*.94-cos*.342)>=0?1:-1;
+ const nearSide=local(w,0).y>=local(-w,0).y?1:-1;
  const drawDamagedDoor=side=>{const stage=damage[side<0?2:3]||0;if(!stage)return;const xx=side*w,front=cabinFront,back=cabinBack;
  shape([[xx,front,3],[xx,back,3],[xx,back,h],[xx,front,h]],'#23333a');
  if(stage<3){const dx=side*(stage===2?11:3);shape([[xx,front,3],[xx+dx,back,3],[xx+dx,back,h],[xx,front,h]],tint(bodyColor,-22));shape([[xx,front,h],[xx+dx,back,h],[side*rw+dx,roofBack,roofH],[side*rw,roofFront,roofH]],'#36525a');line([[xx+dx,back-4,5],[xx+dx*.5,(front+back)/2,8],[xx,front+4,5]],'#1d3038',1.2);}
@@ -94,6 +94,10 @@ window.CityArt=(()=>{
  drawDamagedDoor(nearSide);
  if(sport&&damage[1]!==3)shape([[-w*.9,l*.76,h+2],[w*.9,l*.76,h+2],[w*.9,l*.86,h+2],[-w*.9,l*.86,h+2]],tint(bodyColor,-25));
  }
+ function withProjection(next,draw){const previous=projection;projection=next;try{return draw();}finally{projection=previous;}}
+ // Capture the existing models as world-space polygons; the perspective renderer owns clipping and depth sorting.
+ function geometry(draw){const previous=geometrySink,mesh=[];geometrySink={polygon(points,color){mesh.push({points:points.map(p=>({x:p.x,y:p.y,z:p.z||0})),color});},line(points,color,width){mesh.push({points:points.map(p=>({x:p.x,y:p.y,z:p.z||0})),color,line:width});}};const noop=()=>{},context={beginPath:noop,moveTo:noop,lineTo:noop,closePath:noop,fill:noop,stroke:noop,fillRect:noop,strokeRect:noop,fillText:noop,save:noop,restore:noop,translate:noop,transform:noop};try{withProjection((x,y,z=0)=>({x,y,z}),()=>draw(context,geometrySink));}finally{geometrySink=previous;}return mesh;}
+ function terrainGeometry(){return geometry((c,sink)=>{paintGround(c);window.CityStunts?.paint(c,(points,color)=>sink.polygon(points.map(([x,y,z=0])=>({x,y,z})),color));});}
  function avatar(c,a,m,create){if(typeof Apartment==='undefined')return;const phase=Math.floor(((a.walkPhase||0)%(Math.PI*2))/(Math.PI/2)),key=JSON.stringify([m.skin,m.appearance,m.useCustomAppearance,phase]);let canvas=avatars.get(key);if(!canvas){canvas=create();canvas.width=220;canvas.height=190;const apt=Object.create(Apartment.prototype);apt.ctx=canvas.getContext('2d');apt.iso=()=>({x:110,y:170});apt.profile={appearance:m.appearance,useCustomAppearance:m.useCustomAppearance??true,household:{player:{dead:false}}};apt.character({x:0,y:0},m.skin||'skin-neutral','',phase*Math.PI/2,m.useCustomAppearance===false?null:m.appearance);avatars.set(key,canvas);if(avatars.size>64)avatars.delete(avatars.keys().next().value);}const p=project(a.x,a.y);if(a.ragdoll>0||a.arrested){c.save();const fall=Math.min(1,(1.5-(a.ragdoll||0))/.2);c.translate(p.x,p.y-Math.sin(fall*Math.PI)*9);c.rotate(-Math.PI*.43*fall);c.drawImage(canvas,-44,-45,88,76);c.restore();}else c.drawImage(canvas,p.x-44,p.y-68,88,76);}
  // Cache crisp vehicle poses rather than replaying hundreds of paths every frame.
  function groundShadow(c,a,v){const p=project(a.x,a.y),height=Math.max(0,a.z||0),scale=1+Math.min(.45,height/240);c.save();c.translate(p.x+4,p.y+5);c.rotate((a.angle||0)-.28);c.fillStyle='rgba(12,29,35,'+Math.max(.14,.32-height/600)+')';c.beginPath();c.ellipse(0,0,v.width*.75*scale,v.length*.65*scale,0,0,Math.PI*2);c.fill();c.restore();}
@@ -107,5 +111,5 @@ window.CityArt=(()=>{
  function preview(canvas,v,color,damage){canvas.width=340;canvas.height=220;const c=canvas.getContext('2d');c.fillStyle='#ded9ca';c.fillRect(0,0,340,220);c.translate(170,115);c.scale(2.4,2.4);car(c,{x:0,y:0,angle:Math.PI/2,damage,damageLength:v.length*.8},v,color||v.color);}
  const parked=[{x:390,y:515,angle:Math.PI/2,model:6},{x:820,y:585,angle:-Math.PI/2,model:8},{x:685,y:285,angle:0,model:2},{x:1540,y:1065,angle:0,model:4}].map(a=>({...a,halfWidth:BrawlCore.vehicles[a.model].width*.7+2,halfLength:BrawlCore.vehicles[a.model].length*.8+2}));
  const obstacles=parked.map(a=>{const v=BrawlCore.vehicles[a.model],w=Math.abs(Math.cos(a.angle))*v.width*1.4+Math.abs(Math.sin(a.angle))*v.length*1.6,d=Math.abs(Math.sin(a.angle))*v.width*1.4+Math.abs(Math.cos(a.angle))*v.length*1.6;return {x:a.x-w/2,y:a.y-d/2,w,d};});
- return {occludes,avatar,obstacles,parked,size,buildings,project,background,drawBuilding,car,nameTag,preview,cacheStats:()=>({carHits,carMisses,carPixels,carPixelLimit,groundShapes:groundCommands?.length||0}),clear:()=>{ground=null;sprites.clear();avatars.clear();nameWidths.clear();carSprites.clear();auraSprites.clear();carPixels=carHits=carMisses=0;}};
+ return {withProjection,geometry,terrainGeometry,buildingModel:building,carModel:carVector,occludes,avatar,obstacles,parked,size,buildings,project,background,drawBuilding,car,nameTag,preview,cacheStats:()=>({carHits,carMisses,carPixels,carPixelLimit,groundShapes:groundCommands?.length||0}),clear:()=>{ground=null;sprites.clear();avatars.clear();nameWidths.clear();carSprites.clear();auraSprites.clear();carPixels=carHits=carMisses=0;}};
 })();
