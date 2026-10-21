@@ -1924,7 +1924,7 @@ async function handleCityActivities(req) {
   if (!Number.isInteger(req.index) || req.index < 0 || req.index >= active.points.length) throw Error('Étape invalide.');
   if (req.index < active.index) return await result();
   if (req.index !== active.index) throw Error('Suis les points dans l’ordre.');
-  const target = active.points[active.index], distance = Math.hypot(target.x - active.lastPoint.x, target.y - active.lastPoint.y);
+  const target = active.points[active.index], distance = BrawlCore.cityRoute(active.lastPoint, target).reduce((n, p, i, list) => n + (i ? Math.hypot(p.x - list[i - 1].x, p.y - list[i - 1].y) : 0), 0);
   if (Math.hypot(point.x - target.x, point.y - target.y) > 60) throw Error('Approche du point de mission.');
   if (!Number.isFinite(active.travelDistance)) {
     let previous = active.origin;
