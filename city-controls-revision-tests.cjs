@@ -11,7 +11,7 @@ function game(kind){const actors={a:{id:'a',x:650,y:550},b:{id:'b',x:700,y:550}}
  let now=0,callback,context;
  const scope={BrawlCore:C,Math,Date,Map,Set,crypto:require('node:crypto').webcrypto,App:{profile:()=>profile,api:async()=>({driveId:'drive'}),toast(){},closeModal(){},popup(){}},CityNetwork:{room:()=>({id:'runtime',host:'a',members}),isHost:()=>true,connected:()=>false,send(){}},document:{hidden:false,getElementById:id=>id==='city-canvas'?canvas:id==='modal'?{open:false}:['city-stick','city-action','city-fuel'].includes(id)?node():null,querySelector:()=>null,addEventListener(){},createElement:()=>createCanvas(1,1)},performance:{now:()=>now},ResizeObserver:class{observe(){}disconnect(){}},requestAnimationFrame:f=>(callback=f,1),cancelAnimationFrame(){},setInterval:()=>1,clearInterval(){},matchMedia:()=>({matches:false}),devicePixelRatio:1,addEventListener(){}};
  scope.window=scope;vm.createContext(scope);
- for(const file of ['city-driving.js','city-art.js','city-zombie-fx.js','city-combat.js','city-sports.js','city-tailblazer.js','bowling-physics.js','city-games.js','city-activities.js','city.js'])vm.runInContext(fs.readFileSync(file,'utf8'),scope);
+ for(const file of ['city-driving.js','city-art.js','city-stunts.js','city-zombie-fx.js','city-combat.js','city-sports.js','city-tailblazer.js','bowling-physics.js','city-games.js','city-activities.js','city.js'])vm.runInContext(fs.readFileSync(file,'utf8'),scope);
  const mount=scope.CityGames.mount;scope.CityGames.mount=ctx=>{context=ctx;mount(ctx);};scope.City.mount();assert(scope.CityGames.launch('derby',['a','b'],'a'));
  const actors=context.actors(),d=C.cityMap.derby;
  for(let n=0;n<4;n++){
@@ -20,6 +20,7 @@ function game(kind){const actors={a:{id:'a',x:650,y:550},b:{id:'b',x:700,y:550}}
   now+=34;callback(now);const state=scope.CityGames.snapshot();assert.equal(state.players.b.hp,75-n*25);assert.equal(state.players.a.hp,100-(n+1)*12.5);
   if(n<3){actors.b.x=d.x+350;for(let f=0;f<28;f++){now+=34;callback(now);}}
  }
+ now+=34;callback(now);const calls=[],originalStep=scope.CityDriving.step;scope.CityDriving.step=(a,i,dt,car,boost)=>{calls.push({id:a.id,car,boost});return originalStep(a,i,dt,car,boost);};members[1].vehicle='car-inferno';members[1].cars={'car-inferno':{fuel:0,boost:5}};scope.CityActivities.controls=()=>({x:0,y:-1,brake:false});assert(scope.CityGames.launch('drift',['a','b'],'a'));now+=34;callback(now);for(const id of ['a','b']){const call=calls.find(p=>p.id===id);assert(call);assert.equal(call.car.id,'car-pulse');assert.equal(call.car.speed*.36,100);assert.equal(call.boost,0);}assert.equal(actors.a.loanVehicle,actors.b.loanVehicle);console.log('Actual city loop supplies both drift players the same 100 km/h loan car and zero personal upgrades.');
  scope.City.destroy();console.log('Actual city frame loop applies all four derby impacts to visible player health.');
 }
 

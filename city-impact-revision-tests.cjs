@@ -39,3 +39,11 @@ console.log('Oriented bumper and swept impacts; physical NPC crash, full one-sec
  const heights=[];for(const speed of [80,160,300]){let a={x:660,y:1940,angle:Math.PI/2,driving:true,speed,vx:speed,vy:0};a=S.jump(a,1/120);let peak=0;for(let n=0;n<240;n++){a=S.jump(a,1/120);peak=Math.max(peak,a.z);}heights.push(peak);}assert(heights[1]>heights[0]*1.5&&heights[2]>heights[1]*1.5,'Jump height must visibly scale with takeoff speed');
  const d=S.areas.drift;assert(d.w>=1500&&d.h>=1400);for(const b of [C.cityMap.track,C.cityMap.field,S.areas.tennis])assert(d.x>b.x+b.w+100||d.y>b.y+b.h+100||d.x+d.w+100<b.x||d.y+d.h+100<b.y,'Separated facilities need a clear grass gap');assert(d.x+d.w<C.cityMap.width&&d.y+d.h<C.cityMap.height);const u=S.areas.sumo;assert(u.y-u.r>d.y+d.h);for(const p of S.driftPath)assert(p.x-108>d.x&&p.x+108<d.x+d.w&&p.y-108>d.y&&p.y+108<d.y+d.h);console.log('Expanded drift ground clears the race circuit, soccer, tennis and sumo; slow, medium and fast jumps have distinct heights.');
 }
+
+{
+ const G=require('./city-games.js'),actors={p:{id:'p',x:650,y:550}},s=G.create('zombie','p');G.start(s,actors);s.buffs.vehicleUntil=30;s.wavePause=999;s.zombies=Array.from({length:16},(_,i)=>({id:'crowd'+i,x:620+Math.cos(i)*24,y:550+Math.sin(i)*24,hp:50,phase:i,cooldown:0}));for(let i=0;i<180;i++){G.laser(s,'p',{x:0,y:i>120?-.78:0,ax:0,ay:0,brake:i<=120});G.simulate(s,actors,1/60);}assert.equal(s.phase,'running');assert.equal(s.players.p.hp,100);assert(s.players.p.speed>50,'A stopped car can accelerate again after being surrounded by zombies');s.buffs.vehicleUntil=s.elapsed-.01;G.simulate(s,actors,1/60);assert(!s.players.p.riding&&!s.players.p.driving);s.buffs.vehicleUntil=s.elapsed+30;s.players.p.hp=0;Z.before(s,1/60);assert(!s.players.p.riding,'Downed teammates must not appear as frozen bonus cars');console.log('Zombie vehicle survives a surrounding crowd, restarts after braking, expires normally and does not appear on downed teammates.');
+}
+
+{
+ const v=S.driftVehicle();let a={x:0,y:0,angle:0,speed:0,vx:0,vy:0,driving:true};for(let n=0;n<2000;n++){a=D.step(a,{x:n>900?.8:0,y:-1,drift:n>900},1/120,v);assert(Math.hypot(a.vx,a.vy)*.36<=100.001);}assert.equal(v.speed*.36,100);console.log('The standard drift car stays within 100 km/h in straight lines and sustained slides.');
+}
