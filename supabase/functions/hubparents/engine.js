@@ -1714,6 +1714,8 @@ async function cityPublicMember(req) {
 async function handleCityAction(req) {
   if (!String(req.action).startsWith('city')) return null;
   if (requestParent) throw Error('Choisis un profil enfant.');
+  const loot = await handleCityLoot(req);
+  if (loot) return loot;
   const activity = typeof handleCityActivities === 'function' ? await handleCityActivities(req) : null;
   if (activity) return activity;
   const cache = CacheService.getScriptCache(), now = Date.now();
@@ -1957,6 +1959,69 @@ async function handleCityActivities(req) {
   }, day, false); else p.revision++;
   await saveRecord(record);
   return await result();
+}
+async function handleCityLoot(req) {
+  if (!['cityLootStatus', 'cityLootClaim'].includes(req.action)) return null;
+  const family = await authFamilyOf(req.player), scope = family === 'legacy' ? 'player:' + req.player : family, cache = CacheService.getScriptCache(), now = Date.now(), minute = Math.floor(now / 60000), key = 'city-loot:' + scope;
+  let loot = JSON.parse(await cache.get(key) || 'null');
+  if (!loot || loot.minute !== minute) {
+    const seed = parseInt(Utilities.getUuid().replace(/-/g, '').slice(0, 8), 16), map = BrawlCore.cityMap, vertical = seed % 2 === 0, road = (vertical ? map.roadsX : map.roadsY)[(seed >>> 2) % 4], along = 170 + (seed >>> 5) % (vertical ? 1200 : 1450), record = await profileRecord(req.player), unowned = BrawlCore.cards.filter(c => !record.profile.cards.some(v => v.id === c.id)), card = seed % 8 === 0 && unowned.length ? unowned[(seed >>> 12) % unowned.length] : null;
+    loot = {
+      id: 'loot:' + scope + ':' + minute,
+      minute,
+      x: vertical ? road : along,
+      y: vertical ? along : road,
+      kind: card ? 'card' : 'coin',
+      card: card?.id || null,
+      created: now,
+      expires: (minute + 1) * 60000,
+      claimedBy: null
+    };
+    await cache.put(key, JSON.stringify(loot), 180);
+  }
+  if (req.action === 'cityLootStatus') return {
+    ok: true,
+    loot: loot.claimedBy ? null : loot,
+    nextAt: loot.expires
+  };
+  if (req.lootId !== loot.id || loot.claimedBy && loot.claimedBy !== req.player) throw Error('Cette récompense a déjà été ramassée ou a expiré.');
+  const record = await profileRecord(req.player), p = BrawlCore.upgrade(record.profile);
+  if (p.seen.includes(loot.id)) return {
+    ok: true,
+    profile: await publicProfile(p),
+    loot: null,
+    nextAt: loot.expires
+  };
+  const q = req.position;
+  if (!q || ![q.x, q.y].every(Number.isFinite) || Math.hypot(q.x - loot.x, q.y - loot.y) > 45) throw Error('Approche de la récompense.');
+  if (now - loot.created < 500) throw Error('Réessaie dans un instant.');
+  if (loot.kind === 'card' && !p.cards.some(c => c.id === loot.card)) {
+    p.cards.push(BrawlCore.cardState({
+      id: loot.card,
+      condition: 100
+    }));
+  } else p.coins += 1;
+  p.seen.push(loot.id);
+  p.seen = p.seen.slice(-500);
+  p.revision++;
+  p.history.unshift({
+    day: Utilities.formatDate(new Date(), TZ, 'yyyy-MM-dd'),
+    label: loot.kind === 'card' ? 'Carte trouvée en ville' : 'Récompense trouvée en ville',
+    coins: loot.kind === 'coin' ? 1 : 0,
+    xp: 0
+  });
+  p.history = p.history.slice(0, 100);
+  record.profile = p;
+  await saveRecord(record);
+  loot.claimedBy = req.player;
+  await cache.put(key, JSON.stringify(loot), 180);
+  return {
+    ok: true,
+    profile: await publicProfile(p),
+    loot: null,
+    nextAt: loot.expires,
+    reward: loot.kind
+  };
 }
 async function handleWordLists(req) {
   if (!['wordLists', 'wordListSave', 'wordListArchive', 'wordListMerge', 'wordListApply', 'wordListUnassign'].includes(req.action)) return null;

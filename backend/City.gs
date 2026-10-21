@@ -5,6 +5,7 @@ function cityPublicMember(req){const p=profileRecord(req.player).profile;const k
  return {id:p.id,name:p.name,skin:p.skin,useCustomAppearance:p.useCustomAppearance,appearance:BrawlCore.effectiveAppearance(p),publicKey:{kty:'EC',crv:'P-256',x:key.x,y:key.y,ext:true},seen:Date.now(),vehicle:p.garage?.selected||'',cars:p.garage?.cars||{}};}
 function handleCityAction(req){
  if(!String(req.action).startsWith('city'))return null;if(requestParent)throw Error('Choisis un profil enfant.');
+ const loot=handleCityLoot(req);if(loot)return loot;
  const activity=typeof handleCityActivities==='function'?handleCityActivities(req):null;if(activity)return activity;
  const cache=CacheService.getScriptCache(),now=Date.now();
  if(req.action==='cityDriveStart'){const p=profileRecord(req.player).profile;if(!p.garage?.cars[req.car])throw Error('Voiture indisponible.');const id=Utilities.getUuid();cache.put('drive:'+req.player,JSON.stringify({id,car:req.car,started:now,used:0}),7200);return {ok:true,driveId:id};}

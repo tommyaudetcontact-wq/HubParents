@@ -21,3 +21,17 @@ function handleCityActivities(req){
 
  saveRecord(record);return result();
 }
+/** One shared, server-issued street pickup per minute and family. Claims use the request transaction lock. */
+function handleCityLoot(req){
+ if(!['cityLootStatus','cityLootClaim'].includes(req.action))return null;
+ const family=authFamilyOf(req.player),scope=family==='legacy'?'player:'+req.player:family,cache=CacheService.getScriptCache(),now=Date.now(),minute=Math.floor(now/60000),key='city-loot:'+scope;
+ let loot=JSON.parse(cache.get(key)||'null');
+ if(!loot||loot.minute!==minute){const seed=parseInt(Utilities.getUuid().replace(/-/g,'').slice(0,8),16),map=BrawlCore.cityMap,vertical=seed%2===0,road=(vertical?map.roadsX:map.roadsY)[(seed>>>2)%4],along=170+(seed>>>5)%(vertical?1200:1450),record=profileRecord(req.player),unowned=BrawlCore.cards.filter(c=>!record.profile.cards.some(v=>v.id===c.id)),card=seed%8===0&&unowned.length?unowned[(seed>>>12)%unowned.length]:null;loot={id:'loot:'+scope+':'+minute,minute,x:vertical?road:along,y:vertical?along:road,kind:card?'card':'coin',card:card?.id||null,created:now,expires:(minute+1)*60000,claimedBy:null};cache.put(key,JSON.stringify(loot),180);}
+ if(req.action==='cityLootStatus')return {ok:true,loot:loot.claimedBy?null:loot,nextAt:loot.expires};
+ if(req.lootId!==loot.id||loot.claimedBy&&loot.claimedBy!==req.player)throw Error('Cette récompense a déjà été ramassée ou a expiré.');
+ const record=profileRecord(req.player),p=BrawlCore.upgrade(record.profile);if(p.seen.includes(loot.id))return {ok:true,profile:publicProfile(p),loot:null,nextAt:loot.expires};
+ const q=req.position;if(!q||![q.x,q.y].every(Number.isFinite)||Math.hypot(q.x-loot.x,q.y-loot.y)>45)throw Error('Approche de la récompense.');
+ if(now-loot.created<500)throw Error('Réessaie dans un instant.');
+ if(loot.kind==='card'&&!p.cards.some(c=>c.id===loot.card)){p.cards.push(BrawlCore.cardState({id:loot.card,condition:100}));}else p.coins+=1;
+ p.seen.push(loot.id);p.seen=p.seen.slice(-500);p.revision++;p.history.unshift({day:Utilities.formatDate(new Date(),TZ,'yyyy-MM-dd'),label:loot.kind==='card'?'Carte trouvée en ville':'Récompense trouvée en ville',coins:loot.kind==='coin'?1:0,xp:0});p.history=p.history.slice(0,100);record.profile=p;saveRecord(record);loot.claimedBy=req.player;cache.put(key,JSON.stringify(loot),180);return {ok:true,profile:publicProfile(p),loot:null,nextAt:loot.expires,reward:loot.kind};
+}
