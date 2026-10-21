@@ -48,3 +48,5 @@ button.city-mission{border:1px solid #ccdcbe;cursor:pointer;pointer-events:auto;
 .city-fuel-meter{display:block;width:112px;height:9px;margin-top:4px;border:1px solid #65826c;border-radius:8px;background:#304950;overflow:hidden}.city-fuel-meter i{display:block;height:100%;border-radius:6px}.zombie-drive{position:absolute;right:15px;bottom:20px;width:min(350px,calc(100% - 30px));display:flex;gap:12px;align-items:center;touch-action:none}.zombie-drive[hidden]{display:none}.zombie-drive .city-slider{flex:1;height:58px}.zombie-drive .city-reverse{position:static;min-height:58px;width:78px}
 
 .city-camera-options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:18px 0}.city-camera-options .btn{min-height:66px;white-space:normal}
+
+.city-carnage-boost{position:absolute;left:0;top:0;min-height:44px;padding:9px 18px;border:2px solid #ffe8a6;border-radius:15px;background:#dd6f33;color:#fff8df;font-weight:800;box-shadow:0 3px 0 #91492b;touch-action:manipulation}.city-carnage-boost:disabled{background:#637b86;box-shadow:none;color:#e5ecea}.city-carnage-boost[hidden]{display:none}
