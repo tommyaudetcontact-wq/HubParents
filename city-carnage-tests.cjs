@@ -22,3 +22,6 @@ console.log('Dirt ramps launch moving cars; track sliding stays on-road, map exp
 {const a=actors(1),s=G.create('carnage-ville','p0');G.start(s,a);s.countdown=0;s.elapsed=4;const bot=s.bots[0];Object.assign(a.p0,{x:650,y:550,angle:Math.PI/2,vx:180,vy:0,speed:180,driving:true});Object.assign(bot,{x:690,y:550,angle:Math.PI/2,vx:0,vy:0,speed:0});const events=D.contacts([a.p0],[bot]);assert(events.length);for(const event of events)G.contact(s,event);assert.equal(bot.hp,75);assert(bot.vx>0);assert.equal(s.players.p0.hp,100);}
 console.log('Real oriented vehicle contacts propel the NPC and apply Carnage health damage through the shared driving engine.');
 
+
+for(const kind of K.kinds){const a=actors(1),s=G.create(kind,'p0');G.start(s,a);s.countdown=0;const [fast,slow,target]=s.bots;for(let n=0;n<20;n++){s.elapsed+=1;G.contact(s,{a:fast,b:slow,av:180,bv:20,closing:160});}assert.equal(slow.hp,80);assert.equal(fast.hp,90);assert.equal(s.players.p0.score,0);for(let n=0;n<4;n++){s.elapsed+=1;G.contact(s,{a:a.p0,b:target,av:180,bv:20,closing:160});}assert.equal(target.hp,0);assert.equal(s.players.p0.score,1);assert.equal(s.players.p0.hp,100);}
+console.log('All Carnage modes: NPC collisions deal only 1% damage and 0.5% recoil; player winning hits retain 25% damage and four-hit elimination.');
