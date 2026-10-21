@@ -67,7 +67,8 @@ window.CityArt=(()=>{
  // The far door is painted before the opaque body; the near door follows it.
  if(!a.noShadow)shape(outline.map(([x,y])=>[x+6,y+6,0]),'#172b3038',null);
  drawDamagedDoor(-nearSide);
- for(const x of [-w-2,w-1])for(const y of [-l*.65,l*.45]){shape([[x,y,0],[x+3,y,0],[x+3,y+9,0],[x,y+9,0]],'#1d2429');shape([[x,y,1],[x,y+9,1],[x,y+9,6],[x,y,6]],'#111e24');}
+ if(geometrySink){for(const side of [-1,1])for(const y of [-l*.65+4.5,l*.45+4.5]){const inner=side*(w-.5),outer=side*(w+2.8),radius=4.7,centerZ=4.8,ring=(x,r)=>Array.from({length:12},(_,n)=>[x,y+Math.cos(n*Math.PI/6)*r,centerZ+Math.sin(n*Math.PI/6)*r]);const a=ring(inner,radius),b=ring(outer,radius);for(let n=0;n<12;n++){const next=(n+1)%12;shape([a[n],b[n],b[next],a[next]],n<6?'#20292e':'#121b21',null);}shape(b,'#202a30','#11191e',.35);shape(ring(outer+side*.08,3.1),'#8b9da6','#40505b',.3);shape(ring(outer+side*.12,2.1),'#35444f',null);for(let n=0;n<5;n++){const angle=n*Math.PI*2/5;line([[outer+side*.18,y,centerZ],[outer+side*.18,y+Math.cos(angle)*2.7,centerZ+Math.sin(angle)*2.7]],'#d3dce0',.5);}shape(ring(outer+side*.22,.8),'#b7c8ce',null);}}
+ else for(const x of [-w-2,w-1])for(const y of [-l*.65,l*.45]){shape([[x,y,0],[x+3,y,0],[x+3,y+9,0],[x,y+9,0]],'#1d2429');shape([[x,y,1],[x,y+9,1],[x,y+9,6],[x,y,6]],'#111e24');}
  const faces=outline.map(([x,y],n)=>{const [u,t]=outline[(n+1)%outline.length];return {p:[[x,y,2],[u,t,2],[u,t,h],[x,y,h]],depth:(local(x,y).y+local(u,t).y)/2,fill:n<3?tint(bodyColor,-36):tint(bodyColor,-20)};}).sort((a,b)=>a.depth-b.depth);for(const f of faces)shape(f.p,f.fill);
  shape(outline.map(([x,y])=>[x,y,h]),tint(bodyColor,6));
  shape([[-cw,cabinFront,h],[cw,cabinFront,h],[rw,roofFront,roofH],[-rw,roofFront,roofH]],'#4b6772');
