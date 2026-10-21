@@ -21,11 +21,11 @@ for(const angle of [0,Math.PI/4,Math.PI/2,2.1])for(const sign of [-1,1]){
  car={...car,crashed:true,recovering:false,stillFor:.9,vx:30};car=C.cityTrafficStep([car],1/60,0)[0];assert.equal(car.stillFor,0,'New motion resets the stop timer');
 }
 {
- const car=Z.vehicle();assert.equal(car.trail,'fire');let p={x:0,y:0,angle:0,driving:true,speed:0,vx:0,vy:0};for(let n=0;n<1200;n++)p=D.step(p,{x:0,y:-.78},1/120,car);assert(Math.abs(p.speed*.36-150)<.01);
+ const car=Z.vehicle();assert.equal(car.trail,'fire');let p={x:0,y:0,angle:0,driving:true,speed:0,vx:0,vy:0};for(let n=0;n<1200;n++)p=D.step(p,{x:0,y:-.78},1/120,car);assert(Math.abs(p.speed*.36-100)<.01);
  const dead=kind=>{const s={elapsed:1,kills:0,drops:[],lastDropAt:0},z={id:kind,x:0,y:0,phase:0};Z.death(s,z,{vx:690,vy:0,kind});return z;},gun=dead('gun'),flame=dead('flame'),missile=dead('missile');assert(gun.kx>300);assert(flame.kx>gun.kx);assert(missile.kx>flame.kx*1.5);assert(missile.vz>flame.vz);const rig=Z.rigFor(missile,1.5);assert(rig.nodes[6][0]>100,'Explosion carries the articulated body a visible distance');
 }
 assert(S.areas.drift.w>=1000&&S.areas.drift.h>=1000);const p=S.driftPath[0],q=S.driftPath[1],len=Math.hypot(q.x-p.x,q.y-p.y),a={x:p.x-(q.y-p.y)/len*70,y:p.y+(q.x-p.x)/len*70,vx:10,vy:0,speed:10};const before={...a};S.constrainDrift(a);assert.equal(a.x,before.x);assert.equal(a.y,before.y);assert(S.driftPath.length>30);
-console.log('Oriented bumper and swept impacts; physical NPC crash, full one-second stop and smooth rejoin; fire car at 150 km/h; stronger weapon-specific corpse propulsion; wider rounded drift passed.');
+console.log('Oriented bumper and swept impacts; physical NPC crash, full one-second stop and smooth rejoin; fire car at 100 km/h; stronger weapon-specific corpse propulsion; wider rounded drift passed.');
 
 {
  globalThis.CityStunts=S;const car=C.vehicles[0],start={x:660,y:1940,angle:Math.PI/2,driving:true,speed:180,vx:180,vy:0};const takeoff=D.step(start,{x:1,y:-1},1/120,car);assert(takeoff.z>0&&takeoff.jumpSpin>0);let left={...takeoff},right={...takeoff};for(let n=0;n<20;n++){left=D.step(left,{x:-1,y:1},1/120,car);right=D.step(right,{x:1,y:-1},1/120,car);assert.equal(left.angle,right.angle);assert.equal(left.vx,right.vx);assert.equal(left.vy,right.vy);}assert(left.angle>takeoff.angle,'Takeoff retains part of the grounded steering rotation');assert(takeoff.jumpSpin<takeoff.turnRate);console.log('Airborne car retains 65% of its takeoff rotation, independent of steering during flight.');
@@ -46,4 +46,12 @@ console.log('Oriented bumper and swept impacts; physical NPC crash, full one-sec
 
 {
  const v=S.driftVehicle();let a={x:0,y:0,angle:0,speed:0,vx:0,vy:0,driving:true};for(let n=0;n<2000;n++){a=D.step(a,{x:n>900?.8:0,y:-1,drift:n>900},1/120,v);assert(Math.hypot(a.vx,a.vy)*.36<=100.001);}assert.equal(v.speed*.36,100);console.log('The standard drift car stays within 100 km/h in straight lines and sustained slides.');
+}
+
+{
+ const G=require('./city-games.js'),actors={a:{id:'a',x:650,y:550}},s=G.create('drift','a');globalThis.CityStunts=S;G.start(s,actors,[]);const a=actors.a,q=S.driftPath[7],r=S.driftPath[8],heading=Math.atan2(r.x-q.x,-(r.y-q.y));Object.assign(a,{...q,vx:Math.sin(heading)*150,vy:-Math.cos(heading)*150,speed:150,angle:heading+.15});S.simulate(s,actors,.1,()=>{});assert.equal(s.players.a.score,0);assert(!s.players.a.drifting);a.angle=heading+.35;S.simulate(s,actors,.1,()=>{});assert(s.players.a.score>0&&s.players.a.drifting);console.log('Drift points require a meaningful slip angle, lateral motion and speed; mild steering no longer counts.');
+}
+
+{
+ const G=require('./city-games.js'),actors={p:{id:'p',x:650,y:550}},s=G.create('zombie','p');G.start(s,actors);s.buffs.vehicleUntil=30;s.wavePause=999;const p=s.players.p;Object.assign(p,{x:650,y:550,angle:Math.PI/2,riding:true,speed:0,vx:0,vy:0});const packet=seq=>({x:0,y:-.78,ax:0,ay:0,frames:[{seq,dt:1/60,x:0,y:-.78,ax:0,ay:0,brake:false}]});G.laser(s,'p',packet(1));for(let n=0;n<20;n++)G.simulate(s,actors,1/60);assert(p.x>655,'An empty input queue must not freeze the host-side vehicle between guest packets');assert.equal(p.ack,1);for(let n=0;n<100;n++)G.simulate(s,actors,1/60);assert(Math.abs(p.speed)<5,'Stale commands apply a safety brake');const stopped=p.x;G.laser(s,'p',packet(121));for(let n=0;n<15;n++)G.simulate(s,actors,1/60);assert(p.x>stopped+3);assert.equal(p.ack,121);console.log('Guest zombie car moves between packets, brakes on a real input timeout and resumes after a long packet gap.');
 }
