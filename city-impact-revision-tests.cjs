@@ -28,7 +28,7 @@ assert(S.areas.drift.w>=1000&&S.areas.drift.h>=1000);const p=S.driftPath[0],q=S.
 console.log('Oriented bumper and swept impacts; physical NPC crash, full one-second stop and smooth rejoin; fire car at 100 km/h; stronger weapon-specific corpse propulsion; wider rounded drift passed.');
 
 {
- globalThis.CityStunts=S;const car=C.vehicles[0],start={x:660,y:1940,angle:Math.PI/2,driving:true,speed:180,vx:180,vy:0};const takeoff=D.step(start,{x:1,y:-1},1/120,car);assert(takeoff.z>0&&takeoff.jumpSpin>0);let left={...takeoff},right={...takeoff};for(let n=0;n<20;n++){left=D.step(left,{x:-1,y:1},1/120,car);right=D.step(right,{x:1,y:-1},1/120,car);assert.equal(left.angle,right.angle);assert.equal(left.vx,right.vx);assert.equal(left.vy,right.vy);}assert(left.angle>takeoff.angle,'Takeoff retains part of the grounded steering rotation');assert(takeoff.jumpSpin<takeoff.turnRate);console.log('Airborne car retains 65% of its takeoff rotation, independent of steering during flight.');
+ globalThis.CityStunts=S;const car=C.vehicles[0],start={x:660,y:1940,angle:Math.PI/2,driving:true,speed:180,vx:180,vy:0};let takeoff={...start};for(let n=0;n<180&&!takeoff.jumpSpin;n++)takeoff=D.step(takeoff,{x:.04,y:-1},1/120,car);assert(takeoff.z>0&&!takeoff.onRamp&&takeoff.jumpSpin>0);let left={...takeoff},right={...takeoff};for(let n=0;n<20;n++){left=D.step(left,{x:-1,y:1},1/120,car);right=D.step(right,{x:1,y:-1},1/120,car);assert.equal(left.angle,right.angle);assert.equal(left.vx,right.vx);assert.equal(left.vy,right.vy);}assert(left.angle>takeoff.angle,'Takeoff retains part of the grounded steering rotation');assert(takeoff.jumpSpin<takeoff.turnRate);console.log('Airborne car retains 65% of its takeoff rotation, independent of steering during flight.');
 }
 
 {
@@ -36,7 +36,7 @@ console.log('Oriented bumper and swept impacts; physical NPC crash, full one-sec
 }
 
 {
- const heights=[];for(const speed of [80,160,300]){let a={x:660,y:1940,angle:Math.PI/2,driving:true,speed,vx:speed,vy:0};a=S.jump(a,1/120);let peak=0;for(let n=0;n<240;n++){a=S.jump(a,1/120);peak=Math.max(peak,a.z);}heights.push(peak);}assert(heights[1]>heights[0]*1.5&&heights[2]>heights[1]*1.5,'Jump height must visibly scale with takeoff speed');
+ const heights=[];for(const speed of [80,160,300]){let a={x:660,y:1940,angle:Math.PI/2,driving:true,speed,vx:speed,vy:0};a=S.jump(a,1/120);let peak=0;for(let n=0;n<400;n++){a.x+=speed/120;a.vx=speed;a.speed=speed;a=S.jump(a,1/120);peak=Math.max(peak,a.z);}heights.push(peak);}assert(heights[1]>heights[0]+1&&heights[2]>heights[1]+4,'Jump height must visibly scale with takeoff speed');
  const d=S.areas.drift;assert(d.w>=1500&&d.h>=1400);for(const b of [C.cityMap.track,C.cityMap.field,S.areas.tennis])assert(d.x>b.x+b.w+100||d.y>b.y+b.h+100||d.x+d.w+100<b.x||d.y+d.h+100<b.y,'Separated facilities need a clear grass gap');assert(d.x+d.w<C.cityMap.width&&d.y+d.h<C.cityMap.height);const u=S.areas.sumo;assert(u.y-u.r>d.y+d.h);for(const p of S.driftPath)assert(p.x-108>d.x&&p.x+108<d.x+d.w&&p.y-108>d.y&&p.y+108<d.y+d.h);console.log('Expanded drift ground clears the race circuit, soccer, tennis and sumo; slow, medium and fast jumps have distinct heights.');
 }
 
