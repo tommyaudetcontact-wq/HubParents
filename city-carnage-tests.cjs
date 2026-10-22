@@ -4,7 +4,7 @@ const actors=n=>Object.fromEntries(Array.from({length:n},(_,i)=>['p'+i,{id:'p'+i
 for(const kind of K.kinds){
  const count=K.botCount(kind),a=actors(6),s=G.create(kind,'p0');s.accepted=Object.keys(a);assert(G.start(s,a,s.accepted.map(id=>({id,vehicle:'car-retro'}))));assert.equal(s.bots.length,count);assert.equal(new Set(s.bots.map(b=>b.model)).size,Math.min(count,K.motoRace(kind)?6:25));assert.equal(new Set(s.bots.map(b=>b.paint)).size,count);assert.deepEqual(I.limits[kind],[1,6]);
  const grid=Object.values(a).concat(s.bots);for(let i=0;i<grid.length;i++)for(let j=i+1;j<grid.length;j++)assert(!D.overlap(D.shape(grid[i]),D.shape(grid[j])),kind+' spawn must not overlap');
- for(const b of s.bots)assert(b.x>=0&&b.y>=0&&b.x<C.cityMap.width&&b.y<C.cityMap.height);
+ for(const b of s.bots)assert(b.x>=(C.cityMap.minX||0)&&b.y>=0&&b.x<C.cityMap.width&&b.y<C.cityMap.height);
  assert(K.decode(K.wire(s),kind));const bad=K.wire(s);bad[1][0]=bad[0][0];assert.equal(K.decode(bad),null);
  const before=s.bots.map(b=>[b.x,b.y]);G.simulate(s,a,3.01);for(let i=0;i<90;i++)G.simulate(s,a,1/30);assert(s.bots.some((b,i)=>Math.hypot(b.x-before[i][0],b.y-before[i][1])>15));
  const victim=s.bots[0];for(let n=0;n<3;n++){s.elapsed+=3;victim.riderTime=0;G.contact(s,{a:a.p0,b:victim,av:180,bv:20,closing:160});assert(Math.abs(victim.hp-(K.motoRace(kind)?Math.max(0,100-(n+1)*100/3):Math.max(0,66-n*34)))<1e-8);}
