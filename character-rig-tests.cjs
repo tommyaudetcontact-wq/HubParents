@@ -17,3 +17,5 @@ for(const npc of [false,true])for(const speed of [60,150,300])for(const angle of
 console.log('Pedestrians hit by NPC/player cars launch in the impact direction at three speeds and four angles, with airborne clearance and the full physical ragdoll.');
 console.log('Rear shoulder continuity, rigid torso through fall/recovery, forward ejection and two single thin wheels per motorcycle passed.');
 console.log('All skins and clothing in directional articulated poses; bounded eight-appearance cache, physical independent joints/recovery, persistent motorcycle purchase and collision ejection passed.');
+
+R.clear();for(let n=0;n<32;n++)R.ragdoll({id:'persistent-corpse-'+n,ragdollDuration:2.8,ragdoll:.65,ragdollStamp:1});assert.equal(R.stats().falls,32,'The complete Ultimate motorcycle field must remain cached');for(let n=0;n<100;n++)R.ragdoll({id:'bounded-fall-'+n,ragdollDuration:2.8,ragdoll:2.79,ragdollStamp:1});assert(R.stats().falls<=64,'Skeleton memory stays bounded');console.log('All 32 Ultimate ragdolls remain cached together, avoiding repeated reconstruction of persistent bodies.');

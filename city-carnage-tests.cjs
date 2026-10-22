@@ -7,7 +7,7 @@ for(const kind of K.kinds){
  for(const b of s.bots)assert(b.x>=0&&b.y>=0&&b.x<C.cityMap.width&&b.y<C.cityMap.height);
  assert(K.decode(K.wire(s),kind));const bad=K.wire(s);bad[1][0]=bad[0][0];assert.equal(K.decode(bad),null);
  const before=s.bots.map(b=>[b.x,b.y]);G.simulate(s,a,3.01);for(let i=0;i<90;i++)G.simulate(s,a,1/30);assert(s.bots.some((b,i)=>Math.hypot(b.x-before[i][0],b.y-before[i][1])>15));
- const victim=s.bots[0];for(let n=0;n<(K.motoRace(kind)?2:3);n++){s.elapsed+=3;victim.riderTime=0;G.contact(s,{a:a.p0,b:victim,av:180,bv:20,closing:160});assert.equal(victim.hp,K.motoRace(kind)?50-n*50:Math.max(0,66-n*34));}
+ const victim=s.bots[0];for(let n=0;n<3;n++){s.elapsed+=3;victim.riderTime=0;G.contact(s,{a:a.p0,b:victim,av:180,bv:20,closing:160});assert(Math.abs(victim.hp-(K.motoRace(kind)?Math.max(0,100-(n+1)*100/3):Math.max(0,66-n*34)))<1e-8);}
  assert.equal(s.players.p0.score,1);assert.equal(s.players.p0.hp,100);const hp=s.players.p0.hp;G.contact(s,{a:a.p0,b:s.bots[1],av:0,bv:0,closing:0});assert.equal(s.players.p0.hp,hp);
  const wire=G.serialize(s,true);assert(!wire.bots);assert.equal(K.decode(wire.botFrames,kind).length,count);assert(JSON.stringify(wire).length<12000);
  for(let n=0;n<20;n++){s.elapsed+=1;G.contact(s,{a:a.p1,b:s.bots[n%16],av:20,bv:180,closing:160});assert.equal(s.players.p1.hp,100);assert.equal(s.players.p1.respawn,0);}const position={x:a.p1.x,y:a.p1.y};s.players.p1.hp=0;s.players.p1.respawn=3;G.simulate(s,a,.01);assert.equal(s.players.p1.hp,100);assert.equal(s.players.p1.respawn,0);assert.equal(a.p1.x,position.x);assert.equal(a.p1.y,position.y);
