@@ -10,8 +10,8 @@
   spawn(s);
  }
  function spawn(s){
-  const start=(s.streetStage-1)*blockWidth,count=Math.min(14,4+s.accepted.length+s.streetStage*2);
-  s.enemies=Array.from({length:count},(_,n)=>({id:'street-'+s.streetStage+'-'+n,x:start+670+(n%4)*105,y:lane.top+30+(n*47)%155,hp:n%5===4?100:60,maxHp:n%5===4?100:60,seed:n+s.streetStage*17,face:-1,cooldown:.7+n*.16,windup:0,stun:0,ragdoll:0,ragdollDuration:2.7,z:0,vz:0,vx:0,vy:0,phase:n*.7,flash:0}));
+  const start=(s.streetStage-1)*blockWidth,count=Math.min(8,2+Math.ceil(s.accepted.length/2)+s.streetStage);
+  s.enemies=Array.from({length:count},(_,n)=>({id:'street-'+s.streetStage+'-'+n,x:start+670+(n%4)*105,y:lane.top+30+(n*47)%155,hp:n%4===3?150:110,maxHp:n%4===3?150:110,seed:n+s.streetStage*17,face:-1,cooldown:.7+n*.16,windup:0,stun:0,ragdoll:0,ragdollDuration:2.7,z:0,vz:0,vx:0,vy:0,phase:n*.7,flash:0}));
  }
  function move(p,input,dt,s){
   p.cooldown=Math.max(0,(p.cooldown||0)-dt);p.attackTime=Math.max(0,(p.attackTime||0)-dt);p.invincible=Math.max(0,(p.invincible||0)-dt);p.down=Math.max(0,(p.down||0)-dt);
@@ -57,7 +57,7 @@
    e.face=dx>=0?1:-1;
    if(e.windup>0){e.windup-=dt;if(e.windup<=0){if(Math.abs(dx)<68&&Math.abs(dy)<38&&!target.invincible){target.hp=Math.max(0,target.hp-9);target.invincible=.7;target.down=target.hp<=0?2.7:0;target.x+=e.face*12;s.effects.push({x:target.x,y:target.y-65,life:.18,kind:'hit'});}e.cooldown=1.1;}}
    else if(Math.abs(dx)<55&&Math.abs(dy)<30){if(!e.cooldown)e.windup=.48;}
-   else{const len=Math.max(1,Math.hypot(dx,dy*2));e.x+=dx/len*(e.maxHp>60?66:90)*dt;e.y=clamp(e.y+dy/len*105*dt,lane.top,lane.bottom);e.phase+=dt*8;}
+   else{const len=Math.max(1,Math.hypot(dx,dy*2));e.x+=dx/len*(e.maxHp>110?66:90)*dt;e.y=clamp(e.y+dy/len*105*dt,lane.top,lane.bottom);e.phase+=dt*8;}
   }
   // Keep approaching opponents distinct rather than stacking every sprite.
   for(let i=0;i<s.enemies.length;i++)for(let j=i+1;j<s.enemies.length;j++){
@@ -80,7 +80,7 @@
   for(const e of s.enemies||[]){e.flash=Math.max(0,e.flash-dt);if(e.ragdoll>0)advanceEnemy(e,dt);}
   for(const [who,p]of Object.entries(s.players))if(who!==id)p.attackTime=Math.max(0,(p.attackTime||0)-dt);
  }
- function valid(s){return Number.isInteger(s.streetStage)&&s.streetStage>=1&&s.streetStage<=3&&Array.isArray(s.enemies)&&s.enemies.length<=14&&s.enemies.every(e=>typeof e.id==='string'&&[e.x,e.y,e.hp,e.maxHp,e.seed,e.face,e.cooldown,e.windup,e.stun,e.ragdoll,e.z,e.vz,e.vx,e.vy,e.phase,e.flash].every(Number.isFinite)&&e.hp>=0&&e.hp<=100&&Math.abs(e.x)<6000&&Math.abs(e.y)<1000);}
+ function valid(s){return Number.isInteger(s.streetStage)&&s.streetStage>=1&&s.streetStage<=3&&Array.isArray(s.enemies)&&s.enemies.length<=14&&s.enemies.every(e=>typeof e.id==='string'&&[e.x,e.y,e.hp,e.maxHp,e.seed,e.face,e.cooldown,e.windup,e.stun,e.ragdoll,e.z,e.vz,e.vx,e.vy,e.phase,e.flash].every(Number.isFinite)&&e.hp>=0&&e.hp<=160&&Math.abs(e.x)<6000&&Math.abs(e.y)<1000);}
  function draw(c,{state:s,members,localId,width:w,height:h}){
   const viewWidth=clamp(600*w/h,360,1000),scale=Math.min(w/viewWidth,h/600),ox=(w-viewWidth*scale)/2,oy=(h-600*scale)/2,me=s.players[localId],start=(s.streetStage-1)*blockWidth,camera=clamp((me?.x||start+180)-viewWidth*.35,start,start+blockWidth-viewWidth);
   c.fillStyle='#101b30';c.fillRect(0,0,w,h);c.save();c.translate(ox,oy);c.scale(scale,scale);

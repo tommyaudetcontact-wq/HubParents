@@ -12,7 +12,7 @@ for(const terrain of ['course','drift','derby','ville'])for(const playerVehicle 
 }
 assert(!K.validRules({terrain:'bad'}));assert(K.validRules(K.rules()));assert(new Set(Array.from({length:32},(_,seed)=>K.riderMember({seed}).appearance.topColor)).size>=6);
 console.log('Carnage: 32 rule combinations support 6 humans, loan vehicles, 16/32 NPC, bounded wire snapshots and continuation after host migration; 6 stable shirt colours.');
-const bodies=actors(),s=G.create('street-rage','p0');s.accepted=Object.keys(bodies);assert(G.start(s,bodies,members));assert.equal(s.enemies.length,12);assert(R.valid(s));
+const bodies=actors(),s=G.create('street-rage','p0');s.accepted=Object.keys(bodies);assert(G.start(s,bodies,members));assert.equal(s.enemies.length,6);assert(R.valid(s));
 const p=s.players.p0,e=s.enemies[0];Object.assign(p,{x:200,y:420,face:1});Object.assign(e,{x:250,y:420,hp:60,maxHp:60});s.enemies=[e];for(const other of Object.values(s.players))other.invincible=100;
 for(let hit=1;hit<=4;hit++){
  Object.assign(e,{x:250,y:420,stun:0});p.cooldown=0;p.input={x:0,y:0,fire:true,at:s.elapsed};G.simulate(s,bodies,1/60);assert.equal(p.combo,hit);assert.equal(e.hp,hit<4?60-hit*10:0);s.elapsed+=.25;
