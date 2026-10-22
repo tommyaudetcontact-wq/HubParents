@@ -20,7 +20,7 @@
  if(a.crashed){
   if(physicsStep)physicsStep(a,dt);else{a.x+=(a.vx||0)*dt;a.y+=(a.vy||0)*dt;a.angle+=(a.yawRate||0)*dt;const drag=Math.exp(-dt*2.8);a.vx=(a.vx||0)*drag;a.vy=(a.vy||0)*drag;a.yawRate=(a.yawRate||0)*drag;}
   if(Math.hypot(a.vx||0,a.vy||0)<2&&Math.abs(a.yawRate||0)<.04){a.vx=a.vy=a.speed=a.yawRate=0;a.stillFor=(a.stillFor||0)+dt;}else a.stillFor=0;
-  if(a.stillFor>=1){a.crashed=false;a.recovering=true;a.rejoin=null;}return a;
+  if(a.stillFor>=1&&!a.rigidActive&&!(a.vehicleRespawn>0)){a.crashed=false;a.recovering=true;a.rejoin=null;}return a;
  }
  if(a.recovering){
   if(!a.rejoin){const turning=a.phase==='turn',from=turning?a.to:a.from,to=turning?a.next:a.to,l=lane(from,to),travel=turning?85:clamp((a.x-from.x)*l.dx+(a.y-from.y)*l.dy+35,85,l.length-85);a.rejoin={x:from.x+l.dx*travel+l.ox,y:from.y+l.dy*travel+l.oy,from,to,travel,routeIndex:turning?a.nextIndex:a.routeIndex};}
