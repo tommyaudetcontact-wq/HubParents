@@ -2,7 +2,7 @@
 const assert=require('node:assert/strict'),C=require('./domain.js'),G=require('./city-games.js'),K=require('./city-carnage.js'),D=require('./city-driving.js'),I=require('./city-invites.js');
 const actors=n=>Object.fromEntries(Array.from({length:n},(_,i)=>['p'+i,{id:'p'+i,x:650+i*40,y:550,angle:.3,fuel:210,driving:false}]));
 for(const kind of K.kinds){
- const count=K.botCount(kind),a=actors(6),s=G.create(kind,'p0');s.accepted=Object.keys(a);assert(G.start(s,a,s.accepted.map(id=>({id,vehicle:'car-retro'}))));assert.equal(s.bots.length,count);assert.equal(new Set(s.bots.map(b=>b.model)).size,Math.min(count,25));assert.equal(new Set(s.bots.map(b=>b.paint)).size,count);assert.deepEqual(I.limits[kind],[1,6]);
+ const count=K.botCount(kind),a=actors(6),s=G.create(kind,'p0');s.accepted=Object.keys(a);assert(G.start(s,a,s.accepted.map(id=>({id,vehicle:'car-retro'}))));assert.equal(s.bots.length,count);assert.equal(new Set(s.bots.map(b=>b.model)).size,Math.min(count,K.motoRace(kind)?6:25));assert.equal(new Set(s.bots.map(b=>b.paint)).size,count);assert.deepEqual(I.limits[kind],[1,6]);
  const grid=Object.values(a).concat(s.bots);for(let i=0;i<grid.length;i++)for(let j=i+1;j<grid.length;j++)assert(!D.overlap(D.shape(grid[i]),D.shape(grid[j])),kind+' spawn must not overlap');
  for(const b of s.bots)assert(b.x>=0&&b.y>=0&&b.x<C.cityMap.width&&b.y<C.cityMap.height);
  assert(K.decode(K.wire(s),kind));const bad=K.wire(s);bad[1][0]=bad[0][0];assert.equal(K.decode(bad),null);
@@ -33,4 +33,4 @@ for(const kind of ['carnage-course','carnage-drift','carnage-course-ultime','car
 console.log('All track Carnage modes: one to six humans start behind the full NPC field, with a clear row gap and no overlapping vehicle bodies.');
 
 for(const kind of K.kinds){const moto=C.vehicles.find(v=>v.body==='motorcycle'),rider={id:'moto-player',x:400,y:400,angle:0,vehicle:moto.id,motorcycle:true,driving:true,speed:0},actors={'moto-player':rider},s=G.create(kind,rider.id);assert(G.start(s,actors,[{id:rider.id,vehicle:moto.id,cars:{[moto.id]:{fuel:600}}}]));assert(rider.carnageProtected);if(K.baseKind(kind)!=='carnage-drift')assert.equal(rider.loanVehicle,moto.id);s.countdown=0;Object.assign(rider,{x:300,y:300,angle:0,vx:0,vy:-160,speed:160,motorcycle:true,z:0});Object.assign(s.bots[0],{x:300,y:260,angle:0,vx:0,vy:0,speed:0,z:0});D.contacts([rider],[s.bots[0]],new Set());assert(rider.driving,'Carnage motorcycles must never eject their riders');assert.equal(rider.ragdoll,0);assert.equal(rider.hitStun,0);assert(!rider.crashedBike);G.finish(s,actors);assert(!rider.carnageProtected,'Carnage protection must end when leaving the activity');}
-console.log('All eight Carnage variants retain motorcycles and prevent rider falls; leaving restores ordinary collision behaviour.');
+console.log('Carnage variants retain motorcycles against NPC collisions and prevent rider falls; leaving restores ordinary collision behaviour.');
