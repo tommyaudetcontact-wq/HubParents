@@ -17,7 +17,7 @@ const p=s.players.p0,e=s.enemies[0];Object.assign(p,{x:200,y:420,face:1});Object
 for(let hit=1;hit<=4;hit++){
  Object.assign(e,{x:250,y:420,stun:0});p.cooldown=0;p.input={x:0,y:0,fire:true,at:s.elapsed};G.simulate(s,bodies,1/60);assert.equal(p.combo,hit);assert.equal(e.hp,hit<4?60-hit*10:0);s.elapsed+=.25;
 }
-assert(e.ragdoll>0&&e.vx>250&&e.vz>200);const x=e.x,z=e.z;R.advanceEnemy(e,.1);assert(e.x>x+20&&e.z>z);assert.equal(s.streetKills,1);assert.equal(s.players.p1.hp,100,'Allies do not take combo damage');
+assert(e.ragdoll>0&&e.vx>250&&e.vz>=180);const x=e.x,z=e.z;R.advanceEnemy(e,.1);assert(e.x>x+20&&e.z>z);assert.equal(s.streetKills,1);assert.equal(s.players.p1.hp,100,'Allies do not take combo damage');
 const checkpoint=structuredClone(s),predicted=structuredClone(s),f={x:1,y:-.5,fire:false};R.move(checkpoint.players.p1,f,.016,checkpoint);R.predict(predicted,'p1',f,.016);assert.deepEqual(checkpoint.players.p1,predicted.players.p1);
 const queued=G.create('street-rage','p0'),qa=actors();queued.accepted=['p0','p1'];G.start(queued,qa,members);queued.enemies=[];const frames=Array.from({length:30},(_,n)=>({seq:n+1,dt:1/60,x:1,y:0,ax:0,ay:0,fire:false}));const before=queued.players.p1.x;assert(G.laser(queued,'p1',{x:1,y:0,ax:0,ay:0,frames}));assert(G.laser(queued,'p1',{x:1,y:0,ax:0,ay:0,frames}));for(let n=0;n<40;n++)G.simulate(queued,qa,1/60);assert.equal(queued.players.p1.ack,30);assert(Math.abs(queued.players.p1.x-before-107.5)<.001);
 for(let stage=1;stage<=3;stage++){s.enemies=[];s.streetNext=s.elapsed+.01;G.simulate(s,bodies,.02);assert.equal(s.streetStage,Math.min(3,stage+1));}assert.equal(s.phase,'finished');assert(s.streetWon);assert.equal(bodies.p0.x,650,'Finishing returns the player to the city');

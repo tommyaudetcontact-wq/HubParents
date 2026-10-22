@@ -41,3 +41,14 @@ for(const mode of ['laser','zombie'])for(const aim of [{ax:1,ay:0},{ax:-1,ay:0},
 rig.draw=original;const guns=createCanvas(1000,280),gg=guns.getContext('2d');gg.fillStyle='#b9c7b8';gg.fillRect(0,0,1000,280);for(let n=0;n<5;n++){const angle=n*Math.PI/2,kind=n===3?'missile':n===4?'flame':null;rig.draw(gg,{skin:'skin-riff-nocturne',useCustomAppearance:false},{x:100+n*200,y:225,scale:1.1,yaw:angle,weapon:{x:Math.sin(angle),y:Math.cos(angle),kind,flash:true}});}fs.writeFileSync('../contact-held-rifles.png',guns.toBuffer('image/png'));
 rig.clear();const riders=Array.from({length:12},(_,n)=>({skin:'skin-neutral',useCustomAppearance:true,appearance:{...C.appearanceDefaults(),topColor:'#'+(0x334455+n*3571).toString(16)}})),hot=riders.map(m=>rig.source(m));for(let n=0;n<10;n++)riders.forEach((m,i)=>assert.equal(rig.source(m),hot[i]));assert(rig.stats().sources<=16);
 console.log('Zombie and laser both aim a two-handed rifle in four directions, suppress it during ragdoll and keep twelve simultaneous appearances cached without rebuilding them.');
+
+// The sight and projectile offset use the same posed hands and barrel as the held gun.
+for(const zombie of [false,true])for(let n=0;n<8;n++)for(const recoil of [0,.3]){
+ const ax=Math.cos(n*Math.PI/4),ay=Math.sin(n*Math.PI/4),v=scope.CityCombatArt.aimGeometry(ax,ay,zombie,recoil),weapon={x:v.x,y:v.y,recoil},yaw=Math.atan2(v.x,v.y),frame=rig.draw(out.getContext('2d'),{skin:'skin-neutral',useCustomAppearance:false},{scale:.65,yaw,weapon});
+ const x=((frame.points.rh.x+frame.points.lh.x)/2+v.x*(41-recoil*8))*.65,y=((frame.points.rh.y+frame.points.lh.y)/2+v.y*(41-recoil*8))*.65;
+ assert(Math.hypot(v.muzzle.x-x,v.muzzle.y-y)<1e-8,'Sight must start at the drawn barrel, including recoil');
+ assert(Math.abs(v.x*v.x+v.y*v.y-1)<1e-9);
+}
+const aligned=createCanvas(800,600),alignedState={id:'muzzle',kind:'zombie',elapsed:4,players:{a:{hp:100,x:650,y:550,input:{ax:1,ay:0}}},shots:[],zombies:[],effects:[],covers:[],buffs:{}};
+scope.CityCombatArt.draw(aligned.getContext('2d'),{state:alignedState,members:[{id:'a',name:'Tommy',skin:'skin-riff-nocturne',useCustomAppearance:false}],localId:'a',control:{ax:1,ay:0},width:800,height:600});fs.writeFileSync('../zombie-aligned-muzzle.png',aligned.toBuffer('image/png'));
+console.log('Zombie and laser sights start at the exact rifle muzzle in eight directions, with recoil; projectiles share the same muzzle geometry.');
