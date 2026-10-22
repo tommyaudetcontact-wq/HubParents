@@ -131,7 +131,8 @@ function handleSocialAction(req){
 }
 function handleVisitBatch(req){
  if(req.action!=='visitBatch')return null;if(requestParent)throw Error('Connecte ton profil enfant.');
- if(!Array.isArray(req.entries)||req.entries.length>20)throw Error('Résultats de visite invalides.');const cache=CacheService.getScriptCache(),room=JSON.parse(cache.get('live:'+req.roomId)||'null'),now=Date.now();
+ if(!Array.isArray(req.entries)||req.entries.length>20)throw Error('Résultats de visite invalides.');const cache=CacheService.getScriptCache(),now=Date.now();let room=JSON.parse(cache.get('live:'+req.roomId)||'null');
+ if(!room&&typeof req.owner==='string'){const city=JSON.parse(cache.get('city:'+req.roomId)||'null'),owner=city?.members.find(m=>m.id===req.owner),guest=city?.members.find(m=>m.id===req.player);if(city&&owner&&guest&&owner.id!==guest.id&&now-owner.seen<35000&&now-guest.seen<35000)room={purpose:'house',host:owner.id,guest:guest.id,created:city.created,seen:{[owner.id]:owner.seen}};}
  if(!room||room.purpose!=='house'||room.guest!==req.player)throw Error('Visite introuvable.');
  const visitor=profileRecord(req.player),sheet=activeDB().getSheetByName('Profils'),ids=sheet.getRange(2,1,sheet.getLastRow()-1,1).getValues(),row=ids.findIndex(r=>r[0]===room.host);if(row<0)throw Error('Maison introuvable.');const host=BrawlCore.upgrade(decodeProfile(sheet.getRange(row+2,4).getValues()[0][0]));let p=visitor.profile;
  for(const e of req.entries){if(typeof e.id!=='string'||e.id.length>80)throw Error('Interaction invalide.');const id='visit:'+e.id;if(p.seen.includes(id))continue;
