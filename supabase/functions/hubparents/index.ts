@@ -2,6 +2,7 @@ import postgres from 'npm:postgres@3.4.7';
 import {Buffer} from 'node:buffer';
 import {createHash, timingSafeEqual} from 'node:crypto';
 import {runtime} from './runtime.js';
+import {BrawlCore} from './domain.js';
 import {createEngine} from './engine.js';
 import {selfTest} from './self-test.js';
 
@@ -26,7 +27,7 @@ Deno.serve(async req=>{
  if(req.method==='OPTIONS')return new Response(null,{status:204,headers:cors});
  if(req.method==='GET'){
    try{const rows=await sql`select key from brawl_private.settings where key='AUTH_PEPPER'`;
-     return response({ok:true,app:'HubParents',version:22,backend:'supabase',installed:rows.length===1});
+     return response({ok:true,app:'HubParents',version:23,backend:'supabase',installed:rows.length===1,motorcycles:BrawlCore.vehicles.filter(v=>v.body==='motorcycle').length});
    }catch{return response({ok:false,error:'Backend en préparation.'},503);}
  }
  if(req.method!=='POST')return response({ok:false,error:'Méthode invalide.'},405);

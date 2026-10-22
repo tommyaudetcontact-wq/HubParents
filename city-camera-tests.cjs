@@ -22,7 +22,7 @@ console.log('Third-person perspective: menu-only local toggle, six driving modes
 }
 {
  const D=scope.CityCarDepth,body={points:[{x:-5,y:-5,z:5},{x:5,y:-5,z:5},{x:5,y:5,z:5},{x:-5,y:5,z:5}],color:'body'},door={points:[{x:-3,y:-3,z:1},{x:3,y:-3,z:9},{x:3,y:3,z:9},{x:-3,y:3,z:1}],color:'door'},ordered=D.ordered(D.build([body,door]),{x:0,y:0,z:20}),bodyIndex=ordered.findIndex(f=>f.color==='body');assert(bodyIndex>0&&bodyIndex<ordered.length-1);for(let n=0;n<ordered.length;n++)if(ordered[n].color==='door')for(const p of ordered[n].points)assert(n<bodyIndex?p.z<=5.02:p.z>=4.98,'Intersecting panels must be hidden by the body where physically behind it');
- for(const model of C.vehicles){const mesh=A.geometry(c=>A.carModel(c,{x:0,y:0,angle:0,noShadow:true,damage:{parts:[0,0,70,0,100,0]}},model,model.color));assert.equal(mesh.filter(f=>f.color==='#8b9da6').length,4,'All vehicle models need four round wheel rims');assert(mesh.some(f=>f.color==='#202a30'&&f.points.length===12));assert(D.ordered(D.build(mesh),{x:70,y:80,z:55}).length>mesh.length/2);}
+ for(const model of C.vehicles.filter(v=>v.body!=='motorcycle')){const mesh=A.geometry(c=>A.carModel(c,{x:0,y:0,angle:0,noShadow:true,damage:{parts:[0,0,70,0,100,0]}},model,model.color));assert.equal(mesh.filter(f=>f.color==='#8b9da6').length,4,'All vehicle models need four round wheel rims');assert(mesh.some(f=>f.color==='#202a30'&&f.points.length===12));assert(D.ordered(D.build(mesh),{x:70,y:80,z:55}).length>mesh.length/2);}
  console.log('Intersecting door panels are split around the body depth; all 35 models retain their original door geometry and receive four round 3D tires/rims.');
 }
 {
