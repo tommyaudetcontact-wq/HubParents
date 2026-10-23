@@ -21,3 +21,5 @@ console.log('Spot Battle: 20-second turns, solo/duo, waiting lock, same loan sco
 {const actors={a:{id:'a',x:3750,y:3100,z:40,onParkSurface:1,bodyPitch:.1,driving:true,angle:0,speed:0}},s=G.create('spot-battle','a');s.accepted=['a'];assert(G.start(s,actors));G.finish(s,actors,'a');assert.equal(actors.a.z,40);assert.equal(actors.a.onParkSurface,1);assert.equal(actors.a.bodyPitch,.1);}
 
 {let a=base({x:4195,y:3300,z:P.height(4195,3300),onParkSurface:1,speed:0,vx:0});let launched=false;for(let n=0;n<300;n++){a=D.step(a,{y:-1},1/60,v);if(a.skateModuleLaunch&&a.skateLaunchSerial>0&&!a.onParkSurface&&a.vz>0){launched=true;break;}}assert(launched,'A curved quarter pipe must launch from its actual slope with a module takeoff marker');}
+
+{let a=base({x:4195,y:3300,z:P.height(4195,3300),onParkSurface:1,speed:0,vx:0});let turn=false;for(let n=0;n<300;n++){a=D.step(a,{y:-1},1/60,v);turn=turn||a.scooterFakie>0;assert(a.driving,'Coping must not eject a rider following the curved transition');assert(a.x<P.area.x+P.area.w-12);}assert(turn,'A quarter-pipe return should roll fakie and turn back into the park');}
