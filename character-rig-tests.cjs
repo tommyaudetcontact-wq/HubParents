@@ -19,3 +19,6 @@ console.log('Rear shoulder continuity, rigid torso through fall/recovery, forwar
 console.log('All skins and clothing in directional articulated poses; bounded sixteen-appearance cache, physical independent joints/recovery, persistent motorcycle purchase and collision ejection passed.');
 
 R.clear();for(let n=0;n<32;n++)R.ragdoll({id:'persistent-corpse-'+n,ragdollDuration:2.8,ragdoll:.65,ragdollStamp:1});assert.equal(R.stats().falls,32,'The complete Ultimate motorcycle field must remain cached');for(let n=0;n<100;n++)R.ragdoll({id:'bounded-fall-'+n,ragdollDuration:2.8,ragdoll:2.79,ragdollStamp:1});assert(R.stats().falls<=64,'Skeleton memory stays bounded');console.log('All 32 Ultimate ragdolls remain cached together, avoiding repeated reconstruction of persistent bodies.');
+
+for(const yaw of [0,Math.PI/2,Math.PI,Math.PI*1.5]){const member={skin:'skin-neutral',useCustomAppearance:true,appearance:{...C.appearanceDefaults(),hair:'hair-19',head:'head-0',topColor:'#667c4b',bottomColor:'#48583f'}};assert.notEqual(hash(member,{yaw,military:true}),hash(member,{yaw}),'Military helmet, tactical vest and boots render from every direction');}
+console.log('Mini soldiers wear directional military helmets, tactical vests, camouflage and boots.');
