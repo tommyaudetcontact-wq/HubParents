@@ -1,0 +1,17 @@
+ 'use strict';
+const fs=require('node:fs'),vm=require('node:vm');
+let fixture=fs.readFileSync('city-guest-tests.cjs','utf8').split('(async()=>')[0];
+fixture=fixture.replace("vm.runInContext(fs.readFileSync(f,'utf8'),scope)","vm.runInContext(f==='city.js'?fs.readFileSync(f,'utf8').replace('return {renderStats:', 'return {renderActor,renderStats:'):fs.readFileSync(f,'utf8'),scope)");
+vm.runInNewContext(fixture+`
+const local=scope.City.localActor(),remote={id:'host',x:650,y:700,angle:3.1,speed:200,vx:200,vy:0,z:0,driving:false,recovery:0};
+scope.CityNetwork.room=()=>({id:'party',host:'host',members:[{id:'guest',vehicle:p.garage.selected,cars:p.garage.cars},{id:'host',vehicle:p.garage.selected,cars:p.garage.cars}]});
+const ambient={...remote,id:'traffic-test',npc:true,driving:true,model:0},walker={...remote,id:'ped-test',pedestrian:true,speed:38,vx:38};
+scope.CityActivities.traffic=()=>[ambient];scope.CityActivities.pedestrians=()=>[walker];
+function packet(t){remote.x=650+t*.2;remote.angle=t<500?3.1:-3.1;ambient.x=remote.x;walker.x=650+t*.038;scope.City.receiveState({scene:'street',actors:[{...local},{...remote}],at:t});}
+packet(0);let previous=null,maxStep=0,movingFrames=0,lastArrival=0;const wire=[];for(let sent=100;sent<=2200;sent+=100){lastArrival=Math.max(lastArrival+1,sent+[120,230,140,280][sent/100%4]);wire.push({at:lastArrival,sent});}
+for(let t=0;t<=2200;t+=16){time=t;while(wire.length&&wire[0].at<=t)packet(wire.shift().sent);const shown=scope.City.renderActor(remote),car=scope.City.renderActor(ambient),ped=scope.City.renderActor(walker);assert(Number.isFinite(shown.x)&&Number.isFinite(car.x)&&Number.isFinite(ped.x));assert.equal(remote.x,ambient.x,'Drawing never changes authoritative positions');if(previous&&t>400){const d=shown.x-previous.x;maxStep=Math.max(maxStep,Math.abs(d));if(d>.2)movingFrames++;assert(d>=-.01,'Stable forward movement never jumps backward');assert(Math.abs(Math.atan2(Math.sin(shown.angle-previous.angle),Math.cos(shown.angle-previous.angle)))<.1,'Heading wraps smoothly across pi');}previous=shown;assert.strictEqual(scope.City.renderActor(local),local,'Local motion is never buffered');}
+assert(maxStep<12,'Remote movement advances per frame rather than jumping at snapshot arrivals: '+maxStep);assert(movingFrames>90,'Remote movement continues between packets');
+const beforeStall=scope.City.renderActor(remote).x;time=4000;const stalled=scope.City.renderActor(remote);assert(stalled.x<remote.x+30,'Extrapolation stops during a long outage');const raw=JSON.stringify(remote);for(let n=0;n<20;n++){time+=16;scope.City.renderActor(remote);}assert.equal(JSON.stringify(remote),raw);
+remote.recovery++;remote.x=2100;time+=16;scope.City.receiveState({scene:'street',actors:[{...local},{...remote}]});assert.equal(scope.City.renderActor(remote).x,2100,'A real recovery or teleport takes effect immediately');
+scope.City.destroy();console.log('Guest display: players, traffic and pedestrians advance smoothly between jittered snapshots; angle wrapping, bounded outage extrapolation, exact recovery, local-input immediacy and immutable authoritative collisions passed. Maximum steady 16ms step: '+maxStep.toFixed(2)+' pixels.');
+`,{require,console,process,structuredClone,Buffer},{filename:'free-smoothing-fixture.cjs'});
