@@ -1727,6 +1727,8 @@ async function cityPublicMember(req) {
 async function handleCityAction(req) {
   if (!String(req.action).startsWith('city')) return null;
   if (requestParent) throw Error('Choisis un profil enfant.');
+  const reward = await handleCityGameRewards(req);
+  if (reward) return reward;
   const loot = await handleCityLoot(req);
   if (loot) return loot;
   const activity = typeof handleCityActivities === 'function' ? await handleCityActivities(req) : null;
@@ -2034,6 +2036,119 @@ async function handleCityLoot(req) {
     loot: null,
     nextAt: loot.expires,
     reward: loot.kind
+  };
+}
+async function handleCityGameRewards(req) {
+  if (!['cityActivityStart', 'cityActivityFinish', 'cityActivityClaim'].includes(req.action)) return null;
+  const now = Date.now(), id = req.activityId;
+  if (typeof id !== 'string' || id.length < 4 || id.length > 200 || !(/^[\w:.-]+$/).test(id)) throw Error('Activité invalide.');
+  const props = PropertiesService.getScriptProperties(), key = 'CITY_GAME_' + id;
+  let run = JSON.parse(props.getProperty(key) || 'null');
+  const room = req.roomId ? JSON.parse(await CacheService.getScriptCache().get('city:' + req.roomId) || 'null') : null;
+  const host = room ? room.host === req.player && room.members.some(m => m.id === req.player) : !req.roomId;
+  if (req.action === 'cityActivityStart') {
+    const kinds = ['bracelet', 'hockey', 'race', 'chase', 'soccer', 'bowling', 'laser', 'derby', 'zombie', 'fight', 'tennis', 'sumo', 'tailblazer', 'drift', 'jumps', 'spot-battle', 'trials', 'trampoline', 'street-rage', 'carnage', 'carnage-drift', 'carnage-course', 'carnage-derby', 'carnage-ville', 'carnage-ville-ultime', 'carnage-drift-ultime', 'carnage-course-ultime', 'carnage-derby-ultime', 'carnage-moto-ultime', 'carnage-ville-moto-ultime', 'carnage-derby-moto-ultime'];
+    if (!host || !kinds.includes(req.kind) || typeof req.gameId !== 'string' || req.gameId.length > 100 || !Array.isArray(req.participants) || !req.participants.length || req.participants.length > 6 || new Set(req.participants).size !== req.participants.length || req.participants.some(p => room ? !room.members.some(m => m.id === p) : p !== req.player)) throw Error('Départ d’activité refusé.');
+    if (!run) {
+      run = {
+        id,
+        kind: req.kind,
+        gameId: req.gameId,
+        host: req.player,
+        room: req.roomId || null,
+        participants: req.participants,
+        started: now,
+        expires: now + 86400000,
+        claimed: {},
+        sold: {},
+        checkpoint: 0
+      };
+      await props.setProperty(key, JSON.stringify(run));
+    }
+    if (!room && run.host !== req.player || run.kind !== req.kind || run.gameId !== req.gameId || run.room !== (req.roomId || null)) throw Error('Activité déjà enregistrée.');
+    return {
+      ok: true,
+      activityId: id
+    };
+  }
+  if (!run || run.expires < now) throw Error('Activité expirée.');
+  if (req.action === 'cityActivityFinish') {
+    if (!host || run.room !== (req.roomId || null) || !room && run.host !== req.player) throw Error('Seul l’hôte confirme les résultats.');
+    if (req.checkpoint !== undefined) {
+      const n = req.checkpoint;
+      if (run.kind !== 'zombie' || !Number.isInteger(n) || n < 1 || n > 30 || now - run.started < n * 25000) throw Error('Palier zombie invalide.');
+      run.checkpoint = Math.max(run.checkpoint, n);
+    } else if (!run.done) {
+      if (now - run.started < (run.kind === 'bracelet' ? 2000 : 10000) || !Array.isArray(req.completed) || req.completed.some(p => !run.participants.includes(p))) throw Error('Fin d’activité invalide.');
+      const winner = req.winner || null;
+      if (winner && !req.completed.includes(winner)) throw Error('Gagnant invalide.');
+      if (run.kind === 'bracelet' && winner && JSON.stringify(req.bracelet) !== JSON.stringify(BrawlCore.braceletPattern(run.gameId))) throw Error('Bracelet incorrect.');
+      run.done = true;
+      run.completed = [...new Set(req.completed)];
+      run.winner = winner;
+    }
+    await props.setProperty(key, JSON.stringify(run));
+    return {
+      ok: true
+    };
+  }
+  if (!run.participants.includes(req.player)) throw Error('Tu ne participes pas à cette activité.');
+  const record = await profileRecord(req.player), p = record.profile, who = req.player;
+  let amount = 0, label = '';
+  if (req.reward === 'bracelet') {
+    if (run.kind !== 'bracelet' || !run.done || run.winner !== who) throw Error('Ce bracelet ne t’appartient pas.');
+    if (!run.sold[who]) {
+      amount = 1;
+      run.sold[who] = true;
+      p.bracelets = (p.bracelets || []).filter(b => b.id !== id);
+      label = 'Bracelet revendu';
+    }
+  } else if (req.reward === 'zombie') {
+    if (run.kind !== 'zombie') throw Error('Palier invalide.');
+    const last = run.claimed[who]?.wave || 0;
+    for (let n = last + 1; n <= run.checkpoint; n++) amount += BrawlCore.cityZombieReward(n);
+    run.claimed[who] = {
+      ...run.claimed[who],
+      wave: run.checkpoint
+    };
+    label = 'Survie zombies · paliers de 5 vagues';
+  } else {
+    if (!run.done || !run.completed.includes(who)) throw Error('Activité en cours.');
+    if (!run.claimed[who]?.finish) {
+      amount = 1;
+      run.claimed[who] = {
+        ...run.claimed[who],
+        finish: true
+      };
+      label = 'Activité terminée · ' + run.kind;
+      if (run.kind === 'bracelet' && run.winner === who && !run.sold[who]) {
+        p.bracelets = p.bracelets || [];
+        if (!p.bracelets.some(b => b.id === id)) p.bracelets.push({
+          id,
+          pattern: BrawlCore.braceletPattern(run.gameId),
+          value: 1
+        });
+      }
+    }
+  }
+  if (amount) {
+    p.coins += amount;
+    p.revision++;
+    p.history.unshift({
+      day: Utilities.formatDate(new Date(), TZ, 'yyyy-MM-dd'),
+      label,
+      coins: amount,
+      xp: 0
+    });
+    p.history = p.history.slice(0, 100);
+    await saveRecord(record);
+  }
+  await props.setProperty(key, JSON.stringify(run));
+  return {
+    ok: true,
+    profile: await publicProfile(p),
+    amount,
+    checkpoint: run.claimed[who]?.wave || 0
   };
 }
 async function handleWordLists(req) {

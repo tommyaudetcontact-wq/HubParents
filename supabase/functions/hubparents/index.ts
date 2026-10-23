@@ -27,7 +27,7 @@ Deno.serve(async req=>{
  if(req.method==='OPTIONS')return new Response(null,{status:204,headers:cors});
  if(req.method==='GET'){
    try{const rows=await sql`select key from brawl_private.settings where key='AUTH_PEPPER'`;
-     return response({ok:true,app:'HubParents',version:25,residentialVisits:true,heavyVehicles:BrawlCore.vehicles.filter(v=>v.heavy).length,scooters:BrawlCore.vehicles.filter(v=>v.scooter).length,backend:'supabase',installed:rows.length===1,motorcycles:BrawlCore.vehicles.filter(v=>v.body==='motorcycle').length});
+     return response({ok:true,app:'HubParents',version:26,residentialVisits:true,activityRewards:true,skateboards:BrawlCore.vehicles.filter(v=>v.skateboard).length,heavyVehicles:BrawlCore.vehicles.filter(v=>v.heavy).length,scooters:BrawlCore.vehicles.filter(v=>v.scooter).length,backend:'supabase',installed:rows.length===1,motorcycles:BrawlCore.vehicles.filter(v=>v.body==='motorcycle').length});
    }catch{return response({ok:false,error:'Backend en préparation.'},503);}
  }
  if(req.method!=='POST')return response({ok:false,error:'Méthode invalide.'},405);

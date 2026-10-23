@@ -2,7 +2,7 @@
 (function(root){
  const C=root.BrawlCore||(typeof require==='function'?require('./domain.js'):null),field=C.cityMap.field,dist=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y),clamp=(n,a,b)=>Math.max(a,Math.min(b,n));
  const center=()=>({x:field.x+field.w/2,y:field.y+field.h/2,vx:0,vy:0});
- function create(){return {phase:'running',members:{},score:[0,0],ball:center(),elapsed:0,goalPause:0};}
+ function create(){return {id:'soccer-'+Date.now(),phase:'running',members:{},score:[0,0],ball:center(),elapsed:0,goalPause:0};}
  function join(s,id,team,actors){if(!actors[id])return false;const counts=[0,0];Object.values(s.members).forEach(p=>counts[p.team]++);if(![0,1].includes(team))team=counts[0]<=counts[1]?0:1;if(counts[team]>=3)return false;s.members[id]={team,kickCooldown:0,dashCooldown:0,dash:0,stun:0};Object.assign(actors[id],{recovery:(actors[id].recovery||0)+1,driving:false,loanVehicle:null,police:false,arrested:false,ragdoll:0,speed:0,vx:0,vy:0,x:field.x+field.w*(team?.72:.28),y:field.y+field.h/2+(counts[team]-1)*65});return true;}
  function kick(s,id,actors,power=.35){if(!Number.isFinite(power))power=.35;const p=s?.members[id],a=actors[id];if(s?.phase!=='running'||!p||!a||p.kickCooldown>0||p.stun>0||s.goalPause>0||dist(a,s.ball)>52)return false;const tx=field.x+(p.team?0:field.w),ty=field.y+field.h/2,dx=tx-a.x,dy=ty-a.y,d=Math.hypot(dx,dy)||1,fx=Math.sin(a.angle||Math.PI/2),fy=-Math.cos(a.angle||Math.PI/2),ax=dx/d*.85+fx*.15,ay=dy/d*.85+fy*.15,len=Math.hypot(ax,ay);s.ball.vx=ax/len*(400+clamp(power,0,1)*320);s.ball.vy=ay/len*(400+clamp(power,0,1)*320);p.kickCooldown=.35;return true;}
  function dash(s,id){const p=s?.members[id];if(!p||p.dashCooldown>0||p.stun>0)return false;p.dash=.34;p.dashCooldown=1.6;return true;}
