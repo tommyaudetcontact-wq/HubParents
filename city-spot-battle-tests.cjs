@@ -23,3 +23,14 @@ console.log('Spot Battle: 20-second turns, solo/duo, waiting lock, same loan sco
 {let a=base({x:4195,y:3300,z:P.height(4195,3300),onParkSurface:1,speed:0,vx:0});let launched=false;for(let n=0;n<300;n++){a=D.step(a,{y:-1},1/60,v);if(a.skateModuleLaunch&&a.skateLaunchSerial>0&&!a.onParkSurface&&a.vz>0){launched=true;break;}}assert(launched,'A curved quarter pipe must launch from its actual slope with a module takeoff marker');}
 
 {let a=base({x:4195,y:3300,z:P.height(4195,3300),onParkSurface:1,speed:0,vx:0});let turn=false;for(let n=0;n<300;n++){a=D.step(a,{y:-1},1/60,v);turn=turn||a.scooterFakie>0;assert(a.driving,'Coping must not eject a rider following the curved transition');assert(a.x<P.area.x+P.area.w-12);}assert(turn,'A quarter-pipe return should roll fakie and turn back into the park');}
+
+for(const [x,y,expected]of [[1,.8,'x'],[-1,.7,'x'],[.6,1,'y'],[.5,-1,'y']]){const a=base({x:500,y:1500,z:100}),input={scooterLeanX:x,scooterLeanY:y};for(let n=0;n<8;n++)M.before(a,input,1/60);assert.equal(expected==='x'?a.scooterPitchRate:a.scooterYawRate,0);assert(Math.abs(expected==='x'?a.scooterYawRate:a.scooterPitchRate)>0);assert.equal(a.bodyRoll,0);}
+{const a=base({z:100});M.before(a,{scooterLeanX:1},.033);M.before(a,{scooterLeanY:-1},.033);assert.equal(a.scooterYawRate,0);assert(a.scooterPitchRate>0);const rate=a.scooterPitchRate;M.before(a,{},.033);assert(a.scooterPitchRate>0&&a.scooterPitchRate<rate);}
+{const a=base({x:500,y:1500,vx:80,vy:30,speed:85});D.slide(a,0,1);assert(a.driving);assert.equal(a.vx,0);assert.equal(a.vy,30);}
+{const a=base({x:3300,y:3411,z:0,vx:0,vy:100,speed:100});P.advance(a,.033);assert(a.driving);assert.equal(a.vy,0);assert(Math.abs(a.y-3410)>=8);}
+{const a=base({x:P.area.x-20,y:P.area.y+100});SB.constrain(a);assert(a.driving);assert.equal(a.x,P.area.x+12);assert.equal(a.vx,0);}
+{const props=require('./city-props');for(const [type,moving,fall]of [['pole',false,false],['tree',false,false],['bin',false,true],['tree',true,true]]){const a=base({x:0,y:0}),p={x:20,y:0,type},b={x:20,y:0,vx:moving?-20:0,vy:0,omega:0};assert(props.collide(a,p,b,0));assert.equal(!a.driving,fall,type+' movement='+moving);}}
+{const a=base({z:17,vz:-100,angle:0,scooterAir:true});P.advance(a,.033);assert(!a.driving,'An invalid rail landing angle must still eject the rider');}
+console.log('Four-direction tricks exclude simultaneous yaw/pitch; walls, rails, platforms, bounds and fixed scenery block/slide without ejection; moving props and bad landing angles still cause falls.');
+
+{let a=base({x:500,y:1500,z:100,jumpSpin:4});for(let n=0;n<8;n++)a=D.step(a,{scooterLeanY:-1},1/60,v);assert.equal(a.jumpSpin,0);assert.equal(a.angle,Math.PI/2);assert.equal(a.stuntYaw,0);assert(a.stuntPitch>0);}
