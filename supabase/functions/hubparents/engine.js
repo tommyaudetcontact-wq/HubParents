@@ -2082,7 +2082,16 @@ async function handleCityGameRewards(req) {
       if (now - run.started < (run.kind === 'bracelet' ? 2000 : 10000) || !Array.isArray(req.completed) || req.completed.some(p => !run.participants.includes(p))) throw Error('Fin d’activité invalide.');
       const winner = req.winner || null;
       if (winner && !req.completed.includes(winner)) throw Error('Gagnant invalide.');
-      if (run.kind === 'bracelet' && winner && JSON.stringify(req.bracelet) !== JSON.stringify(BrawlCore.braceletPattern(run.gameId))) throw Error('Bracelet incorrect.');
+      if (run.kind === 'bracelet') {
+        if (req.braceletRounds !== undefined) {
+          const rounds = req.braceletRounds;
+          if (!Array.isArray(rounds) || rounds.length !== 3 || rounds.some((r, n) => r.round !== n + 1 || r.winner && !run.participants.includes(r.winner) || !Number.isFinite(r.seconds) || r.seconds < 0 || r.seconds > 180 || !r.scores || Array.isArray(r.scores) || Object.keys(r.scores).length > 6 || Object.entries(r.scores).some(([id, v]) => !run.participants.includes(id) || !Number.isInteger(v) || v < 0 || v > 10) || r.winner && r.scores[r.winner] !== 10)) throw Error('Manches invalides.');
+          const rank = BrawlCore.braceletRank(run.participants.filter(id => req.completed.includes(id)), rounds), expected = rank[0]?.wins > 0 ? rank[0].id : null;
+          if (winner !== expected) throw Error('Classement invalide.');
+          run.braceletRound = 3;
+        }
+        if (winner && JSON.stringify(req.bracelet) !== JSON.stringify(BrawlCore.braceletPattern(run.gameId, run.braceletRound || 1))) throw Error('Bracelet incorrect.');
+      }
       run.done = true;
       run.completed = [...new Set(req.completed)];
       run.winner = winner;
@@ -2125,7 +2134,7 @@ async function handleCityGameRewards(req) {
         p.bracelets = p.bracelets || [];
         if (!p.bracelets.some(b => b.id === id)) p.bracelets.push({
           id,
-          pattern: BrawlCore.braceletPattern(run.gameId),
+          pattern: BrawlCore.braceletPattern(run.gameId, run.braceletRound || 1),
           value: 1
         });
       }
