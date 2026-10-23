@@ -66,3 +66,7 @@ button.city-mission{border:1px solid #ccdcbe;cursor:pointer;pointer-events:auto;
 .trampoline-flip{position:absolute;right:22px;bottom:22px;width:110px;height:110px;border:4px solid #ffedc1;border-radius:50%;background:#d57f50;color:white;font-weight:850;box-shadow:0 6px 0 #875039;touch-action:none;user-select:none}.trampoline-flip small{display:block;font-size:10px;margin-top:5px}.trampoline-flip[hidden]{display:none}.trampoline-flip:disabled{opacity:.4}.city-game[data-kind="trampoline"] .laser-pad{width:86px;height:86px;bottom:22px}.city-game[data-kind="trampoline"] .city-game-play{background:#b7d7d5}@media(max-height:480px){.trampoline-flip{width:86px;height:86px;bottom:12px}.city-game[data-kind="trampoline"] .laser-pad{width:68px;height:68px;bottom:12px}}
 
 .city-tank-fire{position:absolute;left:16px;bottom:155px;width:84px;height:84px;border-radius:50%;border:3px solid #fff4c7;background:#485e4de8;color:#fff8de;font-weight:800;font-size:15px;touch-action:none;user-select:none;z-index:8;box-shadow:0 3px 10px #10251d66}.city-tank-fire:disabled{opacity:.65}.city-tank-fire[hidden]{display:none}
+
+.city-spawn-shortcut{display:block;margin-top:4px;min-height:36px;border:1px solid #b6e6d7;border-radius:8px;padding:6px 10px;color:#ecfff6;background:#315e68;font-weight:800;touch-action:manipulation}
+
+.gamepad-active .gamepad-focus{outline:4px solid #ffe280!important;outline-offset:3px;box-shadow:0 0 0 7px #203c4d88!important;scroll-margin:18px}
