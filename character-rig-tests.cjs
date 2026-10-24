@@ -22,3 +22,9 @@ R.clear();for(let n=0;n<32;n++)R.ragdoll({id:'persistent-corpse-'+n,ragdollDurat
 
 for(const yaw of [0,Math.PI/2,Math.PI,Math.PI*1.5]){const member={skin:'skin-neutral',useCustomAppearance:true,appearance:{...C.appearanceDefaults(),hair:'hair-19',head:'head-0',topColor:'#667c4b',bottomColor:'#48583f'}};assert.notEqual(hash(member,{yaw,military:true}),hash(member,{yaw}),'Military helmet, tactical vest and boots render from every direction');}
 console.log('Mini soldiers wear directional military helmets, tactical vests, camouflage and boots.');
+
+// A prepared throw must visibly form a pile in the rear hand, lift it, and release to an empty hand.
+let piles=[];scope.CityPoop={pose:a=>a,drawPerson(){},pile(c,x,y,size){piles.push({x,y,size});}};
+for(const yaw of [0,Math.PI/2,Math.PI,Math.PI*1.5]){const stages=[];for(const windup of [1.2,.9,.6,.24,.06,0]){piles=[];stages.push(hash({skin:'skin-neutral'},{yaw,weapon:{kind:'poop',x:1,y:1,poopWindup:windup}}));if(windup===1.2||windup===0)assert.equal(piles.length,0,'The pile must not preexist or linger after release');else assert.equal(piles.length,1,'A growing pile stays in the animated hand');}assert.equal(new Set(stages).size,6,'Crouch, formation, lift, swing and release are distinct at every viewing angle');}
+const rest=R.pose(),crouch=R.armedPose(structuredClone(rest),{kind:'poop',poopWindup:.6}),lift=R.armedPose(structuredClone(rest),{kind:'poop',poopWindup:.24});assert(crouch.hip[2]<rest.hip[2]-15&&crouch.rh[1]<0);assert(lift.rh[2]>crouch.rh[2]+60);assert.equal(JSON.stringify(R.armedPose(structuredClone(rest),{kind:'poop',poopWindup:0})),JSON.stringify(rest));delete scope.CityPoop;
+console.log('Prepared poop throw: crouched rear hand, growing pile, raised arm, forward swing and empty-hand release render distinctly from all four sides.');
