@@ -3,7 +3,7 @@
  const C=root.BrawlCore,clamp=(n,a,b)=>Math.max(a,Math.min(b,n)),phases=['drink','run','soaked','vomit','fall','drunk','sick'];
  let api=null,clock=0,serial=0,states={},chains={},foam=[];
  const host=()=>!!api?.host(),all=()=>Object.values(api?.actors()||{}).concat(root.CityActivities?.pedestrians?.()||[]);
- const person=a=>a&&!a.driving&&!a.seated&&!a.parked&&!a.miniSoldier&&(!a.npc||a.pedestrian)&&!a.dead&&!a.policeDead&&!(a.toyDead>0)&&!root.CityPolice?.locked(a.id)&&!root.CityGames?.current?.(a.id)&&!root.CityActivities?.racing?.(a.id)&&!root.CityChase?.current?.(a.id)&&!root.CitySoccer?.current?.(a.id)&&!root.CityHomes?.active?.();
+ const person=a=>a&&!root.CityVacuum?.held(a)&&!a.driving&&!a.seated&&!a.parked&&!a.miniSoldier&&(!a.npc||a.pedestrian)&&!a.dead&&!a.policeDead&&!(a.toyDead>0)&&!root.CityPolice?.locked(a.id)&&!root.CityGames?.current?.(a.id)&&!root.CityActivities?.racing?.(a.id)&&!root.CityChase?.current?.(a.id)&&!root.CitySoccer?.current?.(a.id)&&!root.CityHomes?.active?.();
  const hash=s=>[...String(s)].reduce((n,c)=>(Math.imul(n^c.charCodeAt(0),16777619)>>>0),2166136261);
  function reset(){api=null;clock=0;states={};chains={};foam=[];}
  function mount(context){reset();api=context;}
