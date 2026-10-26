@@ -5,7 +5,7 @@ function handleCityActivities(req){
  const result=()=>({ok:true,profile:publicProfile(record.profile),job:record.profile.cityWork?.active||null});
  if(req.action==='cityJobStatus')return result();
  if(req.action==='cityJobCancel'){if(active&&active.id===req.jobId){delete p.cityWork.active;p.revision++;saveRecord(record);}return result();}
- const point=req.position;if(!point||![point.x,point.y].every(Number.isFinite)||point.x<0||point.y<0||point.x>BrawlCore.cityMap.width||point.y>BrawlCore.cityMap.height)throw Error('Position de mission invalide.');
+ const point=req.position;if(!point||![point.x,point.y].every(Number.isFinite)||point.x<(BrawlCore.cityStandalone?(BrawlCore.cityMap.minX||0):0)||point.y<(BrawlCore.cityStandalone?(BrawlCore.cityMap.minY||0):0)||point.x>BrawlCore.cityMap.width||point.y>BrawlCore.cityMap.height)throw Error('Position de mission invalide.');
  if(req.action==='cityJobStart'){
  if(active&&now<active.expires)return result();if(!['taxi','delivery'].includes(req.kind)||typeof req.requestId!=='string'||req.requestId.length<8||req.requestId.length>100)throw Error('Mission invalide.');
  authThrottle('city-work:'+req.player,120);const place=BrawlCore.cityPlaces.find(s=>s.job===req.kind),rental=p.cityWork.rental,nearPlace=Math.hypot(point.x-place.x,point.y-place.y)<150||Math.hypot(point.x-BrawlCore.cityRoadSnap(place).x,point.y-BrawlCore.cityRoadSnap(place).y)<100,continuing=req.kind==='taxi'&&rental?.kind==='taxi'&&now<rental.expires&&Math.hypot(point.x-rental.position.x,point.y-rental.position.y)<100;

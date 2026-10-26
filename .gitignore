@@ -11,3 +11,11 @@ local-server/engine/
 /sauvegardes/
 /journaux/
 /settings.json
+
+/android/build/
+/releases/
+*.p12
+*.keystore
+
+/data-ville/
+/sauvegardes-ville/

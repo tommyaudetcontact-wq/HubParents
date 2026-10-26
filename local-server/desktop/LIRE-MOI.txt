@@ -9,9 +9,10 @@ Aucun lien compliqué à partager : le lanceur relie automatiquement le lien
 habituel à ton PC. Une connexion Internet et la connexion GitHub déjà configurée
 sur cet ordinateur sont nécessaires au démarrage.
 
-Les connexions parent/enfant existantes et les sauvegardes sont conservées.
-La base est dans data\brawl.sqlite. Les copies automatiques sont dans sauvegardes
-(à chaque démarrage et toutes les 6 heures). Ne partage jamais ces dossiers.
+Brawl Ville utilise de nouveaux comptes courriel + mot de passe.
+La base du jeu est data-ville\brawl.sqlite; les copies sont dans sauvegardes-ville.
+La base éducative data\brawl.sqlite reste séparée et intacte.
+Sauvegarde automatique à chaque démarrage et toutes les 6 heures. Ne partage jamais ces dossiers.
 N'efface pas les fichiers brawl.sqlite-wal/shm lorsque le serveur fonctionne.
 
 PC éteint, serveur arrêté, connexion Internet coupée ou PC en veille : le jeu
@@ -20,7 +21,13 @@ temporaire et n'offre pas de garantie de disponibilité.
 
 Pour récupérer une nouvelle version du code publiée sur GitHub :
 arrête le serveur, double-clique METTRE-A-JOUR.cmd, puis redémarre.
-La mise à jour conserve data et sauvegardes.
+La mise à jour conserve data, data-ville et leurs sauvegardes.
 
 Supabase ne reçoit plus les requêtes du jeu. Sa copie existante n'est pas effacée.
 Les journaux utiles sont dans journaux. Aucun mot de passe n'y est écrit.
+
+APK : Bureau\Brawl-Ville-Android\Brawl-Ville.apk
+Mises à jour Android : PRODUIRE-NOUVELLE-VERSION.cmd dans ce dossier Android.
+Conserve le code de récupération affiché à la création du compte (pas de courriel automatique).
+Le menu Contrôle parental protège le vocal et les limites avec un code de 6 chiffres.
+Ne partage jamais cles-android : ces clés privées signent les prochaines APK.

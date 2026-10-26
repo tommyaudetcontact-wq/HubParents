@@ -19,7 +19,7 @@ function profileRecord(id){if(!authProfileAllowed(id))throw Error('Ce compte ne 
  if(!values)throw Error('Profil introuvable.');return {sheet,row,profile:BrawlCore.upgrade(decodeProfile(values[3]))};}
 
 function saveRecord(record) {record.sheet.getRange(record.row,1,1,5).setValues([[record.profile.id,sheetText(record.profile.name),record.profile.grade,encodeProfile(record.profile),new Date().toISOString()]]);SpreadsheetApp.flush();}
-function publicProfile(p){const x=BrawlCore.clone(p);delete x._challenge;delete x._lastAnswer;delete x._lastWriting;delete x._studyClock;delete x._houseClock;delete x._dictationRun;delete x._visitUse;delete x._simTimeLedger;delete x._learningCompleted;return x;}
+function publicProfile(p){const x=BrawlCore.clone(p);delete x._cityPlayClock;delete x._challenge;delete x._lastAnswer;delete x._lastWriting;delete x._studyClock;delete x._houseClock;delete x._dictationRun;delete x._visitUse;delete x._simTimeLedger;delete x._learningCompleted;return x;}
 function publicQuestion(q){const x=BrawlCore.clone(q);delete x.answer;delete x.speech;delete x.explanation;return x;}
 function doPost(e) {
   const lock=LockService.getScriptLock();
@@ -47,6 +47,8 @@ function doPost(e) {
     const lobby=handleLobbyAction(req);if(lobby)return jsonResponse(lobby);
     if(!isParent(req.parentToken))authenticate(req.player,req.token);
     const record=profileRecord(req.player),day=Utilities.formatDate(new Date(),TZ,'yyyy-MM-dd');let p=record.profile;
+    const fireDuty=typeof handleCityFire==='function'?handleCityFire(req,record,day):null;if(fireDuty)return jsonResponse(fireDuty);
+    const living=typeof handleCityLiving==='function'?handleCityLiving(req,record,day):null;if(living)return jsonResponse(living);
     if(req.action==='housePulse'){p=BrawlCore.housePulse(p,Date.now(),req.active===true);record.profile=p;saveRecord(record);return jsonResponse({ok:true,profile:publicProfile(p)});}
     if(req.action==='studyPulse'){p=BrawlCore.studyPulse(p,day,Date.now(),req.active===true,req.skill);record.profile=p;saveRecord(record);return jsonResponse({ok:true,profile:publicProfile(p)});}
     if(req.action==='writingCheck')return jsonResponse(handleWritingCheck(req,record,day));

@@ -1,0 +1,2450 @@
+// Generated locally by scripts/build-local-engine.cjs. No cloud services are used.
+import {BrawlCore} from './domain.js';
+import {asyncArray} from './runtime.js';
+/* Reconnaissance de tracés détachés par modèles vectoriels et distances symétriques.
+ * Code original. Aucun service OCR externe, aucun modèle téléchargé.
+ * Une case = un caractère. Les résultats incertains ne sont pas récompensés.
+ */
+var HandwritingRecognizer = (()=>{
+  'use strict';
+  const line=(...xy)=>{const a=[];for(let i=0;i<xy.length;i+=2)a.push([xy[i],xy[i+1]]);return a;};
+  const oval=(cx=50,cy=50,rx=30,ry=40,start=0,end=Math.PI*2)=>Array.from({length:33},(_,i)=>[cx+rx*Math.cos(start+(end-start)*i/32),cy+ry*Math.sin(start+(end-start)*i/32)]);
+  const S=(...strokes)=>strokes;
+  const glyphs={
+    A:S(line(18,90,50,10,82,90),line(31,58,69,58)),B:S(line(25,90,25,10,55,10,72,18,75,31,67,43,25,49,59,49,77,60,77,75,64,89,25,90)),
+    C:S(oval(52,50,31,40,Math.PI*.25,Math.PI*1.75)),D:S(line(25,90,25,10,47,10,66,18,78,35,80,57,74,76,58,89,25,90)),E:S(line(77,10,25,10,25,90,77,90),line(25,49,66,49)),F:S(line(25,90,25,10,77,10),line(25,49,66,49)),
+    G:S(oval(52,50,31,40,Math.PI*.25,Math.PI*1.93),line(79,56,55,56)),H:S(line(25,10,25,90),line(75,10,75,90),line(25,50,75,50)),I:S(line(50,10,50,90)),J:S(line(76,10,76,67,72,83,59,90,41,88,26,77,23,65)),K:S(line(25,10,25,90),line(77,10,25,52,79,90)),L:S(line(25,10,25,90,78,90)),
+    M:S(line(18,90,18,10,50,58,82,10,82,90)),N:S(line(22,90,22,10,78,90,78,10)),O:S(oval()),P:S(line(25,90,25,10,57,10,75,20,77,36,65,49,25,50)),Q:S(oval(),line(58,68,84,95)),R:S(line(25,90,25,10,57,10,75,20,77,36,65,49,25,50),line(51,50,80,90)),
+    S:S(line(78,21,64,11,43,10,27,18,22,32,31,45,64,56,77,68,76,80,62,90,42,90,23,80)),T:S(line(16,10,84,10),line(50,10,50,90)),U:S(line(22,10,22,65,27,82,42,90,58,90,73,82,78,65,78,10)),V:S(line(18,10,50,90,82,10)),W:S(line(12,10,30,90,50,38,70,90,88,10)),X:S(line(20,10,80,90),line(80,10,20,90)),Y:S(line(18,10,50,50,82,10),line(50,50,50,90)),Z:S(line(20,10,80,10,20,90,80,90)),
+    a:S(oval(46,62,24,28),line(70,34,70,90)),b:S(line(25,10,25,90),oval(50,62,25,28)),c:S(oval(52,62,28,28,Math.PI*.25,Math.PI*1.75)),d:S(oval(45,62,25,28),line(70,10,70,90)),e:S(line(22,61,77,61,73,45,58,34,40,35,24,47,21,65,28,82,46,90,64,87,76,78)),
+    f:S(line(64,12,53,9,43,17,39,30,39,90),line(21,40,64,40)),g:S(oval(46,57,24,25),line(70,33,70,83,65,96,51,99,33,94)),h:S(line(25,10,25,90),line(25,53,36,38,51,34,65,39,74,53,74,90)),i:S(line(50,35,50,90),line(50,14,50,15)),j:S(line(61,35,61,82,57,96,43,99,30,93),line(61,14,61,15)),
+    k:S(line(26,10,26,90),line(75,35,26,64,77,90)),l:S(line(50,10,50,90)),m:S(line(16,90,16,35),line(16,51,24,37,34,35,44,41,48,53,48,90),line(48,53,55,37,66,35,77,42,83,56,83,90)),n:S(line(25,90,25,35),line(25,53,36,38,51,34,65,39,74,53,74,90)),o:S(oval(50,62,28,28)),p:S(line(25,35,25,99),oval(50,60,25,25)),q:S(oval(46,60,25,25),line(71,35,71,99)),
+    r:S(line(27,90,27,35),line(27,55,37,39,51,34,65,38)),s:S(line(75,42,61,35,43,35,28,42,27,53,42,62,63,69,73,78,65,88,45,90,26,82)),t:S(line(43,12,43,73,47,86,59,90,72,85),line(21,38,69,38)),u:S(line(25,35,25,71,29,84,42,90,57,86,72,71,72,35,72,90)),v:S(line(21,35,50,90,79,35)),w:S(line(13,35,30,90,50,52,70,90,87,35)),x:S(line(24,35,76,90),line(76,35,24,90)),y:S(line(21,35,47,82),line(78,35,47,95,35,99)),z:S(line(25,35,76,35,24,90,77,90)),
+    '0':S(oval(50,50,26,40)),'1':S(line(32,29,50,10,50,90)),'2':S(line(22,27,30,15,47,10,65,13,77,25,75,39,61,54,23,90,80,90)),'3':S(line(25,18,43,10,63,12,76,23,73,37,57,48,42,49,62,50,78,63,77,78,64,89,43,90,24,80)),
+    '4':S(line(65,90,65,10,20,66,82,66)),'5':S(line(78,10,28,10,25,48,44,43,63,45,76,57,78,73,68,87,49,90,28,82)),'6':S(line(74,16,58,10,40,18,26,39,21,62,25,80,41,90,60,88,76,75,76,58,63,47,45,46,23,61)),
+    '7':S(line(20,10,80,10,38,90)),'8':S(oval(50,30,23,20),oval(50,70,28,22)),'9':S(oval(48,35,26,25),line(74,35,70,63,60,82,43,91,28,87))
+  };
+  const variants={I:[S(line(25,10,75,10),line(50,10,50,90),line(25,90,75,90))],a:[S(line(70,55,64,41,49,35,33,40,24,55,25,74,39,88,55,88,70,73,70,35,70,90))],l:[S(line(45,10,45,82,53,90,65,87))],'1':[S(line(50,10,50,90)),S(line(31,29,51,10,51,90),line(30,90,74,90))],'4':[S(line(29,10,20,65,82,65),line(65,10,65,90))],'7':[S(line(20,10,80,10,38,90),line(30,50,71,50))],'8':[S(line(48,10,29,17,26,31,41,45,64,57,77,72,71,86,54,92,35,86,23,73,28,58,51,45,71,30,72,17,60,10,48,10))]};
+  variants.t=[S(line(47,12,47,90),line(23,39,72,39))];variants.f=[S(line(62,10,45,10,38,23,38,90),line(20,40,68,40))];variants.r=[S(line(28,90,28,35,28,55,40,38,57,35))];(variants['9']||(variants['9']=[])).push(S(oval(48,35,26,25),line(74,11,74,91)));variants['6']=[S(oval(49,64,27,26),line(23,62,26,38,43,17,65,10))];
+  const curve=(points)=>{const out=[];for(let i=0;i<points.length-2;i+=2){const a=points[i],b=points[i+1],c=points[i+2];for(let j=0;j<=16;j++){const t=j/16;out.push([(1-t)**2*a[0]+2*(1-t)*t*b[0]+t*t*c[0],(1-t)**2*a[1]+2*(1-t)*t*b[1]+t*t*c[1]]);}}return out;};
+  variants.n=[S(line(25,90,25,35),curve([[25,57],[39,20],[61,37],[77,43],[75,90]])),S(line(23,90,23,37,23,60),curve([[23,60],[42,13],[70,43],[77,55],[77,90]]))];
+  variants.r.push(S(line(28,90,28,35),curve([[28,58],[40,28],[66,39]])));variants.r.push(S(line(28,90,28,37,28,57,41,38,60,38)));
+  variants['0']=[S(oval(50,50,29,40),line(29,77,71,23)),S(oval(50,50,34,40))];variants['9'].push(S(oval(47,34,25,24),line(72,34,72,90)));variants['9'].push(S(curve([[72,36],[69,5],[43,10],[17,16],[22,39],[28,62],[70,51],[74,39],[72,25]]),line(72,25,67,71,46,92)));
+  const accents={é:['e','acute'],è:['e','grave'],ê:['e','hat'],ë:['e','dots'],à:['a','grave'],â:['a','hat'],ä:['a','dots'],î:['i','hat'],ï:['i','dots'],ô:['o','hat'],ö:['o','dots'],ù:['u','grave'],û:['u','hat'],ü:['u','dots'],ç:['c','cedilla']};
+  for(const [letter,[base,accent]] of Object.entries(accents)){const additions={acute:S(line(44,18,59,5)),grave:S(line(42,5,58,18)),hat:S(line(34,18,50,4,66,18)),dots:S(line(38,12,38,13),line(62,12,62,13)),cedilla:S(line(51,90,56,96,48,99,41,97))}[accent];glyphs[letter]=glyphs[base].map(s=>s.map(p=>p.slice())).concat(additions);glyphs[letter.toUpperCase()]=glyphs[base.toUpperCase()].map(s=>s.map(([x,y])=>[x,accent==='cedilla'?y:18+y*.8])).concat(additions);}
+  const N=64,cache=new Map();
+  const point=p=>[Number(Array.isArray(p)?p[0]:p.x),Number(Array.isArray(p)?p[1]:p.y)];
+  function clean(strokes){if(!Array.isArray(strokes)||strokes.length>40)throw Error('Trop de traits dans cette case.');let count=0;return strokes.map(s=>{if(!Array.isArray(s))throw Error('Tracé invalide.');count+=s.length;if(count>5000)throw Error('Tracé trop long.');return s.map(point).filter(([x,y])=>{if(!Number.isFinite(x)||!Number.isFinite(y)||x<0||y<0||x>100||y>100)throw Error('Point hors de la case.');return true;});}).filter(s=>s.length);}
+  function length(strokes){let total=0;for(const s of strokes)for(let i=1;i<s.length;i++)total+=Math.hypot(s[i][0]-s[i-1][0],s[i][1]-s[i-1][1]);return total;}
+  function pack(strokes){const pts=strokes.flat();if(!pts.length)return null;const xs=pts.map(p=>p[0]),ys=pts.map(p=>p[1]),minX=Math.min(...xs),maxX=Math.max(...xs),minY=Math.min(...ys),maxY=Math.max(...ys),w=maxX-minX,h=maxY-minY,scale=52/Math.max(w,h,1),scaleX=w/Math.max(h,1)<.3?scale:52/Math.max(w,1),scaleY=52/Math.max(h,1),cx=(minX+maxX)/2,cy=(minY+maxY)/2,normalized=strokes.map(s=>s.map(([x,y])=>[(x-cx)*scaleX+31.5,(y-cy)*scaleY+31.5]));const pixels=new Set(),parts=[];for(const s of normalized){const part=new Set();for(let i=0;i<s.length;i++){const a=s[i?i-1:0],b=s[i],steps=Math.max(1,Math.ceil(Math.hypot(a[0]-b[0],a[1]-b[1])*2));for(let k=0;k<=steps;k++){const x=Math.max(0,Math.min(N-1,Math.round(a[0]+(b[0]-a[0])*k/steps))),y=Math.max(0,Math.min(N-1,Math.round(a[1]+(b[1]-a[1])*k/steps))),p=y*N+x;pixels.add(p);part.add(p);}}parts.push([...part]);}const dt=new Float32Array(N*N);dt.fill(1000);pixels.forEach(p=>dt[p]=0);for(let y=0;y<N;y++)for(let x=0;x<N;x++){const i=y*N+x;let v=dt[i];if(x)v=Math.min(v,dt[i-1]+1);if(y)v=Math.min(v,dt[i-N]+1);if(x&&y)v=Math.min(v,dt[i-N-1]+1.414);if(x<N-1&&y)v=Math.min(v,dt[i-N+1]+1.414);dt[i]=v;}for(let y=N-1;y>=0;y--)for(let x=N-1;x>=0;x--){const i=y*N+x;let v=dt[i];if(x<N-1)v=Math.min(v,dt[i+1]+1);if(y<N-1)v=Math.min(v,dt[i+N]+1);if(x<N-1&&y<N-1)v=Math.min(v,dt[i+N+1]+1.414);if(x&&y<N-1)v=Math.min(v,dt[i+N-1]+1.414);dt[i]=v;}return {pixels:[...pixels],parts,dt,w,h,path:length(normalized),rawPath:length(strokes),minX,minY,maxX,maxY};}
+  function models(c){if(!cache.has(c)){const source=[glyphs[c],...(variants[c]||[])].filter(Boolean),forms=[];for(const strokes of source){forms.push(pack(strokes));for(const shear of [-.16,.16])forms.push(pack(strokes.map(part=>part.map(([x,y])=>[x+shear*(y-50),y]))));}cache.set(c,forms);}return cache.get(c);}
+
+  function compare(input,model){const avg=(pixels,dt)=>pixels.reduce((s,p)=>s+Math.min(12,dt[p]),0)/pixels.length,coverage=model.pixels.filter(p=>input.dt[p]<=3).length/model.pixels.length,precision=input.pixels.filter(p=>model.dt[p]<=3).length/input.pixels.length,distance=(avg(input.pixels,model.dt)+avg(model.pixels,input.dt))/2,minPart=Math.min(...model.parts.map(part=>part.filter(p=>input.dt[p]<=3).length/part.length)),ratio=input.path/Math.max(1,model.path);return {distance,coverage,precision,minPart,ratio,score:Math.max(0,Math.round(100-distance*12-(1-coverage)*20-(1-precision)*20))};}
+  const sharedCase=new Set('cosvwxz');
+  function alphabet(expected){if(/^[0-9]$/.test(expected))return '0123456789'.split('');return Array.from('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ');}
+
+  function evaluateBasic(strokes,expected){expected=String(expected).normalize('NFC');if(!glyphs[expected])return {accepted:false,recognized:'?',score:0,reason:'unsupported',message:'Ce caractère n’a pas encore de modèle. Choisis une lettre détachée, un chiffre ou un accent français proposé.'};const input=pack(clean(strokes));if(!input||input.rawPath<18||Math.max(input.w,input.h)<17)return {accepted:false,recognized:'',score:0,reason:'empty',message:'Écris le caractère en entier dans cette case.'};const ranked=alphabet(expected).map(c=>{const best=models(c).map(m=>compare(input,m)).sort((a,b)=>b.score-a.score)[0];return {character:c,...best};}).sort((a,b)=>b.score-a.score);const best=ranked[0],target=ranked.find(r=>r.character===expected),sameShape=best.character.toLowerCase()===expected.toLowerCase()&&sharedCase.has(expected.toLowerCase()),match=best.character===expected||sameShape||target.score>=best.score-2,good=target.coverage>=.78&&target.precision>=.78&&target.minPart>=.48&&target.distance<=2.55&&target.ratio<=2.65&&target.ratio>=.52,confident=target.score>=68;let reason='ok',message='Le caractère est reconnu et sa forme est complète.';if(!match){reason=best.character.toLowerCase()===expected.toLowerCase()?'case':'different';message=best.score>=65?'Cela ressemble plutôt à « '+best.character+' ». Regarde les différences avec « '+expected+' ».':'La forme reste difficile à reconnaître. Reprends le modèle lentement.';}else if(target.ratio>2.65||target.precision<.78){reason='extra';message='Il y a des traits en trop. Efface cette case et garde seulement la forme du caractère.';}else if(target.minPart<.48||target.coverage<.78||target.ratio<.52){reason='incomplete';message='Il manque une partie du caractère : vérifie les barres, les boucles, le point ou l’accent.';}else if(!confident||!good){reason='uncertain';message='Le caractère est presque là. Regarde sa forme et recommence plus tranquillement.';}return {accepted:match&&good&&confident,recognized:best.score>=55?best.character:'?',score:target.score,reason,message,caseMismatch:reason==='case'&&best.score>=72&&best.score-target.score>=8,caseAmbiguous:sameShape,coverage:target.coverage,precision:target.precision};}
+  function accentEvidence(strokes,expected){
+    const info=accents[expected.toLowerCase()];if(!info)return null;const [letter,kind]=info,all=clean(strokes),base=letter==='i'?(expected===expected.toUpperCase()?'I':'l'):expected.normalize('NFD')[0];if(!all.length)return {valid:false,body:[],base};
+    const box=part=>{const xs=part.map(p=>p[0]),ys=part.map(p=>p[1]);return {l:Math.min(...xs),r:Math.max(...xs),t:Math.min(...ys),b:Math.max(...ys),w:Math.max(...xs)-Math.min(...xs),h:Math.max(...ys)-Math.min(...ys)};};const anchor=all.map(box).sort((a,b)=>b.h-a.h||b.w-a.w)[0],marks=[],body=[];
+    for(const part of all){const b=box(part),located=kind==='cedilla'?b.t>=anchor.b-Math.max(3,anchor.h*.10):b.b<=anchor.t+Math.max(5,anchor.h*.16),small=b.w<=Math.max(36,anchor.w*.78)&&b.h<=Math.max(20,anchor.h*.60),markShape=kind==='dots'?length([part])<12:kind==='cedilla'?b.h>=2:kind==='hat'?b.h>=1.5||letter==='i'&&length([part])<4:b.w>=3&&b.h>=1.2;
+      (located&&small&&markShape?marks:body).push(part);}
+    const flat=marks.flat();let valid=false;if(flat.length){const b=box(flat);if(kind==='dots')valid=marks.length>=2&&b.w>=5;else if(kind==='hat'){const sorted=flat.slice().sort((a,b)=>a[0]-b[0]),peak=sorted.reduce((a,b)=>a[1]<b[1]?a:b),left=sorted[0],right=sorted.at(-1);valid=b.w>=6&&peak[0]>b.l+b.w*.15&&peak[0]<b.r-b.w*.15&&peak[1]<Math.min(left[1],right[1])-1.5;}else if(kind==='cedilla')valid=b.w>=3&&b.h>=3;else valid=marks.some(part=>{const b=box(part),mx=part.reduce((n,p)=>n+p[0],0)/part.length,my=part.reduce((n,p)=>n+p[1],0)/part.length,cov=part.reduce((n,p)=>n+(p[0]-mx)*(p[1]-my),0);return b.w>=3&&b.h>=1.2&&(kind==='acute'?cov<0:cov>0);});}
+    return {valid,body,base,kind,marks};
+  }
+
+  function evaluate(strokes,expected){
+    expected=String(expected).normalize('NFC');const evidence=accentEvidence(strokes,expected);if(!evidence)return evaluateBasic(strokes,expected);
+    const base=evaluateBasic(evidence.body,evidence.base);return {...base,accepted:base.accepted&&evidence.valid,accentValid:evidence.valid,recognized:base.accepted&&evidence.valid?expected:base.recognized,caseMismatch:base.caseMismatch,reason:!evidence.valid?'accent':base.reason,message:!evidence.valid?'La lettre est là ; vérifie la présence et le sens de son accent.':base.accepted?'La lettre et son accent sont reconnus.':base.message};
+  }
+  function evaluateWord(segments,text){const chars=Array.from(String(text).normalize('NFC'));if(!chars.length||chars.length>16||!Array.isArray(segments)||segments.length!==chars.length)throw Error('Il faut une case par caractère (16 maximum).');const results=chars.map((c,i)=>evaluate(segments[i],c));return {accepted:results.every(r=>r.accepted),recognized:results.map(r=>r.recognized||'□').join(''),score:Math.round(results.reduce((s,r)=>s+r.score,0)/results.length),results};}
+  function evaluateOCR(segments,text,ocr){
+    const result=evaluateWord(segments,text);
+    if(!Array.isArray(ocr)||ocr.length!==text.length)throw Error('Lecture incomplète.');
+    result.results=result.results.map((g,i)=>{
+      const read=ocr[i];if(!read||typeof read.text!=='string'||read.text.length>8||!Number.isFinite(read.confidence)||read.confidence<0||read.confidence>100)throw Error('Lecture invalide.');
+      const recognized=read.text.trim().normalize('NFC'),exact=recognized===text[i]||sharedCase.has(text[i].normalize('NFD')[0].toLowerCase())&&recognized.toLowerCase()===text[i].toLowerCase()||(g.accentValid===true&&recognized.normalize('NFD')[0]===text[i].normalize('NFD')[0]);
+      const accepted=g.accepted||(g.reason!=='empty'&&g.accentValid!==false&&!g.caseMismatch&&read.confidence>=35&&exact);
+      return {...g,accepted,recognized:g.accepted?text[i]:recognized||'?',score:g.accepted?g.score:Math.round(read.confidence),reason:accepted?'ok':g.reason==='empty'?'empty':'ocr',message:accepted?(g.accepted?'La forme de ton caractère est reconnue.':'Le lecteur a reconnu ton caractère.'):g.reason==='empty'?g.message:recognized?'Le lecteur a vu « '+recognized+' ». Essaie à nouveau « '+text[i]+' ».':'Je n’ai pas bien lu. Écris bien gros dans la case.'};
+    });
+    result.accepted=result.results.every(r=>r.accepted);result.recognized=result.results.map(r=>r.recognized).join('');result.score=Math.round(result.results.reduce((n,r)=>n+r.score,0)/text.length);return result;
+  }
+  function template(c){return (glyphs[c]||[]).map(s=>s.map(p=>p.slice()));}
+  function compact(strokes){return clean(strokes).map(s=>{if(s.length<=30)return s.map(([x,y])=>[Math.round(x*10)/10,Math.round(y*10)/10]);const out=[];for(let i=0;i<30;i++){const p=s[Math.round(i*(s.length-1)/29)];out.push([Math.round(p[0]*10)/10,Math.round(p[1]*10)/10]);}return out;});}
+  return {evaluate,evaluateWord,evaluateOCR,accentEvidence,template,compact,supported:Object.keys(glyphs)};
+})();
+if(typeof module!=='undefined')module.exports=HandwritingRecognizer;
+
+
+
+export function createEngine(services) {
+const {Utilities,PropertiesService,SpreadsheetApp,CacheService,LockService,ContentService}=services;
+const sheetText=value=>value;
+const encodeProfile=JSON.stringify;
+const TZ = 'America/Toronto';
+async function jsonResponse(value) {
+  return ContentService.createTextOutput(JSON.stringify(value)).setMimeType(ContentService.MimeType.JSON);
+}
+async function doGet() {
+  return await jsonResponse({
+    ok: true,
+    app: 'Brawl Académie',
+    version: 16,
+    batches: true,
+    visits: true,
+    notifications: true,
+    accounts: true,
+    duels: true,
+    childLogin: true,
+    shortCodes: true,
+    installed: !!(await properties()).getProperty('DB_ID'),
+    message: 'Utiliser POST pour les requêtes authentifiées.'
+  });
+}
+async function digestKey(token) {
+  return Utilities.base64Encode(Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256, String(token)));
+}
+async function properties() {
+  return PropertiesService.getScriptProperties();
+}
+async function isParent(token) {
+  if (requestParent) return true;
+  const h = (await properties()).getProperty('PARENT_HASH');
+  return !!h && typeof token === 'string' && await digestKey(token) === h;
+}
+async function authenticate(id, token) {
+  const session = await authSession(token, 'child');
+  if (session && session.values[2] === id && session.values[3] === await authFamilyOf(id)) return;
+  const h = (await properties()).getProperty('PLAYER_' + id);
+  if (!h || typeof token !== 'string' || await digestKey(token) !== h) throw Error('Ta connexion enfant a expiré. Demande un nouveau code au parent.');
+}
+let requestDB = null;
+async function activeDB() {
+  if (requestDB) return requestDB;
+  const id = (await properties()).getProperty('DB_ID');
+  if (!id) throw Error('Exécute initializeBrawl dans Apps Script.');
+  return requestDB = SpreadsheetApp.openById(id);
+}
+async function profileRecord(id) {
+  if (!await authProfileAllowed(id)) throw Error('Ce compte ne fait pas partie de ta famille.');
+  const sheet = (await activeDB()).getSheetByName('Profils'), cache = CacheService.getScriptCache(), key = 'profile-row:' + await digestKey(id);
+  let row = Number(await cache.get(key) || 0), values = null;
+  if (row > 1 && row <= await sheet.getLastRow()) {
+    values = (await sheet.getRange(row, 1, 1, 5).getValues())[0];
+    if (String(values[0]) !== id) values = null;
+  }
+  if (!values) {
+    const count = await sheet.getLastRow();
+    if (count > 1) {
+      const ids = await sheet.getRange(2, 1, count - 1, 1).getValues(), index = ids.findIndex(r => String(r[0]) === id);
+      if (index >= 0) {
+        row = index + 2;
+        values = (await sheet.getRange(row, 1, 1, 5).getValues())[0];
+        await cache.put(key, String(row), 1800);
+      }
+    }
+  }
+  if (!values) throw Error('Profil introuvable.');
+  return {
+    sheet,
+    row,
+    profile: BrawlCore.upgrade(await decodeProfile(values[3]))
+  };
+}
+async function saveRecord(record) {
+  await record.sheet.getRange(record.row, 1, 1, 5).setValues([[record.profile.id, sheetText(record.profile.name), record.profile.grade, encodeProfile(record.profile), new Date().toISOString()]]);
+  SpreadsheetApp.flush();
+}
+async function publicProfile(p) {
+  const x = BrawlCore.clone(p);
+  delete x._cityPlayClock;
+  delete x._challenge;
+  delete x._lastAnswer;
+  delete x._lastWriting;
+  delete x._studyClock;
+  delete x._houseClock;
+  delete x._dictationRun;
+  delete x._visitUse;
+  delete x._simTimeLedger;
+  delete x._learningCompleted;
+  return x;
+}
+async function publicQuestion(q) {
+  const x = BrawlCore.clone(q);
+  delete x.answer;
+  delete x.speech;
+  delete x.explanation;
+  return x;
+}
+async function doPost(e) {
+  const lock = LockService.getScriptLock();
+  try {
+    if (!e || !e.postData || e.postData.contents.length > 300000) throw Error('Requête invalide.');
+    requestFamily = null;
+    requestParent = null;
+    requestFamilyMap = null;
+    requestAuthRows = new Map();
+    requestDB = null;
+    const req = JSON.parse(e.postData.contents);
+    if (typeof req.player !== 'string' || req.player.length > 100) throw Error('Profil invalide.');
+    const cache = CacheService.getScriptCache(), rateKey = 'rate:' + req.player + ':' + Math.floor(Date.now() / 60000);
+    const rate = Number(await cache.get(rateKey) || 0);
+    if (rate >= 180) throw Error('Trop de requêtes. Réessaie dans une minute.');
+    await cache.put(rateKey, String(rate + 1), 60);
+    if (req.action === 'duelSync' && !req.answer && (req.candidates === undefined || Array.isArray(req.candidates) && req.candidates.length === 0)) {
+      await authScope(req);
+      return await jsonResponse(await handleDuelAction(req));
+    }
+    lock.waitLock(15000);
+    const auth = await handleAuthAction(req);
+    if (auth) return await jsonResponse(auth);
+    await authScope(req);
+    const city = typeof handleCityAction === 'function' ? await handleCityAction(req) : null;
+    if (city) return await jsonResponse(city);
+    const wordLists = typeof handleWordLists === 'function' ? await handleWordLists(req) : null;
+    if (wordLists) return await jsonResponse(wordLists);
+    if (req.action === 'statsDirectory') return await jsonResponse(await statsDirectory(req));
+    if (req.action === 'parentCheck') {
+      if (!await isParent(req.parentToken)) throw Error('Clé parent incorrecte.');
+      return await jsonResponse({
+        ok: true
+      });
+    }
+    const family = await handleFamilyAction(req);
+    if (family) return await jsonResponse(family);
+    const batch = await handleBatchAction(req);
+    if (batch) return await jsonResponse(batch);
+    const visit = await handleVisitBatch(req);
+    if (visit) return await jsonResponse(visit);
+    const social = await handleSocialAction(req);
+    if (social) return await jsonResponse(social);
+    const duel = await handleDuelAction(req);
+    if (duel) return await jsonResponse(duel);
+    const lobby = await handleLobbyAction(req);
+    if (lobby) return await jsonResponse(lobby);
+    if (!await isParent(req.parentToken)) await authenticate(req.player, req.token);
+    const record = await profileRecord(req.player), day = Utilities.formatDate(new Date(), TZ, 'yyyy-MM-dd');
+    let p = record.profile;
+    const fireDuty = typeof handleCityFire === 'function' ? await handleCityFire(req, record, day) : null;
+    if (fireDuty) return await jsonResponse(fireDuty);
+    const living = typeof handleCityLiving === 'function' ? await handleCityLiving(req, record, day) : null;
+    if (living) return await jsonResponse(living);
+    if (req.action === 'housePulse') {
+      p = BrawlCore.housePulse(p, Date.now(), req.active === true);
+      record.profile = p;
+      await saveRecord(record);
+      return await jsonResponse({
+        ok: true,
+        profile: await publicProfile(p)
+      });
+    }
+    if (req.action === 'studyPulse') {
+      p = BrawlCore.studyPulse(p, day, Date.now(), req.active === true, req.skill);
+      record.profile = p;
+      await saveRecord(record);
+      return await jsonResponse({
+        ok: true,
+        profile: await publicProfile(p)
+      });
+    }
+    if (req.action === 'writingCheck') return await jsonResponse(await handleWritingCheck(req, record, day));
+    const tradeResult = await handleTradeAction(req, record);
+    if (tradeResult) return await jsonResponse(tradeResult);
+    if (req.action === 'state') return await jsonResponse({
+      ok: true,
+      profile: await publicProfile(p)
+    });
+    if (req.action === 'parentCheck') {
+      if (!await isParent(req.parentToken)) throw Error('Clé parent incorrecte.');
+      return await jsonResponse({
+        ok: true
+      });
+    }
+    if (req.action === 'challenge') {
+      if (!BrawlCore.studyEnabled(p, req.skill)) throw Error('Cette activité n’est pas dans ton programme.');
+      if (!BrawlCore.skills.some(s => s.id === req.skill)) throw Error('Activité inconnue.');
+      let dictation = null;
+      if (req.skill === 'dictation') {
+        const prepared = BrawlCore.prepareDictation(p, day);
+        p = prepared.profile;
+        dictation = prepared.run;
+        if (dictation.index >= dictation.words.length) {
+          record.profile = p;
+          await saveRecord(record);
+          return await jsonResponse({
+            ok: true,
+            finished: true,
+            total: dictation.words.length,
+            missed: dictation.missed,
+            profile: await publicProfile(p)
+          });
+        }
+      }
+      const q = BrawlCore.question(req.skill, p.grade, undefined, dictation ? [dictation.words[dictation.index]] : undefined, ['digits', 'numbers', 'large'].includes(req.numberMode) ? req.numberMode : 'digits', req.mathOptions);
+      if (dictation) {
+        q.dictationIndex = dictation.index;
+        q.dictationTotal = dictation.words.length;
+      }
+      q.id = Utilities.getUuid();
+      q.attempts = 0;
+      q.created = Date.now();
+      p._challenge = q;
+      record.profile = p;
+      await saveRecord(record);
+      return await jsonResponse({
+        ok: true,
+        question: await publicQuestion(q)
+      });
+    }
+    if (req.action === 'answer') {
+      if (typeof req.requestId !== 'string' || req.requestId.length > 100 || String(req.answer).length > 300) throw Error('Réponse invalide.');
+      if (p._lastAnswer && p._lastAnswer.id === req.requestId) return await jsonResponse({
+        ...p._lastAnswer.result,
+        profile: await publicProfile(p)
+      });
+      const q = p._challenge;
+      if (!q || q.id !== req.challengeId || Date.now() - q.created > 3600000) throw Error('Cette question a expiré. Demande la suivante.');
+      if (q.done) throw Error('Question déjà terminée.');
+      const correct = BrawlCore.correct(q, req.answer), first = q.attempts === 0;
+      q.attempts++;
+      if (correct) {
+        q.done = true;
+        p = BrawlCore.apply(p, {
+          type: 'study',
+          skill: q.skill,
+          id: q.id,
+          first
+        }, day, false);
+        if (q.skill === 'dictation') p = BrawlCore.advanceDictation(p, day, q.dictationIndex);
+      }
+      const result = {
+        ok: true,
+        correct,
+        explanation: correct || q.attempts >= 2 ? q.explanation : ''
+      };
+      p._lastAnswer = {
+        id: req.requestId,
+        result
+      };
+      record.profile = p;
+      await saveRecord(record);
+      return await jsonResponse({
+        ...result,
+        profile: await publicProfile(p)
+      });
+    }
+    if (req.action === 'speak' || req.action === 'copyWord' || req.action === 'reveal') {
+      const q = p._challenge;
+      if (!q || q.id !== req.challengeId || Date.now() - q.created > 3600000) throw Error('Cette question a expiré.');
+      if (req.action === 'speak' || req.action === 'copyWord') {
+        if (req.action === 'copyWord') {
+          q.attempts = Math.max(1, q.attempts);
+          record.profile = p;
+          await saveRecord(record);
+        }
+        if (!['dictation', 'number-dictation'].includes(q.skill)) throw Error('Ce mode ne propose pas de dictée.');
+        return await jsonResponse({
+          ok: true,
+          word: q.answer
+        });
+      }
+      q.done = true;
+      if (q.skill === 'dictation') p = BrawlCore.advanceDictation(p, day, q.dictationIndex, true);
+      record.profile = p;
+      await saveRecord(record);
+      return await jsonResponse({
+        ok: true,
+        explanation: q.explanation
+      });
+    }
+    if (req.action === 'event') {
+      const ev = req.event;
+      if (['carUse', 'cityWorkReward'].includes(ev?.type)) throw Error('Utilise la séance de conduite.');
+      if (!ev || typeof ev.id !== 'string') throw Error('Action invalide.');
+      if (ev.type === 'study') throw Error('Les récompenses de pratique sont calculées par le serveur.');
+      const privileged = ['reviewTask', 'addTask', 'dictationList'].includes(ev.type);
+      if (privileged && !await isParent(req.parentToken)) throw Error('Clé parent nécessaire.');
+      if (ev.type === 'writing') throw Error('La récompense d’écriture exige la reconnaissance du tracé par le serveur.');
+      if (ev.type === 'room' && !p.seen.includes(ev.id) && ev.revision !== p.revision) throw Error('Le plan a changé sur un autre appareil. Actualise le profil avant de continuer.');
+      const replay = p.seen.includes(ev.id);
+      p = BrawlCore.apply(p, ev, day, await isParent(req.parentToken));
+      record.profile = p;
+      await saveRecord(record);
+      if (!replay) {
+        try {
+          await (await activeDB()).getSheetByName('Journal').appendRow([new Date().toISOString(), p.id, sheetText(ev.id), ev.type, p.coins, p.xp, p.revision]);
+        } catch (auditError) {
+          console.error('Journal indisponible : ' + auditError.message);
+        }
+      }
+      return await jsonResponse({
+        ok: true,
+        profile: await publicProfile(p)
+      });
+    }
+    throw Error('Action inconnue.');
+  } catch (err) {
+    return await jsonResponse({
+      ok: false,
+      error: err.message || String(err)
+    });
+  } finally {
+    requestFamily = null;
+    requestParent = null;
+    requestFamilyMap = null;
+    requestAuthRows = new Map();
+    requestDB = null;
+    if (lock.hasLock()) lock.releaseLock();
+  }
+}
+async function houseFingerprint(p) {
+  return await digestKey(JSON.stringify([p.room, p.household, p.sim, p.needs, p.appearance, p.furnitureColors, p.furnitureMaterials, p.supplies]));
+}
+async function handleBatchAction(req) {
+  if (!['learningStart', 'learningFinish', 'houseStart', 'houseBatch'].includes(req.action)) return null;
+  if (requestParent) throw Error('Connecte ton profil enfant.');
+  const record = await profileRecord(req.player), p = record.profile, now = Date.now(), cache = CacheService.getScriptCache(), day = Utilities.formatDate(new Date(), TZ, 'yyyy-MM-dd');
+  if (req.action === 'houseStart' || req.action === 'learningStart') {
+    const id = Utilities.getUuid(), house = req.action === 'houseStart', grant = {
+      player: p.id,
+      created: now,
+      revision: p.revision,
+      skill: house ? 'house' : req.skill,
+      questions: []
+    };
+    if (house) grant.houseStamp = await houseFingerprint(p);
+    if (!house) {
+      if (req.skill !== 'writing' && !BrawlCore.skills.some(s => s.id === req.skill) || !BrawlCore.studyEnabled(p, req.skill)) throw Error('Activité indisponible.');
+      if (req.skill !== 'writing') {
+        let words = req.skill === 'dictation' ? p.dictation?.[BrawlCore.weekOf(day)] || [] : null;
+        if (words && !words.length) throw Error('Ton parent doit ajouter les mots de la semaine.');
+        if (words) {
+          const prepared = BrawlCore.prepareDictation(p, day);
+          grant.dictationOffset = prepared.run.index;
+          grant.dictationWords = prepared.run.words;
+          grant.missed = prepared.run.missed;
+          words = words.slice(prepared.run.index);
+        }
+        grant.questions = Array.from({
+          length: words ? words.length : 5
+        }, (_, i) => {
+          const q = BrawlCore.question(req.skill, p.grade, undefined, words ? [words[i]] : undefined, req.numberMode, req.mathOptions);
+          q.id = id + ':' + i;
+          return q;
+        });
+      }
+    }
+    await cache.put('batch:' + id, JSON.stringify(grant), 7200);
+    return {
+      ok: true,
+      sessionId: id,
+      questions: grant.questions,
+      offset: grant.dictationOffset || 0,
+      total: grant.dictationWords?.length || grant.questions.length,
+      missed: grant.missed || [],
+      created: now,
+      revision: p.revision
+    };
+  }
+  if (typeof req.sessionId !== 'string' || typeof req.requestId !== 'string' || req.requestId.length > 80) throw Error('Séance invalide.');
+  if (p.seen.includes('batch:' + req.requestId)) return {
+    ok: true,
+    profile: await publicProfile(p),
+    replay: true
+  };
+  const grant = JSON.parse(await cache.get('batch:' + req.sessionId) || 'null');
+  if (!grant || grant.player !== p.id || now - grant.created > 7200000) throw Error('Séance expirée. Tes résultats locaux sont conservés.');
+  let next = p;
+  if (req.action === 'houseBatch') {
+    if (grant.skill !== 'house' || !Array.isArray(req.events) || req.events.length > 220) throw Error('Session maison invalide.');
+    if (!Number.isInteger(req.revision) || req.revision < grant.revision || req.revision > p.revision || req.revision !== p.revision && grant.houseStamp !== await houseFingerprint(p)) throw Error('Le compte a changé sur un autre appareil. Ton brouillon local est conservé.');
+    const allowed = ['roomTerrain', 'houseTranslate', 'roomDimensions', 'room', 'houseControl', 'houseMove', 'houseOrder', 'houseCare', 'simOrder', 'simTick', 'simMeet', 'simMoveIn', 'simCancel', 'simLight', 'furnitureFinish', 'appearance'];
+    let seconds = 0;
+    for (const e of req.events) {
+      if (!allowed.includes(e.type) || e.type === 'furnitureFinish' && e.finish?.mode === 'palette') throw Error('Cette action exige une confirmation séparée.');
+      if (e.type === 'simTick') {
+        if (!Number.isFinite(e.seconds) || e.seconds < 0 || e.seconds > 60) throw Error('Durée invalide.');
+        seconds += e.seconds;
+      }
+      next = BrawlCore.apply(next, e, day, false);
+    }
+    if (seconds + (p._simTimeLedger?.[req.sessionId] || 0) > (now - grant.created) / 1000 + 3) throw Error('Le temps de simulation dépasse la séance réelle.');
+    next._simTimeLedger = {
+      ...p._simTimeLedger,
+      [req.sessionId]: (p._simTimeLedger?.[req.sessionId] || 0) + seconds
+    };
+  } else {
+    if (p._learningCompleted?.includes(req.sessionId)) return {
+      ok: true,
+      profile: await publicProfile(p),
+      replay: true
+    };
+    if (!BrawlCore.studyEnabled(p, grant.skill)) throw Error('Ton parent a désactivé cette activité.');
+    const entries = req.entries;
+    if (!Array.isArray(entries) || entries.length > (grant.skill === 'writing' ? 10 : grant.questions.length)) throw Error('Résultats invalides.');
+    if (grant.skill === 'writing') for (let i = 0; i < entries.length; i++) {
+      const entry = entries[i];
+      if (typeof entry.target !== 'string' || entry.target.length > 16) throw Error('Écriture invalide.');
+      const result = HandwritingRecognizer.evaluateOCR(entry.segments, entry.target, entry.ocr);
+      if (result.accepted) next = BrawlCore.apply(next, {
+        type: 'writing',
+        id: req.sessionId + ':' + i,
+        symbol: entry.target
+      }, day, false);
+    } else for (let i = 0; i < entries.length; i++) {
+      const q = grant.questions[i], entry = entries[i];
+      const dictation = grant.skill === 'dictation' && JSON.stringify(next.dictation?.[BrawlCore.weekOf(day)] || []) === JSON.stringify(grant.dictationWords), index = (grant.dictationOffset || 0) + i;
+      if (dictation) {
+        const prepared = BrawlCore.prepareDictation(next, day);
+        next = prepared.profile;
+        if (prepared.run.index > index) continue;
+      }
+      if (!Array.isArray(entry.answers) || entry.answers.length > 10 || entry.answers.some(a => typeof a !== 'string' || a.length > 300)) throw Error('Réponses invalides.');
+      const success = entry.answers.findIndex(a => BrawlCore.correct(q, a));
+      if (success >= 0) next = BrawlCore.apply(next, {
+        type: 'study',
+        id: q.id,
+        skill: q.skill,
+        first: success === 0 && !entry.copied
+      }, day, false);
+      if (dictation) {
+        if (success >= 0 || entry.skipped) next = BrawlCore.advanceDictation(next, day, index, success < 0); else break;
+      }
+    }
+    const seconds = Number(req.seconds || 0);
+    if (!Number.isFinite(seconds) || seconds < 0 || seconds > 3600 || seconds > (now - grant.created) / 1000 + 3) throw Error('Durée de pratique invalide.');
+    let cursor = now - seconds * 1000;
+    next._studyClock = {
+      now: cursor,
+      day: day,
+      active: true
+    };
+    for (let left = seconds; left > 0; ) {
+      const step = Math.min(20, left);
+      cursor += step * 1000;
+      next = BrawlCore.studyPulse(next, day, cursor, true, grant.skill);
+      left -= step;
+    }
+    next._learningCompleted = (p._learningCompleted || []).concat(req.sessionId).slice(-100);
+  }
+  next.seen.push('batch:' + req.requestId);
+  next.seen = next.seen.slice(-500);
+  record.profile = next;
+  await saveRecord(record);
+  if (req.action === 'houseBatch') {
+    grant.houseStamp = await houseFingerprint(next);
+    await cache.put('batch:' + req.sessionId, JSON.stringify(grant), Math.max(1, Math.floor((7200000 - (now - grant.created)) / 1000)));
+  }
+  return {
+    ok: true,
+    profile: await publicProfile(next)
+  };
+}
+let requestFamily = null, requestParent = null, requestFamilyMap = null, requestAuthRows = new Map();
+const AUTH_SCHEMA = [['AccesEnfants', ['enfant_id', 'preuve_hachee', 'code_hache', 'modifie_iso']], ['Parents', ['id', 'courriel', 'nom', 'sel', 'preuve_hachee', 'recuperation_hachee', 'cree_iso']], ['Familles', ['id', 'nom', 'cree_iso']], ['ParentsFamilles', ['parent_id', 'famille_id']], ['EnfantsFamilles', ['enfant_id', 'famille_id']], ['Sessions', ['jeton_hache', 'type', 'compte_id', 'famille_id', 'expire_ms']], ['InvitationsParents', ['code_hache', 'famille_id', 'courriel', 'expire_ms', 'statut', 'cree_par']], ['ConnexionsEnfants', ['code_hache', 'enfant_id', 'famille_id', 'expire_ms', 'statut']]];
+async function authInstall() {
+  if ((await properties()).getProperty('AUTH_SCHEMA_VERSION') === '2' && (await properties()).getProperty('AUTH_PEPPER')) return;
+  const db = await activeDB();
+  await asyncArray("forEach", AUTH_SCHEMA, async ([name, headers]) => {
+    const s = db.getSheetByName(name);
+    if (s && await s.getLastRow()) {
+      const actual = (await s.getRange(1, 1, 1, headers.length).getValues())[0];
+      if (headers.some((h, i) => actual[i] !== h)) throw Error('L’onglet ' + name + ' a des colonnes incompatibles. Aucune donnée n’a été effacée.');
+    }
+  });
+  await asyncArray("forEach", AUTH_SCHEMA, async ([name, headers]) => {
+    let s = db.getSheetByName(name);
+    if (!s) {
+      s = await db.insertSheet(name);
+      await s.appendRow(headers);
+      s.setFrozenRows(1);
+    } else if (!await s.getLastRow()) await s.appendRow(headers);
+  });
+  if (!(await properties()).getProperty('AUTH_PEPPER')) await (await properties()).setProperty('AUTH_PEPPER', await authSecret());
+  await (await properties()).setProperty('AUTH_SCHEMA_VERSION', '2');
+}
+async function authSheet(name) {
+  return (await activeDB()).getSheetByName(name);
+}
+async function authRows(name) {
+  const s = await authSheet(name);
+  if (!s) return [];
+  const length = await s.getLastRow(), cached = await requestAuthRows.get(name);
+  if (cached?.length === length) return cached.rows;
+  const rows = (await s.getDataRange().getValues()).slice(1).map((values, i) => ({
+    values,
+    row: i + 2
+  }));
+  requestAuthRows.set(name, {
+    length,
+    rows
+  });
+  return rows;
+}
+async function authSecret() {
+  return Utilities.getUuid().replace(/-/g, '') + Utilities.getUuid().replace(/-/g, '');
+}
+async function authHash(value) {
+  return Utilities.base64Encode(Utilities.computeHmacSha256Signature(String(value), (await properties()).getProperty('AUTH_PEPPER')));
+}
+async function authEqual(a, b) {
+  a = String(a || '');
+  b = String(b || '');
+  let n = a.length ^ b.length;
+  for (let i = 0; i < Math.max(a.length, b.length); i++) n |= (a.charCodeAt(i) || 0) ^ (b.charCodeAt(i) || 0);
+  return n === 0;
+}
+async function authEmail(value) {
+  const email = String(value || '').trim().toLowerCase();
+  if (email.length > 254 || !(/^\S+@\S+\.\S+$/).test(email)) throw Error('Entre une adresse courriel valide.');
+  return email;
+}
+async function authCredentials(req) {
+  if (!(/^[a-f0-9]{32}$/).test(req.salt || '') || !(/^[a-f0-9]{64}$/).test(req.proof || '')) throw Error('Connexion invalide. Recharge l’application et réessaie.');
+}
+async function authThrottle(key, limit) {
+  const cache = CacheService.getScriptCache(), k = 'auth:' + await digestKey(key), n = Number(await cache.get(k) || 0);
+  if (n >= limit) throw Error('Trop de tentatives. Attends 15 minutes avant de réessayer.');
+  await cache.put(k, String(n + 1), 900);
+}
+async function authFamilyOf(id) {
+  if (!requestFamilyMap) requestFamilyMap = new Map((await authRows('EnfantsFamilles')).map(r => [r.values[0], r.values[1]]));
+  return await requestFamilyMap.get(id) || 'legacy';
+}
+async function authProfileAllowed(id) {
+  return requestFamily === null || await authFamilyOf(id) === requestFamily;
+}
+async function authSameFamily(a, b) {
+  return await authFamilyOf(a) === await authFamilyOf(b);
+}
+async function authSession(token, type) {
+  if (typeof token !== 'string' || token.length < 40 || token.length > 200) return null;
+  const hashed = await digestKey(token);
+  return (await authRows('Sessions')).find(r => r.values[0] === hashed && r.values[1] === type && Number(r.values[4]) > Date.now()) || null;
+}
+async function authMembership(parent, family) {
+  return (await authRows('ParentsFamilles')).some(r => r.values[0] === parent && r.values[1] === family);
+}
+async function authNewSession(type, id, family) {
+  const token = await authSecret();
+  await (await authSheet('Sessions')).appendRow([await digestKey(token), type, id, family, 253402300799000]);
+  return token;
+}
+async function authCleanSessions() {
+  const s = await authSheet('Sessions');
+  await asyncArray("forEach", (await authRows('Sessions')).filter(r => Number(r.values[4]) <= Date.now()).reverse(), async r => await s.deleteRow(r.row));
+}
+async function authRevokeParent(id) {
+  const s = await authSheet('Sessions');
+  await asyncArray("forEach", (await authRows('Sessions')).filter(r => r.values[1] === 'parent' && r.values[2] === id).reverse(), async r => await s.deleteRow(r.row));
+}
+async function authRevokeChild(id) {
+  const s = await authSheet('Sessions');
+  if (s) await asyncArray("forEach", (await authRows('Sessions')).filter(r => r.values[1] === 'child' && r.values[2] === id).reverse(), async r => await s.deleteRow(r.row));
+}
+async function authScope(req) {
+  requestFamily = null;
+  requestParent = null;
+  if (req.parentToken) {
+    const session = await authSession(req.parentToken, 'parent');
+    if (session) {
+      const parent = (await authRows('Parents')).find(r => r.values[0] === session.values[2]);
+      if (!parent) throw Error('Reconnecte-toi à ton compte parent.');
+      const family = req.familyId || session.values[3];
+      if (!await authMembership(parent.values[0], family)) throw Error('Cette famille ne fait pas partie de ton compte.');
+      requestParent = parent.values[0];
+      requestFamily = family;
+      return;
+    }
+    const old = (await properties()).getProperty('PARENT_HASH');
+    if (old && await authEqual(await digestKey(req.parentToken), old)) {
+      requestParent = 'legacy';
+      requestFamily = 'legacy';
+      return;
+    }
+    throw Error('Ta session parent a expiré. Reconnecte-toi.');
+  }
+  await authenticate(req.player, req.token);
+  requestFamily = await authFamilyOf(req.player);
+}
+async function authParentInfo(id, family) {
+  const p = (await authRows('Parents')).find(r => r.values[0] === id);
+  if (!p) throw Error('Compte parent introuvable.');
+  const memberships = (await authRows('ParentsFamilles')).filter(r => r.values[0] === id).map(r => r.values[1]), families = (await authRows('Familles')).filter(r => memberships.includes(r.values[0])).map(r => ({
+    id: r.values[0],
+    name: r.values[1]
+  }));
+  return {
+    parent: {
+      id,
+      email: p.values[1],
+      name: p.values[2]
+    },
+    families,
+    familyId: family || families[0]?.id
+  };
+}
+async function authInvite(code, email) {
+  const r = await asyncArray("find", await authRows('InvitationsParents'), async r => await authEqual(r.values[0], await digestKey(String(code || '').trim())) && r.values[4] === 'pending' && Number(r.values[3]) > Date.now() && r.values[2] === email);
+  if (!r) throw Error('Invitation invalide, expirée ou prévue pour un autre courriel.');
+  return r;
+}
+async function authJoin(parent, email, invite) {
+  const family = invite.values[1];
+  if (!await authMembership(parent, family)) await (await authSheet('ParentsFamilles')).appendRow([parent, family]);
+  await (await authSheet('InvitationsParents')).getRange(invite.row, 5).setValue('accepted');
+  return family;
+}
+async function handleAuthAction(req) {
+  if (!String(req.action).startsWith('auth')) return null;
+  await authInstall();
+  const action = req.action;
+  if (['authBegin', 'authRegister', 'authLogin', 'authRecover'].includes(action)) {
+    const email = await authEmail(req.email);
+    await authThrottle(action + ':' + email, action === 'authBegin' ? 30 : 10);
+    const existing = (await authRows('Parents')).find(r => r.values[1] === email);
+    if (action === 'authBegin') return {
+      ok: true,
+      salt: existing ? existing.values[3] : (await authSecret()).slice(0, 32),
+      iterations: 600000
+    };
+    await authCredentials(req);
+    if (action === 'authRegister') {
+      if (existing) throw Error('Ce courriel a déjà un compte. Utilise Se connecter ou Mot de passe oublié.');
+      const name = String(req.name || '').trim().slice(0, 60);
+      if (!name) throw Error('Indique ton prénom.');
+      const invite = req.inviteCode ? await authInvite(req.inviteCode, email) : null, id = Utilities.getUuid(), recovery = await authSecret();
+      let family = invite?.values[1];
+      if (!family) {
+        family = Utilities.getUuid();
+        await (await authSheet('Familles')).appendRow([family, sheetText(String(req.familyName || 'Famille de ' + name).trim().slice(0, 80)), new Date().toISOString()]);
+      }
+      await (await authSheet('Parents')).appendRow([id, sheetText(email), sheetText(name), req.salt, await authHash(req.proof), await authHash(recovery), new Date().toISOString()]);
+      await (await authSheet('ParentsFamilles')).appendRow([id, family]);
+      if (invite) await (await authSheet('InvitationsParents')).getRange(invite.row, 5).setValue('accepted');
+      const token = await authNewSession('parent', id, family);
+      return {
+        ok: true,
+        token,
+        recoveryCode: recovery,
+        ...await authParentInfo(id, family)
+      };
+    }
+    if (action === 'authLogin') {
+      if (!existing || existing.values[3] !== req.salt || !await authEqual(existing.values[4], await authHash(req.proof))) throw Error('Courriel ou mot de passe incorrect.');
+      const invite = req.inviteCode ? await authInvite(req.inviteCode, email) : null;
+      const info = await authParentInfo(existing.values[0]);
+      if (invite) info.familyId = await authJoin(existing.values[0], email, invite);
+      if (!info.familyId) {
+        info.familyId = Utilities.getUuid();
+        await (await authSheet('Familles')).appendRow([info.familyId, 'Famille de ' + existing.values[2], new Date().toISOString()]);
+        await (await authSheet('ParentsFamilles')).appendRow([existing.values[0], info.familyId]);
+      }
+      await authCleanSessions();
+      return {
+        ok: true,
+        token: await authNewSession('parent', existing.values[0], info.familyId),
+        ...await authParentInfo(existing.values[0], info.familyId)
+      };
+    }
+    if (!existing || !await authEqual(existing.values[5], await authHash(String(req.recoveryCode || '').trim()))) throw Error('Courriel ou code de récupération incorrect.');
+    const recovery = await authSecret();
+    await (await authSheet('Parents')).getRange(existing.row, 4, 1, 3).setValues([[req.salt, await authHash(req.proof), await authHash(recovery)]]);
+    await authRevokeParent(existing.values[0]);
+    const info = await authParentInfo(existing.values[0]);
+    return {
+      ok: true,
+      token: await authNewSession('parent', existing.values[0], info.familyId),
+      recoveryCode: recovery,
+      ...info
+    };
+  }
+  if (action === 'authChildBegin') {
+    await authThrottle('child-begin:' + (await authChildName(req.name)).slice(0, 60), 60);
+    return {
+      ok: true,
+      salt: await authChildSalt(),
+      iterations: 600000
+    };
+  }
+  if (action === 'authChildLogin') {
+    const name = await authChildName(req.name);
+    await authThrottle('child-login:' + name, 12);
+    await authCredentials(req);
+    if (req.salt !== await authChildSalt()) throw Error('Prénom ou mot de passe incorrect.');
+    const profiles = await asyncArray("filter", (await lobbyProfiles()).slice(1), async r => await authChildName(r[1]) === name), credentials = await authRows('AccesEnfants');
+    const matches = await asyncArray("filter", profiles, async p => await asyncArray("some", credentials, async c => c.values[0] === p[0] && c.values[1] && await authEqual(c.values[1], await authHash(p[0] + ':' + req.proof))));
+    const selected = req.childId ? matches.find(p => p[0] === req.childId) : matches.length === 1 ? matches[0] : null;
+    if (!matches.length || req.childId && !selected) throw Error('Prénom ou mot de passe incorrect.');
+    if (!selected) {
+      const families = await authRows('Familles');
+      return {
+        ok: true,
+        choices: await asyncArray("map", matches, async p => ({
+          id: p[0],
+          name: p[1],
+          grade: p[2],
+          family: (await asyncArray("find", families, async f => f.values[0] === await authFamilyOf(p[0])))?.values[1] || 'Ma famille'
+        }))
+      };
+    }
+    requestFamily = await authFamilyOf(selected[0]);
+    const p = (await profileRecord(selected[0])).profile;
+    return {
+      ok: true,
+      token: await authNewSession('child', p.id, requestFamily),
+      profile: await publicProfile(p)
+    };
+  }
+  if (action === 'authChildMe' || action === 'authChildLogout') {
+    await authenticate(req.player, req.token);
+    requestFamily = await authFamilyOf(req.player);
+    const session = await authSession(req.token, 'child');
+    if (action === 'authChildLogout') {
+      if (session) await (await authSheet('Sessions')).deleteRow(session.row);
+      return {
+        ok: true
+      };
+    }
+    if (session) await (await authSheet('Sessions')).getRange(session.row, 5).setValue(253402300799000);
+    return {
+      ok: true,
+      profile: await publicProfile((await profileRecord(req.player)).profile)
+    };
+  }
+  if (action === 'authChildConnect') {
+    await authThrottle('child:' + String(req.code || '').slice(0, 80), 10);
+    const code = String(req.code || '').replace(/[\s-]/g, '').toUpperCase(), permanent = await asyncArray("find", await authRows('AccesEnfants'), async r => r.values[2] && await authEqual(r.values[2], await digestKey(code)));
+    if (permanent) {
+      requestFamily = await authFamilyOf(permanent.values[0]);
+      const p = (await profileRecord(permanent.values[0])).profile;
+      return {
+        ok: true,
+        token: await authNewSession('child', p.id, requestFamily),
+        profile: await publicProfile(p)
+      };
+    }
+    const r = await asyncArray("find", await authRows('ConnexionsEnfants'), async r => await authEqual(r.values[0], await digestKey(code)) && r.values[4] === 'pending' && Number(r.values[3]) > Date.now());
+    if (!r) throw Error('Code enfant incorrect ou expiré. Demande un nouveau code au parent.');
+    requestFamily = r.values[2];
+    const p = (await profileRecord(r.values[1])).profile;
+    await (await authSheet('ConnexionsEnfants')).getRange(r.row, 5).setValue('used');
+    return {
+      ok: true,
+      token: await authNewSession('child', p.id, requestFamily),
+      profile: await publicProfile(p)
+    };
+  }
+  await authScope(req);
+  if (!requestParent || requestParent === 'legacy') throw Error('Connecte-toi avec ton compte parent.');
+  if (action === 'authMe') {
+    const current = await authSession(req.parentToken, 'parent');
+    if (current) await (await authSheet('Sessions')).getRange(current.row, 5).setValue(253402300799000);
+    return {
+      ok: true,
+      ...await authParentInfo(requestParent, requestFamily)
+    };
+  }
+  if (action === 'authLogout') {
+    const r = await authSession(req.parentToken, 'parent');
+    if (r) await (await authSheet('Sessions')).deleteRow(r.row);
+    return {
+      ok: true
+    };
+  }
+  if (action === 'authFamilyInfo') {
+    const ids = (await authRows('ParentsFamilles')).filter(r => r.values[1] === requestFamily).map(r => r.values[0]);
+    return {
+      ok: true,
+      ...await authParentInfo(requestParent, requestFamily),
+      parents: (await authRows('Parents')).filter(r => ids.includes(r.values[0])).map(r => ({
+        id: r.values[0],
+        name: r.values[2],
+        email: r.values[1]
+      })),
+      invites: (await authRows('InvitationsParents')).filter(r => r.values[1] === requestFamily && r.values[4] === 'pending' && Number(r.values[3]) > Date.now()).map(r => ({
+        id: r.row,
+        email: r.values[2],
+        expires: Number(r.values[3])
+      }))
+    };
+  }
+  if (action === 'authInviteParent') {
+    const email = await authEmail(req.email);
+    if ((await authRows('InvitationsParents')).filter(r => r.values[1] === requestFamily && r.values[4] === 'pending' && Number(r.values[3]) > Date.now()).length >= 20) throw Error('Annule les invitations en attente avant d’en créer.');
+    const code = (await authSecret()).slice(0, 24).toUpperCase(), expires = Date.now() + 7 * 86400000;
+    await (await authSheet('InvitationsParents')).appendRow([await digestKey(code), requestFamily, sheetText(email), expires, 'pending', requestParent]);
+    return {
+      ok: true,
+      code,
+      expires
+    };
+  }
+  if (action === 'authJoinFamily') {
+    const parent = (await authRows('Parents')).find(r => r.values[0] === requestParent);
+    const invite = await authInvite(req.inviteCode, parent.values[1]);
+    const family = await authJoin(requestParent, parent.values[1], invite);
+    return {
+      ok: true,
+      ...await authParentInfo(requestParent, family)
+    };
+  }
+  if (action === 'authCancelInvite') {
+    const r = (await authRows('InvitationsParents')).find(r => r.row === Number(req.inviteId) && r.values[1] === requestFamily);
+    if (!r) throw Error('Invitation introuvable.');
+    await (await authSheet('InvitationsParents')).getRange(r.row, 5).setValue('cancelled');
+    return {
+      ok: true
+    };
+  }
+  if (action === 'authRemoveParent') {
+    const members = (await authRows('ParentsFamilles')).filter(r => r.values[1] === requestFamily), r = members.find(r => r.values[0] === req.parentId);
+    if (!r) throw Error('Parent introuvable.');
+    if (members.length <= 1) throw Error('La famille doit conserver au moins un parent.');
+    await (await authSheet('ParentsFamilles')).deleteRow(r.row);
+    return {
+      ok: true
+    };
+  }
+  if (action === 'authRenameFamily') {
+    const name = String(req.name || '').trim().slice(0, 80);
+    if (!name) throw Error('Indique un nom de famille.');
+    const r = (await authRows('Familles')).find(r => r.values[0] === requestFamily);
+    await (await authSheet('Familles')).getRange(r.row, 2).setValue(sheetText(name));
+    return {
+      ok: true,
+      ...await authParentInfo(requestParent, requestFamily)
+    };
+  }
+  if (action === 'authChildCredentials') {
+    const p = (await profileRecord(String(req.childId))).profile, table = await authSheet('AccesEnfants'), old = (await authRows('AccesEnfants')).find(r => r.values[0] === p.id);
+    let password = old?.values[1] || '', codeHash = old?.values[2] || '', code = null;
+    if (req.proof) {
+      await authCredentials(req);
+      if (req.salt !== await authChildSalt()) throw Error('Recharge la connexion enfant.');
+      password = await authHash(p.id + ':' + req.proof);
+    }
+    if (req.makeCode === true) {
+      code = (await authSecret()).slice(0, 16).toUpperCase();
+      codeHash = await digestKey(code);
+    }
+    if (!req.proof && req.makeCode !== true) throw Error('Choisis un mot de passe ou crée un code.');
+    const row = [p.id, password, codeHash, new Date().toISOString()];
+    if (old) await table.getRange(old.row, 1, 1, 4).setValues([row]); else await table.appendRow(row);
+    await authRevokeChild(p.id);
+    return {
+      ok: true,
+      code: code,
+      hasPassword: !!password,
+      hasCode: !!codeHash
+    };
+  }
+  if (action === 'authChildCode' || action === 'authPlayChild') {
+    const p = (await profileRecord(String(req.childId))).profile;
+    if (action === 'authPlayChild') return {
+      ok: true,
+      profile: await publicProfile(p),
+      token: await authNewSession('child', p.id, requestFamily)
+    };
+    const code = (await authSecret()).slice(0, 16).toUpperCase(), expires = Date.now() + 10 * 60000;
+    await (await authSheet('ConnexionsEnfants')).appendRow([await digestKey(code), p.id, requestFamily, expires, 'pending']);
+    return {
+      ok: true,
+      code,
+      expires
+    };
+  }
+  if (action === 'authRecoveryCode') {
+    const recovery = await authSecret(), r = (await authRows('Parents')).find(r => r.values[0] === requestParent);
+    await (await authSheet('Parents')).getRange(r.row, 6).setValue(await authHash(recovery));
+    return {
+      ok: true,
+      recoveryCode: recovery
+    };
+  }
+  if (action === 'authPassword') {
+    await authCredentials(req);
+    const r = (await authRows('Parents')).find(r => r.values[0] === requestParent);
+    await authThrottle('change:' + requestParent, 10);
+    if (!await authEqual(r.values[4], await authHash(req.oldProof))) throw Error('Le mot de passe actuel est incorrect.');
+    await (await authSheet('Parents')).getRange(r.row, 4, 1, 2).setValues([[req.salt, await authHash(req.proof)]]);
+    await authRevokeParent(requestParent);
+    return {
+      ok: true,
+      token: await authNewSession('parent', requestParent, requestFamily),
+      ...await authParentInfo(requestParent, requestFamily)
+    };
+  }
+  if (action === 'authImportLegacy') {
+    const h = (await properties()).getProperty('PARENT_HASH');
+    if (!h || !await authEqual(await digestKey(String(req.legacyKey || '')), h)) throw Error('L’ancienne clé parent est incorrecte.');
+    const rows = await asyncArray("filter", (await (await activeDB()).getSheetByName('Profils').getDataRange().getValues()).slice(1), async r => r[0] && await authFamilyOf(r[0]) === 'legacy');
+    await asyncArray("forEach", rows, async r => await (await authSheet('EnfantsFamilles')).appendRow([r[0], requestFamily]));
+    return {
+      ok: true,
+      count: rows.length
+    };
+  }
+  throw Error('Action de compte inconnue.');
+}
+async function authChildSalt() {
+  let salt = (await properties()).getProperty('CHILD_LOGIN_SALT');
+  if (!salt) {
+    salt = (await authSecret()).slice(0, 32);
+    await (await properties()).setProperty('CHILD_LOGIN_SALT', salt);
+  }
+  return salt;
+}
+async function authChildName(value) {
+  return String(value || '').trim().normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+}
+async function handleFamilyAction(req) {
+  if (!['familyList', 'familyCreate', 'familyUpdate', 'familyDelete', 'familyKey'].includes(req.action)) return null;
+  if (!await isParent(req.parentToken)) throw Error('Clé parent nécessaire.');
+  const sheet = (await activeDB()).getSheetByName('Profils');
+  const list = async () => await asyncArray("map", await asyncArray("filter", (await lobbyProfiles()).slice(1), async r => r[0] && await authProfileAllowed(r[0])), async r => await publicProfile((await profileRecord(r[0])).profile));
+  if (req.action === 'familyList') return {
+    ok: true,
+    profiles: await list()
+  };
+  if (req.action === 'familyCreate') {
+    const id = String(req.childId || (requestParent !== 'legacy' ? Utilities.getUuid() : ''));
+    if (!(/^[a-z0-9_-]{1,60}$/i).test(id)) throw Error('Identifiant : lettres, chiffres, tirets, 60 caractères maximum.');
+    if ((await sheet.getDataRange().getValues()).slice(1).some(r => String(r[0]) === id)) throw Error('Cet identifiant existe déjà.');
+    const p = BrawlCore.parentEdit(BrawlCore.upgrade(BrawlCore.makeProfile(id, 'Nouvel enfant', 4, '🦊')), req.patch || ({})), key = Utilities.getUuid() + Utilities.getUuid();
+    await sheet.appendRow([id, sheetText(p.name), p.grade, encodeProfile(p), new Date().toISOString()]);
+    if (requestFamily && requestFamily !== 'legacy') await (await authSheet('EnfantsFamilles')).appendRow([id, requestFamily]);
+    requestFamilyMap = null;
+    await (await properties()).setProperty('PLAYER_' + id, await digestKey(key));
+    return {
+      ok: true,
+      profiles: await list(),
+      childKey: key
+    };
+  }
+  const record = await profileRecord(String(req.childId));
+  if (req.action === 'familyUpdate') {
+    if (req.revision !== record.profile.revision) throw Error('Ce compte a changé. Actualise la liste avant de modifier.');
+    record.profile = BrawlCore.parentEdit(record.profile, req.patch);
+    await saveRecord(record);
+    return {
+      ok: true,
+      profiles: await list()
+    };
+  }
+  if (req.action === 'familyKey') {
+    const key = Utilities.getUuid() + Utilities.getUuid();
+    await (await properties()).setProperty('PLAYER_' + record.profile.id, await digestKey(key));
+    return {
+      ok: true,
+      childKey: key
+    };
+  }
+  if (req.confirmName !== record.profile.name) throw Error('Recopie le prénom pour confirmer la suppression.');
+  let archive = (await activeDB()).getSheetByName('ProfilsArchives');
+  if (!archive) {
+    archive = await (await activeDB()).insertSheet('ProfilsArchives');
+    await archive.appendRow(['id', 'prenom', 'annee', 'etat_archive', 'suppression_iso']);
+  }
+  await archive.appendRow([record.profile.id, sheetText(record.profile.name), record.profile.grade, encodeProfile(record.profile), new Date().toISOString()]);
+  await (await properties()).deleteProperty('PLAYER_' + record.profile.id);
+  await authRevokeChild(record.profile.id);
+  await sheet.deleteRow(record.row);
+  return {
+    ok: true,
+    profiles: await list()
+  };
+}
+async function decodeProfile(value) {
+  const p = JSON.parse(value);
+  if (!p._chunks) return p;
+  const sheet = (await activeDB()).getSheetByName('EtatsProfils');
+  if (!sheet) throw Error('Fragments du profil manquants.');
+  const rows = Number.isInteger(p.start) && p.start >= 2 && Number.isInteger(p.count) && p.count > 0 ? await sheet.getRange(p.start, 1, p.count, 3).getValues() : (await sheet.getDataRange().getValues()).slice(1).filter(r => r[0] === p._chunks).sort((a, b) => a[1] - b[1]);
+  if (rows.some((r, i) => r[0] !== p._chunks || Number(r[1]) !== i)) throw Error('Fragments du profil incohérents.');
+  if (rows.length !== p.count) throw Error('Profil incomplet.');
+  return JSON.parse(rows.map(r => r[2]).join(''));
+}
+async function lobbySheet(name, headers) {
+  let s = (await activeDB()).getSheetByName(name);
+  if (!s) {
+    s = await (await activeDB()).insertSheet(name);
+    await s.appendRow(headers);
+  }
+  return s;
+}
+async function lobbyProfiles() {
+  const sheet = (await activeDB()).getSheetByName('Profils');
+  return await sheet.getRange(1, 1, await sheet.getLastRow(), 3).getValues();
+}
+async function handleLobbyAction(req) {
+  if (!['lobbyPulse', 'lobbyLeave', 'lobbyInvite', 'lobbyReply'].includes(req.action)) return null;
+  await authenticate(req.player, req.token);
+  const p = {
+    id: req.player
+  }, now = Date.now(), presence = await lobbySheet('Lobby', ['profil', 'derniere_presence', 'actif']), invites = await lobbySheet('Invitations', ['id', 'de', 'vers', 'offre', 'reponse', 'statut', 'cree_ms']);
+  const rows = await presence.getDataRange().getValues(), index = rows.findIndex((r, i) => i && r[0] === p.id), presenceRow = [p.id, now, req.action === 'lobbyLeave' ? 'no' : 'yes'];
+  if (index >= 1) await presence.getRange(index + 1, 1, 1, 3).setValues([presenceRow]); else await presence.appendRow(presenceRow);
+  if (req.action === 'lobbyLeave') return {
+    ok: true
+  };
+  const all = await invites.getDataRange().getValues();
+  if (req.action === 'lobbyInvite') {
+    if (req.to === p.id || typeof req.inviteId !== 'string' || !(/^[a-z0-9-]{5,80}$/i).test(req.inviteId) || typeof req.offer !== 'string' || req.offer.length > 40000) throw Error('Invitation invalide.');
+    await profileRecord(String(req.to));
+    if (all.slice(1).filter(r => r[1] === p.id && r[5] === 'pending' && now - Number(r[6]) < 120000).length >= 3) throw Error('Une invitation est déjà en attente.');
+    if (!all.some(r => r[0] === req.inviteId)) await invites.appendRow([req.inviteId, p.id, req.to, sheetText(req.offer), '', 'pending', now]);
+    return {
+      ok: true
+    };
+  }
+  if (req.action === 'lobbyReply') {
+    const index = all.findIndex((r, i) => i && r[0] === req.inviteId), r = all[index];
+    if (!r || r[2] !== p.id || r[5] !== 'pending' || now - Number(r[6]) > 120000) throw Error('Invitation expirée.');
+    if (!['accept', 'reject'].includes(req.decision) || req.decision === 'accept' && (typeof req.answer !== 'string' || req.answer.length > 40000)) throw Error('Réponse invalide.');
+    await invites.getRange(index + 1, 5, 1, 2).setValues([[req.decision === 'accept' ? sheetText(req.answer) : '', req.decision === 'accept' ? 'accepted' : 'rejected']]);
+    return {
+      ok: true
+    };
+  }
+  const directory = (await lobbyProfiles()).slice(1), online = new Set(rows.slice(1).filter(r => r[2] === 'yes' && now - Number(r[1]) < 45000).map(r => r[0]));
+  online.add(p.id);
+  return {
+    ok: true,
+    online: (await asyncArray("filter", directory, async r => online.has(r[0]) && await authProfileAllowed(r[0]))).map(r => ({
+      id: r[0],
+      name: r[1]
+    })),
+    duels: await duelInbox(req.player),
+    invitations: all.slice(1).filter(r => (r[1] === p.id || r[2] === p.id) && now - Number(r[6]) < 120000).map(r => ({
+      id: r[0],
+      from: r[1],
+      to: r[2],
+      offer: r[2] === p.id ? r[3] : '',
+      answer: r[1] === p.id ? r[4] : '',
+      status: r[5]
+    }))
+  };
+}
+async function duelTable() {
+  return await lobbySheet('Duels', ['id', 'hote', 'invite', 'statut', 'cree_ms']);
+}
+async function duelInbox(player) {
+  const sheet = (await activeDB()).getSheetByName('Duels');
+  if (!sheet) return [];
+  const now = Date.now(), names = await lobbyProfiles();
+  return (await asyncArray("map", (await asyncArray("filter", (await sheet.getDataRange().getValues()).slice(1), async r => r[2] === player && r[3] === 'waiting' && now - Number(r[4]) < 180000 && await authProfileAllowed(r[1]))).slice(-10), async r => ({
+    row: r,
+    room: JSON.parse(await CacheService.getScriptCache().get('duel:' + r[0]) || 'null')
+  }))).filter(x => x.room && x.room.status !== 'cancelled' && now - (x.room.hostSeen || x.room.created) <= 35000).map(({row: r, room}) => ({
+    id: r[0],
+    from: r[1],
+    purpose: room.purpose || 'duel',
+    name: String(names.find(n => n[0] === r[1])?.[1] || 'Un ami')
+  }));
+}
+async function duelDescription(value, type) {
+  if (!value || value.type !== type || typeof value.sdp !== 'string' || value.sdp.length > 16000 || !value.sdp.startsWith('v=0')) throw Error('Description réseau invalide.');
+  return {
+    type: type,
+    sdp: value.sdp
+  };
+}
+async function duelCandidates(values) {
+  if (values === undefined) return [];
+  if (!Array.isArray(values) || values.length > 20) throw Error('Informations réseau invalides.');
+  return values.map(v => {
+    if (!v || typeof v.candidate !== 'string' || v.candidate.length > 1500 || typeof v.sdpMid !== 'string' && v.sdpMid !== null || v.sdpMLineIndex !== null && (!Number.isInteger(v.sdpMLineIndex) || v.sdpMLineIndex < 0 || v.sdpMLineIndex > 20)) throw Error('Adresse réseau invalide.');
+    return {
+      candidate: v.candidate,
+      sdpMid: v.sdpMid,
+      sdpMLineIndex: v.sdpMLineIndex
+    };
+  });
+}
+async function handleDuelAction(req) {
+  if (!['duelCreate', 'duelSync', 'duelCancel', 'peerCodeCreate', 'peerCodeJoin', 'peerCodeApprove'].includes(req.action)) return null;
+  if (requestParent) throw Error('Connecte un profil enfant pour jouer.');
+  let id = req.roomId;
+  if (req.action === 'peerCodeJoin') {
+    await authThrottle('peer-code:' + req.player, 30);
+    if (!(/^[0-9]{1,4}$/).test(String(req.code || ''))) throw Error('Entre un code de 4 chiffres.');
+    id = await CacheService.getScriptCache().get('peer-code:' + String(req.code).padStart(4, '0'));
+    if (!id) throw Error('Code incorrect ou expiré.');
+  }
+  if (typeof id !== 'string' || !(/^[a-z0-9-]{10,80}$/i).test(id)) throw Error('Invitation invalide.');
+  const cache = CacheService.getScriptCache(), key = 'duel:' + id, now = Date.now();
+  let room = JSON.parse(await cache.get(key) || 'null');
+  if (req.action === 'peerCodeCreate') {
+    if (!['duel', 'house'].includes(req.purpose)) throw Error('Type de rencontre invalide.');
+    if (room) {
+      if (room.host !== req.player || !room.publicCode || room.status === 'cancelled') throw Error('Invitation déjà utilisée.');
+      return {
+        ok: true,
+        code: room.code,
+        roomId: id
+      };
+    }
+    const table = await duelTable(), rows = await table.getDataRange().getValues();
+    if (rows.some(r => r[0] === id)) throw Error('Invitation expirée. Crée une nouvelle rencontre.');
+    if (rows.slice(1).filter(r => r[1] === req.player && ['waiting', 'code'].includes(r[3]) && now - Number(r[4]) < 180000).length >= 2) throw Error('Annule ton invitation actuelle avant d’en créer une autre.');
+    let code = null;
+    for (let n = 0; n < 100; n++) {
+      const candidate = String(Math.floor(Math.random() * 10000)).padStart(4, '0');
+      if (!await cache.get('peer-code:' + candidate)) {
+        code = candidate;
+        break;
+      }
+    }
+    if (!code) throw Error('Réessaie dans quelques secondes.');
+    room = {
+      host: req.player,
+      guest: null,
+      created: now,
+      offer: await duelDescription(req.offer, 'offer'),
+      answer: null,
+      ice: [[], []],
+      row: await table.getLastRow() + 1,
+      hostSeen: now,
+      status: 'code',
+      code: code,
+      publicCode: true,
+      approved: false,
+      purpose: req.purpose
+    };
+    await cache.put(key, JSON.stringify(room), 180);
+    await cache.put('peer-code:' + code, id, 180);
+    await table.appendRow([id, req.player, '', 'code', now]);
+    return {
+      ok: true,
+      code: code,
+      roomId: id
+    };
+  }
+  if (req.action === 'peerCodeJoin') {
+    if (!room || !room.publicCode || now - room.created >= 180000 || room.status === 'cancelled') throw Error('Code incorrect ou expiré.');
+    if (now - (room.hostSeen || room.created) > 35000) throw Error('Ton ami a quitté le jeu. Demande une nouvelle invitation.');
+    if (room.host === req.player) throw Error('Ce code appartient à ton propre appareil.');
+    if (room.guest && room.guest !== req.player) throw Error('Ce code est déjà utilisé.');
+    room.guest = req.player;
+    room.approved = room.approved || await authSameFamily(room.host, req.player);
+    await cache.put(key, JSON.stringify(room), 180);
+    await (await duelTable()).getRange(room.row, 3).setValue(req.player);
+    return {
+      ok: true,
+      roomId: id,
+      purpose: room.purpose,
+      approvalRequired: !room.approved
+    };
+  }
+  if (req.action === 'duelCreate') {
+    if (req.to === req.player || typeof req.to !== 'string' || !await authProfileAllowed(req.to)) throw Error('Choisis un élève de ta famille.');
+    const profiles = await lobbyProfiles();
+    if (!profiles.some((r, i) => i && r[0] === req.to)) throw Error('Profil introuvable.');
+    const offer = await duelDescription(req.offer, 'offer'), table = await duelTable(), rows = await table.getDataRange().getValues();
+    const existing = rows.find(r => r[0] === id);
+    if (existing) {
+      if (!room || room.host !== req.player || room.guest !== req.to || JSON.stringify(room.offer) !== JSON.stringify(offer)) throw Error('Invitation déjà utilisée.');
+      return {
+        ok: true
+      };
+    }
+    if (rows.slice(1).filter(r => r[1] === req.player && r[3] === 'waiting' && now - Number(r[4]) < 180000).length >= 2) throw Error('Une invitation est déjà en attente.');
+    room = {
+      host: req.player,
+      guest: req.to,
+      created: now,
+      offer: offer,
+      answer: null,
+      ice: [await duelCandidates(req.candidates), []],
+      row: await table.getLastRow() + 1,
+      hostSeen: now,
+      purpose: req.purpose === 'house' ? 'house' : 'duel',
+      status: 'waiting'
+    };
+    await cache.put(key, JSON.stringify(room), 180);
+    await table.appendRow([id, room.host, room.guest, 'waiting', now]);
+    return {
+      ok: true
+    };
+  }
+  if (!room || now - room.created >= 180000) throw Error('Invitation expirée. Crée un nouveau duel.');
+  if (req.player !== room.host && req.player !== room.guest || !room.publicCode && (!await authProfileAllowed(room.host) || !await authProfileAllowed(room.guest))) throw Error('Cette invitation ne t’est pas destinée.');
+  if (req.action !== 'duelCancel' && now - (room.hostSeen || room.created) > 35000) throw Error('Invitation expirée : ton ami a quitté le jeu.');
+  if (req.player === room.host) {
+    room.hostSeen = now;
+    await cache.put(key, JSON.stringify(room), 180);
+  }
+  if (req.action === 'peerCodeApprove') {
+    if (req.player !== room.host || !room.publicCode || !room.guest || room.status === 'cancelled') throw Error('Demande invalide.');
+    room.approved = true;
+    await cache.put(key, JSON.stringify(room), 180);
+    return {
+      ok: true
+    };
+  }
+  if (req.action === 'duelCancel') {
+    room.status = 'cancelled';
+    await cache.put(key, JSON.stringify(room), 180);
+    await (await duelTable()).getRange(room.row, 4).setValue('cancelled');
+    return {
+      ok: true
+    };
+  }
+  if (room.status === 'cancelled') return {
+    ok: true,
+    cancelled: true
+  };
+  if (room.publicCode && !room.approved && req.player === room.guest) return {
+    ok: true,
+    pending: true,
+    description: null,
+    candidates: [],
+    next: 0
+  };
+  const side = req.player === room.host ? 0 : 1, remote = 1 - side, candidates = await duelCandidates(req.candidates);
+  let changed = false;
+  if (req.answer) {
+    if (side !== 1) throw Error('Seul l’invité peut répondre.');
+    const answer = await duelDescription(req.answer, 'answer');
+    if (room.answer && JSON.stringify(room.answer) !== JSON.stringify(answer)) throw Error('Réponse déjà enregistrée.');
+    if (!room.answer) {
+      room.answer = answer;
+      room.status = 'accepted';
+      changed = true;
+    }
+  }
+  for (const candidate of candidates) {
+    if (!room.ice[side].some(c => JSON.stringify(c) === JSON.stringify(candidate))) {
+      if (room.ice[side].length >= 40) throw Error('Trop d’adresses réseau.');
+      room.ice[side].push(candidate);
+      changed = true;
+    }
+  }
+  if (changed) {
+    const encoded = JSON.stringify(room);
+    if (encoded.length > 80000) throw Error('Trop d’informations réseau.');
+    await cache.put(key, encoded, 180);
+    if (room.status === 'accepted') await (await duelTable()).getRange(room.row, 4).setValue('accepted');
+  }
+  const after = req.after ?? 0;
+  if (!Number.isInteger(after) || after < 0 || after > 40) throw Error('Curseur invalide.');
+  const request = room.publicCode && room.guest && !room.approved && side === 0 ? {
+    id: room.guest,
+    name: String((await lobbyProfiles()).find(r => r[0] === room.guest)?.[1] || 'Un ami')
+  } : null;
+  return {
+    ok: true,
+    request: request,
+    description: side === 0 ? room.answer : room.offer,
+    candidates: room.ice[remote].slice(after),
+    next: room.ice[remote].length
+  };
+}
+async function socialPresence(id) {
+  return JSON.parse(await CacheService.getScriptCache().get('playing:' + id) || 'null');
+}
+async function socialOnline(id) {
+  const p = await socialPresence(id);
+  return !!p && Date.now() - p.at < 35000;
+}
+async function livePeer(req) {
+  const cache = CacheService.getScriptCache(), key = 'live:' + req.roomId, room = JSON.parse(await cache.get(key) || 'null');
+  if (!room || room.closed || ![room.host, room.guest].includes(req.player)) throw Error('La visite est terminée.');
+  return {
+    cache,
+    key,
+    room
+  };
+}
+async function handleSocialAction(req) {
+  if (!['notifications', 'activityLeave', 'peerPulse', 'peerClose', 'visitUse'].includes(req.action)) return null;
+  if (requestParent) throw Error('Connecte un profil enfant pour jouer.');
+  const cache = CacheService.getScriptCache(), now = Date.now();
+  if (req.action === 'notifications') {
+    const route = String(req.route || '').slice(0, 40);
+    await cache.put('playing:' + req.player, JSON.stringify({
+      at: now,
+      route
+    }), 45);
+    const names = await lobbyProfiles(), name = id => String(names.find(r => r[0] === id)?.[1] || 'Un ami'), items = (await duelInbox(req.player)).map(i => ({
+      ...i,
+      type: 'invite',
+      label: i.purpose === 'house' ? 't’invite chez lui' : 'te propose un duel'
+    }));
+    const table = (await activeDB()).getSheetByName('Duels');
+    if (table) for (const r of (await table.getDataRange().getValues()).slice(1)) {
+      if (r[1] !== req.player || now - Number(r[4]) >= 180000) continue;
+      const room = JSON.parse(await cache.get('duel:' + r[0]) || 'null');
+      if (room && room.status !== 'cancelled' && room.publicCode && room.guest && !room.approved) items.push({
+        id: r[0],
+        type: 'request',
+        name: await name(room.guest),
+        purpose: room.purpose,
+        label: 'demande à te rejoindre'
+      });
+    }
+    for (const t of (await asyncArray("filter", await readTrades(), async t => t.to === req.player && t.status === 'pending' && await authProfileAllowed(t.from))).slice(-30)) items.push({
+      id: t.id,
+      type: 'trade',
+      name: await name(t.from),
+      offer: t.offer,
+      request: t.request,
+      label: 'te propose un échange',
+      available: await socialOnline(t.from)
+    });
+    return {
+      ok: true,
+      items
+    };
+  }
+  if (req.action === 'activityLeave') {
+    await cache.put('playing:' + req.player, 'null', 1);
+    const table = (await activeDB()).getSheetByName('Duels');
+    if (table) for (const r of (await table.getDataRange().getValues()).slice(1)) if (r[1] === req.player && now - Number(r[4]) < 180000) {
+      const key = 'duel:' + r[0], room = JSON.parse(await cache.get(key) || 'null');
+      if (room) {
+        room.status = 'cancelled';
+        await cache.put(key, JSON.stringify(room), 180);
+        await table.getRange(room.row, 4).setValue('cancelled');
+      }
+    }
+    if (req.roomId) {
+      try {
+        const live = await livePeer(req);
+        live.room.closed = true;
+        await live.cache.put(live.key, JSON.stringify(live.room), 300);
+      } catch (ignore) {}
+    }
+    return {
+      ok: true
+    };
+  }
+  if (req.action === 'peerPulse') {
+    if (typeof req.roomId !== 'string' || !(/^[a-z0-9-]{10,80}$/i).test(req.roomId)) throw Error('Rencontre invalide.');
+    const key = 'live:' + req.roomId;
+    let room = JSON.parse(await cache.get(key) || 'null');
+    if (!room) {
+      const pending = JSON.parse(await cache.get('duel:' + req.roomId) || 'null');
+      if (!pending || pending.status === 'cancelled' || !pending.guest || pending.publicCode && !pending.approved || ![pending.host, pending.guest].includes(req.player) || now - pending.created > 180000 || now - (pending.hostSeen || pending.created) > 35000) throw Error('Rencontre expirée.');
+      room = {
+        host: pending.host,
+        guest: pending.guest,
+        purpose: pending.purpose || 'duel',
+        seen: {},
+        created: now
+      };
+    }
+    if (room.closed || ![room.host, room.guest].includes(req.player)) throw Error('La rencontre est terminée.');
+    const expected = room.purpose === 'house' ? 'apartment' : 'battle';
+    if (req.route !== expected) {
+      room.closed = true;
+      await cache.put(key, JSON.stringify(room), 300);
+      return {
+        ok: true,
+        closed: true
+      };
+    }
+    room.seen[req.player] = now;
+    const other = req.player === room.host ? room.guest : room.host;
+    if (now - (room.seen[other] || room.created) > 45000) room.closed = true;
+    await cache.put(key, JSON.stringify(room), 300);
+    return {
+      ok: true,
+      closed: !!room.closed
+    };
+  }
+  const live = await livePeer(req), room = live.room;
+  if (req.action === 'peerClose') {
+    const pending = JSON.parse(await cache.get('duel:' + req.roomId) || 'null');
+    if (pending) {
+      pending.status = 'cancelled';
+      await cache.put('duel:' + req.roomId, JSON.stringify(pending), 180);
+      await (await duelTable()).getRange(pending.row, 4).setValue('cancelled');
+    }
+    room.closed = true;
+    await cache.put(live.key, JSON.stringify(room), 300);
+    return {
+      ok: true
+    };
+  }
+  if (room.purpose !== 'house' || req.player !== room.guest || now - (room.seen[room.host] || 0) > 35000 || now - (room.seen[room.guest] || 0) > 35000) throw Error('Ton ami n’est plus dans la maison.');
+  if (typeof req.requestId !== 'string' || !(/^[a-z0-9-]{10,80}$/i).test(req.requestId)) throw Error('Interaction invalide.');
+  const visitor = await profileRecord(req.player), p = visitor.profile;
+  if (p._visitUse?.id === req.requestId && p._visitUse.done) return {
+    ok: true,
+    profile: await publicProfile(p)
+  };
+  const sheet = (await activeDB()).getSheetByName('Profils'), ids = await sheet.getRange(2, 1, await sheet.getLastRow() - 1, 1).getValues(), index = ids.findIndex(r => r[0] === room.host);
+  if (index < 0) throw Error('Maison indisponible.');
+  const host = BrawlCore.upgrade(await decodeProfile((await sheet.getRange(index + 2, 4).getValues())[0][0])), placed = host.room.items.find(i => i.id === req.item), item = BrawlCore.catalog.find(i => i.id === req.item), pos = req.position;
+  if (!placed || !item || !['food', 'energy', 'clean', 'fun'].includes(item.need) || p.household.player.dead) throw Error('Ce meuble ne peut pas être utilisé.');
+  if (!pos || !Number.isFinite(pos.x) || !Number.isFinite(pos.y) || pos.x < 0 || pos.y < 0 || pos.x >= host.room.size || pos.y >= host.room.size || Math.hypot(pos.x - placed.x, pos.y - placed.y) > (placed.scale || 1) + 1.7) throw Error('Approche-toi du meuble.');
+  const probe = BrawlCore.clone(p);
+  probe.room = host.room;
+  probe.household.player.position = {
+    ...pos
+  };
+  const destination = BrawlCore.houseDestination(probe, 'player', ({
+    food: 'feed',
+    energy: 'rest',
+    clean: 'wash',
+    fun: 'play'
+  })[item.need], req.item);
+  if (!destination || destination.path.length > 1 || BrawlCore.houseBlocked(host.room, pos, pos) || BrawlCore.wallCrossed(host.room, pos, {
+    x: placed.x + ((placed.scale || 1) - 1) / 2,
+    y: placed.y + ((placed.scale || 1) - 1) / 2
+  })) throw Error('Place-toi devant le meuble, sans mur entre vous.');
+  if (req.stage === 'begin') {
+    if (p._visitUse?.id === req.requestId) return {
+      ok: true,
+      readyAt: p._visitUse.at + 10000
+    };
+    if (p._visitUse && !p._visitUse.done && now - p._visitUse.at < 12000) throw Error('Une interaction est déjà en cours.');
+    p._visitUse = {
+      id: req.requestId,
+      item: req.item,
+      roomId: req.roomId,
+      at: now,
+      done: false
+    };
+    await saveRecord(visitor);
+    return {
+      ok: true,
+      readyAt: now + 10000
+    };
+  }
+  const use = p._visitUse;
+  if (!use || use.id !== req.requestId || use.item !== req.item || use.roomId !== req.roomId || now - use.at < 10000 || now - use.at > 60000) throw Error('Recommence cette interaction.');
+  p.needs[item.need] = Math.min(100, p.needs[item.need] + Math.min(55, item.amount || 30));
+  use.done = true;
+  p.revision++;
+  await saveRecord(visitor);
+  return {
+    ok: true,
+    profile: await publicProfile(p)
+  };
+}
+async function handleVisitBatch(req) {
+  if (req.action !== 'visitBatch') return null;
+  if (requestParent) throw Error('Connecte ton profil enfant.');
+  if (!Array.isArray(req.entries) || req.entries.length > 20) throw Error('Résultats de visite invalides.');
+  const cache = CacheService.getScriptCache(), now = Date.now();
+  let room = JSON.parse(await cache.get('live:' + req.roomId) || 'null');
+  if (!room && typeof req.owner === 'string') {
+    const city = JSON.parse(await cache.get('city:' + req.roomId) || 'null'), owner = city?.members.find(m => m.id === req.owner), guest = city?.members.find(m => m.id === req.player);
+    if (city && owner && guest && owner.id !== guest.id && now - owner.seen < 35000 && now - guest.seen < 35000) room = {
+      purpose: 'house',
+      host: owner.id,
+      guest: guest.id,
+      created: city.created,
+      seen: {
+        [owner.id]: owner.seen
+      }
+    };
+  }
+  if (!room || room.purpose !== 'house' || room.guest !== req.player) throw Error('Visite introuvable.');
+  const visitor = await profileRecord(req.player), sheet = (await activeDB()).getSheetByName('Profils'), ids = await sheet.getRange(2, 1, await sheet.getLastRow() - 1, 1).getValues(), row = ids.findIndex(r => r[0] === room.host);
+  if (row < 0) throw Error('Maison introuvable.');
+  const host = BrawlCore.upgrade(await decodeProfile((await sheet.getRange(row + 2, 4).getValues())[0][0]));
+  let p = visitor.profile;
+  for (const e of req.entries) {
+    if (typeof e.id !== 'string' || e.id.length > 80) throw Error('Interaction invalide.');
+    const id = 'visit:' + e.id;
+    if (p.seen.includes(id)) continue;
+    if (!Number.isFinite(e.started) || !Number.isFinite(e.finished) || e.started < room.created - 3000 || e.finished - e.started < 10000 || e.finished > now + 3000 || now - e.finished > 7200000 || e.finished > (room.seen[room.host] || room.created) + 35000) throw Error('Interaction hors de la visite active.');
+    const item = BrawlCore.catalog.find(i => i.id === e.item), placed = host.room.items.find(i => i.id === e.item), q = e.position;
+    if (!item || !placed || !['food', 'clean', 'energy', 'fun'].includes(item.need) || !q || !Number.isFinite(q.x) || !Number.isFinite(q.y) || q.x < 0 || q.y < 0 || q.x >= host.room.size || q.y >= host.room.size || Math.hypot(q.x - placed.x, q.y - placed.y) > (placed.scale || 1) + 1.7 || BrawlCore.wallCrossed(host.room, q, {
+      x: placed.x,
+      y: placed.y
+    }, 0)) throw Error('Meuble ou position invalide.');
+    if (p.household.player.dead) throw Error('Ton personnage doit être réanimé.');
+    p.needs[item.need] = Math.min(100, p.needs[item.need] + Math.min(55, item.amount || 30));
+    p.seen.push(id);
+    p.revision++;
+  }
+  p.seen = p.seen.slice(-500);
+  visitor.profile = p;
+  await saveRecord(visitor);
+  return {
+    ok: true,
+    profile: await publicProfile(p)
+  };
+}
+async function statsDirectory(req) {
+  const query = String(req.query || '').trim().toLowerCase();
+  if (query.length > 60) throw Error('Recherche trop longue.');
+  const offset = Number(req.offset || 0);
+  if (!Number.isInteger(offset) || offset < 0 || offset > 1000000) throw Error('Page invalide.');
+  const stats = [];
+  for (const row of (await (await activeDB()).getSheetByName('Profils').getDataRange().getValues()).slice(1)) {
+    if (!row[0]) continue;
+    const p = BrawlCore.upgrade(await decodeProfile(row[3]));
+    if (!await authProfileAllowed(p.id) && p.shareStats !== true) continue;
+    if (query && !p.name.toLowerCase().includes(query)) continue;
+    stats.push(BrawlCore.publicStats(p));
+  }
+  stats.sort((a, b) => a.name.localeCompare(b.name, 'fr') || a.id.localeCompare(b.id));
+  return {
+    ok: true,
+    stats: stats.slice(offset, offset + 30),
+    total: stats.length
+  };
+}
+async function tradeSheet() {
+  const ss = await activeDB();
+  let s = ss.getSheetByName('Echanges_V2');
+  if (!s) {
+    s = await ss.insertSheet('Echanges_V2');
+    await s.appendRow(['id', 'de', 'vers', 'carte_offerte', 'carte_demandee', 'statut', 'cree_iso']);
+    s.setFrozenRows(1);
+  }
+  return s;
+}
+async function readTrades() {
+  return (await (await tradeSheet()).getDataRange().getValues()).slice(1).filter(r => r[0]).map((r, i) => ({
+    id: String(r[0]),
+    from: String(r[1]),
+    to: String(r[2]),
+    offer: String(r[3]),
+    request: String(r[4]),
+    status: String(r[5]),
+    created: String(r[6]),
+    row: i + 2
+  }));
+}
+async function handleTradeAction(req, record) {
+  if (!['trades', 'offerTrade', 'decideTrade'].includes(req.action)) return null;
+  const p = record.profile, all = await readTrades();
+  if (req.action === 'trades') {
+    const rows = (await (await activeDB()).getSheetByName('Profils').getDataRange().getValues()).slice(1);
+    return {
+      ok: true,
+      directory: await asyncArray("map", await asyncArray("filter", rows, async r => r[0] && await authProfileAllowed(r[0])), async r => {
+        const x = BrawlCore.upgrade(await decodeProfile(r[3]));
+        return {
+          id: x.id,
+          name: x.name,
+          cards: x.cards.map(c => c.id)
+        };
+      }),
+      trades: all.filter(t => t.from === p.id || t.to === p.id).map(t => {
+        const x = {
+          ...t
+        };
+        delete x.row;
+        return x;
+      })
+    };
+  }
+  if (req.action === 'offerTrade') {
+    await CacheService.getScriptCache().put('playing:' + p.id, JSON.stringify({
+      at: Date.now(),
+      route: 'cards'
+    }), 45);
+    if (typeof req.requestId !== 'string' || !(/^[a-z0-9-]{5,80}$/i).test(req.requestId)) throw Error('Identifiant de proposition invalide.');
+    const replay = all.find(t => t.id === req.requestId);
+    if (replay) {
+      if (replay.from !== p.id) throw Error('Proposition invalide.');
+      return {
+        ok: true
+      };
+    }
+    if (all.filter(t => t.status === 'pending' && (t.from === p.id || t.to === p.id)).length >= 30) throw Error('Traite les échanges en attente avant d’en ajouter.');
+    const other = await profileRecord(String(req.to));
+    const t = {
+      id: req.requestId,
+      from: p.id,
+      to: other.profile.id,
+      offer: req.offer,
+      request: req.request
+    };
+    BrawlCore.exchange(p, other.profile, t);
+    await (await tradeSheet()).appendRow([t.id, t.from, t.to, t.offer, t.request, 'pending', new Date().toISOString()]);
+    return {
+      ok: true
+    };
+  }
+  const t = all.find(t => t.id === req.tradeId);
+  if (!t) throw Error('Échange introuvable.');
+  const decision = req.decision;
+  if (!['accept', 'reject', 'cancel'].includes(decision)) throw Error('Décision invalide.');
+  if (decision === 'cancel' ? t.from !== p.id : t.to !== p.id) throw Error('Cette décision appartient à l’autre joueur.');
+  const a = await profileRecord(t.from), b = await profileRecord(t.to), transaction = 'trade:' + t.id;
+  if (a.profile.seen.includes(transaction) && b.profile.seen.includes(transaction)) {
+    await (await tradeSheet()).getRange(t.row, 6).setValue('accepted');
+    return {
+      ok: true,
+      profile: await publicProfile(p.id === a.profile.id ? a.profile : b.profile)
+    };
+  }
+  if (t.status !== 'pending') throw Error('Échange déjà traité.');
+  if (decision === 'accept') {
+    if (!await socialOnline(t.from)) throw Error('Ton ami est hors ligne. Attends son retour ou refuse cet échange.');
+    const [x, y] = BrawlCore.exchange(a.profile, b.profile, t);
+    const start = Math.min(a.row, b.row), end = Math.max(a.row, b.row), range = a.sheet.getRange(start, 1, end - start + 1, 5), rows = await range.getValues();
+    const date = new Date().toISOString();
+    rows[a.row - start] = [x.id, sheetText(x.name), x.grade, encodeProfile(x), date];
+    rows[b.row - start] = [y.id, sheetText(y.name), y.grade, encodeProfile(y), date];
+    await range.setValues(rows);
+    SpreadsheetApp.flush();
+    await (await tradeSheet()).getRange(t.row, 6).setValue('accepted');
+    return {
+      ok: true,
+      profile: await publicProfile(p.id === x.id ? x : y)
+    };
+  }
+  await (await tradeSheet()).getRange(t.row, 6).setValue(decision === 'cancel' ? 'cancelled' : 'rejected');
+  return {
+    ok: true,
+    profile: await publicProfile(p)
+  };
+}
+async function cityPublicMember(req) {
+  const p = (await profileRecord(req.player)).profile;
+  const key = req.publicKey;
+  if (!key || key.kty !== 'EC' || key.crv !== 'P-256' || !(/^[\w-]{43}$/).test(key.x) || !(/^[\w-]{43}$/).test(key.y)) throw Error('Clé de partie invalide.');
+  const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_', decode = s => {
+    let n = 0n;
+    for (const c of s) n = n * 64n + BigInt(alphabet.indexOf(c));
+    if (n % 4n) throw Error('Clé non canonique.');
+    return n / 4n;
+  }, x = await decode(key.x), y = await decode(key.y), prime = 0xffffffff00000001000000000000000000000000ffffffffffffffffffffffffn, b = 0x5ac635d8aa3a93e7b3ebbd55769886bc651d06b0cc53b0f63bce3c3e27d2604bn;
+  if (x >= prime || y >= prime || (y * y - (x * x * x - 3n * x + b)) % prime !== 0n) throw Error('Clé de partie invalide.');
+  return {
+    id: p.id,
+    name: p.name,
+    skin: p.skin,
+    useCustomAppearance: p.useCustomAppearance,
+    appearance: BrawlCore.effectiveAppearance(p),
+    publicKey: {
+      kty: 'EC',
+      crv: 'P-256',
+      x: key.x,
+      y: key.y,
+      ext: true
+    },
+    seen: Date.now(),
+    vehicle: p.garage?.selected || '',
+    cars: p.garage?.cars || ({})
+  };
+}
+async function handleCityAction(req) {
+  if (!String(req.action).startsWith('city') || (/^city(?:Living|Fire)/).test(String(req.action))) return null;
+  if (requestParent) throw Error('Choisis un profil enfant.');
+  const reward = await handleCityGameRewards(req);
+  if (reward) return reward;
+  const loot = await handleCityLoot(req);
+  if (loot) return loot;
+  const activity = typeof handleCityActivities === 'function' ? await handleCityActivities(req) : null;
+  if (activity) return activity;
+  const cache = CacheService.getScriptCache(), now = Date.now();
+  if (req.action === 'cityDriveStart') {
+    const p = (await profileRecord(req.player)).profile;
+    if (!p.garage?.cars[req.car]) throw Error('Voiture indisponible.');
+    const id = Utilities.getUuid();
+    await cache.put('drive:' + req.player, JSON.stringify({
+      id,
+      car: req.car,
+      started: now,
+      used: 0
+    }), 7200);
+    return {
+      ok: true,
+      driveId: id
+    };
+  }
+  if (req.action === 'cityDriveSave') {
+    const grant = JSON.parse(await cache.get('drive:' + req.player) || 'null');
+    if (!grant || grant.id !== req.driveId || !Number.isFinite(req.seconds) || req.seconds < 0 || req.seconds > 120 || typeof req.requestId !== 'string' || req.requestId.length > 100) throw Error('Séance de conduite invalide.');
+    const record = await profileRecord(req.player);
+    if (record.profile.seen.includes(req.requestId)) return {
+      ok: true,
+      profile: await publicProfile(record.profile)
+    };
+    if (grant.used + req.seconds > (now - grant.started) / 1000 + 2) throw Error('Durée de conduite invalide.');
+    const event = {
+      type: 'carUse',
+      car: grant.car,
+      seconds: req.seconds,
+      id: req.requestId
+    };
+    if (!record.profile.seen.includes(event.id)) {
+      record.profile = BrawlCore.apply(record.profile, event, Utilities.formatDate(new Date(), TZ, 'yyyy-MM-dd'), false);
+      await saveRecord(record);
+      grant.used += req.seconds;
+      await cache.put('drive:' + req.player, JSON.stringify(grant), 7200);
+    }
+    return {
+      ok: true,
+      profile: await publicProfile(record.profile)
+    };
+  }
+  const family = await authFamilyOf(req.player), familyKey = BrawlCore.cityStandalone ? 'city-world:standalone' : 'city-family:' + (family === 'legacy' ? 'player:' + req.player : family);
+  if (req.action === 'cityPartyAuto') {
+    const member = await cityPublicMember(req);
+    let id = await cache.get(familyKey), room = id ? JSON.parse(await cache.get('city:' + id) || 'null') : null;
+    if (room) {
+      room.members = room.members.filter(m => now - m.seen < 24000);
+      if (!room.members.some(m => m.id === room.host)) {
+        room.host = room.members[0]?.id;
+        room.term = (room.term || 0) + 1;
+      }
+    }
+    if (!room || !room.members.length) {
+      const created = await handleCityAction({
+        ...req,
+        action: 'cityPartyCreate'
+      });
+      room = created.room;
+      room.family = family;
+      room.automatic = true;
+      room.term = 1;
+      id = room.id;
+    }
+    const old = room.members.findIndex(m => m.id === req.player);
+    if (old < 0 && room.members.length >= 6) throw Error('Le quartier familial est complet (6 joueurs).');
+    if (old < 0) room.members.push(member); else room.members[old] = member;
+    await cache.put('city:' + id, JSON.stringify(room), 120);
+    await cache.put('city-code:' + room.code, id, 120);
+    await cache.put(familyKey, id, 120);
+    return {
+      ok: true,
+      room
+    };
+  }
+  if (req.action === 'cityPartyCreate') {
+    await authThrottle('city-create:' + req.player, 12);
+    const member = await cityPublicMember(req), id = Utilities.getUuid();
+    let code = null;
+    for (let i = 0; i < 20; i++) {
+      const c = String(parseInt(Utilities.getUuid().replace(/-/g, '').slice(0, 8), 16) % 1000000).padStart(6, '0');
+      if (!await cache.get('city-code:' + c)) {
+        code = c;
+        break;
+      }
+    }
+    if (!code) throw Error('Réessaie dans quelques instants.');
+    const room = {
+      id,
+      code,
+      host: req.player,
+      created: now,
+      members: [member]
+    };
+    await cache.put('city:' + id, JSON.stringify(room), 120);
+    await cache.put('city-code:' + code, id, 120);
+    return {
+      ok: true,
+      room
+    };
+  }
+  let id = req.roomId;
+  if (req.action === 'cityPartyJoin') {
+    await authThrottle('city-join:' + req.player, 20);
+    if (!(/^\d{6}$/).test(req.code || '')) throw Error('Entre les 6 chiffres du code.');
+    id = await cache.get('city-code:' + req.code);
+  }
+  if (typeof id !== 'string' || id.length > 60) throw Error('Partie introuvable.');
+  const room = JSON.parse(await cache.get('city:' + id) || 'null');
+  if (!room) throw Error('Partie introuvable.');
+  const timeout = room.automatic ? 24000 : 45000;
+  room.members = room.members.filter(m => now - m.seen < timeout);
+  if (!room.members.some(m => m.id === room.host)) {
+    if (!room.automatic) throw Error('L’hôte a quitté la partie.');
+    room.host = room.members[0]?.id;
+    room.term = (room.term || 0) + 1;
+  }
+  if (room.automatic && room.family !== family) throw Error('Ce quartier appartient à une autre famille.');
+  if (req.action === 'cityPartyJoin') {
+    const member = await cityPublicMember(req), old = room.members.findIndex(m => m.id === req.player);
+    if (old < 0 && room.members.length >= 6) throw Error('Cette partie est complète (6 joueurs).');
+    if (old < 0) room.members.push(member); else room.members[old] = member;
+  } else {
+    const member = room.members.find(m => m.id === req.player);
+    if (!member) throw Error('Tu ne fais pas partie de cette partie.');
+    member.seen = now;
+    if (req.action === 'cityPartyLeave') {
+      room.members = room.members.filter(m => m.id !== req.player);
+      if (req.player === room.host) {
+        if (room.automatic) {
+          room.host = room.members[0]?.id || null;
+          room.term = (room.term || 0) + 1;
+        } else room.members = [];
+      }
+    } else if (req.action === 'cityPartyPulse') {
+      const p = (await profileRecord(req.player)).profile;
+      member.name = p.name;
+      member.skin = p.skin;
+      member.appearance = BrawlCore.effectiveAppearance(p);
+      member.useCustomAppearance = p.useCustomAppearance;
+      member.vehicle = p.garage?.selected || '';
+      member.cars = p.garage?.cars || ({});
+    } else throw Error('Action de partie inconnue.');
+  }
+  await cache.put('city:' + id, JSON.stringify(room), 120);
+  await cache.put('city-code:' + room.code, id, 120);
+  if (room.automatic) await cache.put(familyKey, id, 120);
+  return {
+    ok: true,
+    room
+  };
+}
+async function handleCityActivities(req) {
+  if (!['cityJobStart', 'cityJobStatus', 'cityJobCheckpoint', 'cityJobCancel'].includes(req.action)) return null;
+  const record = await profileRecord(req.player), p = record.profile, now = Date.now(), day = Utilities.formatDate(new Date(), TZ, 'yyyy-MM-dd');
+  p.cityWork = p.cityWork || ({
+    halves: 0,
+    completed: 0
+  });
+  let active = p.cityWork.active;
+  const result = async () => ({
+    ok: true,
+    profile: await publicProfile(record.profile),
+    job: record.profile.cityWork?.active || null
+  });
+  if (req.action === 'cityJobStatus') return await result();
+  if (req.action === 'cityJobCancel') {
+    if (active && active.id === req.jobId) {
+      delete p.cityWork.active;
+      p.revision++;
+      await saveRecord(record);
+    }
+    return await result();
+  }
+  const point = req.position;
+  if (!point || ![point.x, point.y].every(Number.isFinite) || point.x < (BrawlCore.cityStandalone ? BrawlCore.cityMap.minX || 0 : 0) || point.y < (BrawlCore.cityStandalone ? BrawlCore.cityMap.minY || 0 : 0) || point.x > BrawlCore.cityMap.width || point.y > BrawlCore.cityMap.height) throw Error('Position de mission invalide.');
+  if (req.action === 'cityJobStart') {
+    if (active && now < active.expires) return await result();
+    if (!['taxi', 'delivery'].includes(req.kind) || typeof req.requestId !== 'string' || req.requestId.length < 8 || req.requestId.length > 100) throw Error('Mission invalide.');
+    await authThrottle('city-work:' + req.player, 120);
+    const place = BrawlCore.cityPlaces.find(s => s.job === req.kind), rental = p.cityWork.rental, nearPlace = Math.hypot(point.x - place.x, point.y - place.y) < 150 || Math.hypot(point.x - BrawlCore.cityRoadSnap(place).x, point.y - BrawlCore.cityRoadSnap(place).y) < 100, continuing = req.kind === 'taxi' && rental?.kind === 'taxi' && now < rental.expires && Math.hypot(point.x - rental.position.x, point.y - rental.position.y) < 100;
+    if (!nearPlace && !continuing) throw Error('Approche du restaurant ou de la station de taxis.');
+    const id = Utilities.getUuid(), origin = BrawlCore.cityRoadSnap(point), job = BrawlCore.cityMakeJob(req.kind, origin, id);
+    if (req.kind === 'delivery') for (let n = 1; n < 32 && p.cityWork.lastDelivery && Math.hypot(job.destination.x - p.cityWork.lastDelivery.x, job.destination.y - p.cityWork.lastDelivery.y) < 1; n++) Object.assign(job, BrawlCore.cityMakeJob(req.kind, origin, id + ':' + n));
+    p.cityWork.active = {
+      ...job,
+      id,
+      requestId: req.requestId,
+      index: 0,
+      started: now,
+      lastAt: now,
+      lastPoint: origin,
+      expires: now + 1800000
+    };
+    p.revision++;
+    await saveRecord(record);
+    return await result();
+  }
+  if (!active || active.id !== req.jobId) {
+    if ((p.cityWork.recent || []).includes(req.jobId)) return await result();
+    throw Error('Mission introuvable.');
+  }
+  if (now > active.expires) throw Error('Mission expirée. Reprends une commande.');
+  if (!Number.isInteger(req.index) || req.index < 0 || req.index >= active.points.length) throw Error('Étape invalide.');
+  if (req.index < active.index) return await result();
+  if (req.index !== active.index) throw Error('Suis les points dans l’ordre.');
+  const target = active.points[active.index], distance = BrawlCore.cityRoute(active.lastPoint, target).reduce((n, p, i, list) => n + (i ? Math.hypot(p.x - list[i - 1].x, p.y - list[i - 1].y) : 0), 0);
+  if (Math.hypot(point.x - target.x, point.y - target.y) > 60) throw Error('Approche du point de mission.');
+  if (!Number.isFinite(active.travelDistance)) {
+    let previous = active.origin;
+    active.travelDistance = active.points.slice(0, active.index).reduce((total, p) => {
+      const d = Math.hypot(p.x - previous.x, p.y - previous.y);
+      previous = p;
+      return total + d;
+    }, 0);
+  }
+  if (now - active.started < Math.max((active.index + 1) * 180, (active.travelDistance + distance) / 330 * 1000 * .8)) throw Error('Trajet trop rapide.');
+  active.travelDistance += distance;
+  if (active.kind === 'taxi' && Math.hypot(target.x - active.pickup.x, target.y - active.pickup.y) < 1) active.hasPassenger = true;
+  active.index++;
+  active.lastAt = now;
+  active.lastPoint = target;
+  const final = active.index === active.points.length, drop = active.kind === 'delivery' && active.drops?.find(d => d.index === req.index), reward = active.kind === 'taxi' && final || !!drop || active.kind === 'delivery' && !active.drops && final, id = active.id, kind = active.kind;
+  if (final) {
+    p.cityWork.rental = {
+      kind,
+      position: target,
+      vehicle: active.vehicle,
+      expires: now + 1800000
+    };
+    if (kind === 'delivery') p.cityWork.lastDelivery = active.destination;
+    delete p.cityWork.active;
+    p.cityWork.recent = [...p.cityWork.recent || [], id].slice(-30);
+  }
+  if (reward) record.profile = BrawlCore.apply(p, {
+    type: 'cityWorkReward',
+    id: 'work:' + id + (drop ? ':' + req.index : ''),
+    kind
+  }, day, false); else p.revision++;
+  await saveRecord(record);
+  return await result();
+}
+async function handleCityLoot(req) {
+  if (!['cityLootStatus', 'cityLootClaim'].includes(req.action)) return null;
+  const family = await authFamilyOf(req.player), scope = family === 'legacy' ? 'player:' + req.player : family, cache = CacheService.getScriptCache(), now = Date.now(), minute = Math.floor(now / 60000), key = 'city-loot:' + scope;
+  let loot = JSON.parse(await cache.get(key) || 'null');
+  if (!loot || loot.minute !== minute) {
+    const seed = parseInt(Utilities.getUuid().replace(/-/g, '').slice(0, 8), 16), map = BrawlCore.cityMap, vertical = seed % 2 === 0, road = (vertical ? map.roadsX : map.roadsY)[(seed >>> 2) % 4], along = 170 + (seed >>> 5) % (vertical ? 1200 : 1450), record = await profileRecord(req.player), unowned = BrawlCore.cards.filter(c => !record.profile.cards.some(v => v.id === c.id)), card = seed % 8 === 0 && unowned.length ? unowned[(seed >>> 12) % unowned.length] : null;
+    loot = {
+      id: 'loot:' + scope + ':' + minute,
+      minute,
+      x: vertical ? road : along,
+      y: vertical ? along : road,
+      kind: card ? 'card' : 'coin',
+      card: card?.id || null,
+      created: now,
+      expires: (minute + 1) * 60000,
+      claimedBy: null
+    };
+    await cache.put(key, JSON.stringify(loot), 180);
+  }
+  if (req.action === 'cityLootStatus') return {
+    ok: true,
+    loot: loot.claimedBy ? null : loot,
+    nextAt: loot.expires
+  };
+  if (req.lootId !== loot.id || loot.claimedBy && loot.claimedBy !== req.player) throw Error('Cette récompense a déjà été ramassée ou a expiré.');
+  const record = await profileRecord(req.player), p = BrawlCore.upgrade(record.profile);
+  if (p.seen.includes(loot.id)) return {
+    ok: true,
+    profile: await publicProfile(p),
+    loot: null,
+    nextAt: loot.expires
+  };
+  const q = req.position;
+  if (!q || ![q.x, q.y].every(Number.isFinite) || Math.hypot(q.x - loot.x, q.y - loot.y) > 45) throw Error('Approche de la récompense.');
+  if (now - loot.created < 500) throw Error('Réessaie dans un instant.');
+  if (loot.kind === 'card' && !p.cards.some(c => c.id === loot.card)) {
+    p.cards.push(BrawlCore.cardState({
+      id: loot.card,
+      condition: 100
+    }));
+  } else p.coins += 1;
+  p.seen.push(loot.id);
+  p.seen = p.seen.slice(-500);
+  p.revision++;
+  p.history.unshift({
+    day: Utilities.formatDate(new Date(), TZ, 'yyyy-MM-dd'),
+    label: loot.kind === 'card' ? 'Carte trouvée en ville' : 'Récompense trouvée en ville',
+    coins: loot.kind === 'coin' ? 1 : 0,
+    xp: 0
+  });
+  p.history = p.history.slice(0, 100);
+  record.profile = p;
+  await saveRecord(record);
+  loot.claimedBy = req.player;
+  await cache.put(key, JSON.stringify(loot), 180);
+  return {
+    ok: true,
+    profile: await publicProfile(p),
+    loot: null,
+    nextAt: loot.expires,
+    reward: loot.kind
+  };
+}
+async function handleCityGameRewards(req) {
+  if (!['cityActivityStart', 'cityActivityFinish', 'cityActivityClaim'].includes(req.action)) return null;
+  const now = Date.now(), id = req.activityId;
+  if (typeof id !== 'string' || id.length < 4 || id.length > 200 || !(/^[\w:.-]+$/).test(id)) throw Error('Activité invalide.');
+  const props = PropertiesService.getScriptProperties(), key = 'CITY_GAME_' + id;
+  let run = JSON.parse(props.getProperty(key) || 'null');
+  const room = req.roomId ? JSON.parse(await CacheService.getScriptCache().get('city:' + req.roomId) || 'null') : null;
+  const host = room ? room.host === req.player && room.members.some(m => m.id === req.player) : !req.roomId;
+  if (req.action === 'cityActivityStart') {
+    const kinds = ['bracelet', 'hockey', 'race', 'chase', 'soccer', 'bowling', 'laser', 'derby', 'zombie', 'fight', 'tennis', 'sumo', 'tailblazer', 'drift', 'jumps', 'spot-battle', 'trials', 'trampoline', 'street-rage', 'carnage', 'carnage-drift', 'carnage-course', 'carnage-derby', 'carnage-ville', 'carnage-ville-ultime', 'carnage-drift-ultime', 'carnage-course-ultime', 'carnage-derby-ultime', 'carnage-moto-ultime', 'carnage-ville-moto-ultime', 'carnage-derby-moto-ultime'];
+    if (!host || !kinds.includes(req.kind) || typeof req.gameId !== 'string' || req.gameId.length > 100 || !Array.isArray(req.participants) || !req.participants.length || req.participants.length > 6 || new Set(req.participants).size !== req.participants.length || req.participants.some(p => room ? !room.members.some(m => m.id === p) : p !== req.player)) throw Error('Départ d’activité refusé.');
+    if (!run) {
+      run = {
+        id,
+        kind: req.kind,
+        gameId: req.gameId,
+        host: req.player,
+        room: req.roomId || null,
+        participants: req.participants,
+        started: now,
+        expires: now + 86400000,
+        claimed: {},
+        sold: {},
+        checkpoint: 0
+      };
+      await props.setProperty(key, JSON.stringify(run));
+    }
+    if (!room && run.host !== req.player || run.kind !== req.kind || run.gameId !== req.gameId || run.room !== (req.roomId || null)) throw Error('Activité déjà enregistrée.');
+    return {
+      ok: true,
+      activityId: id
+    };
+  }
+  if (!run || run.expires < now) throw Error('Activité expirée.');
+  if (req.action === 'cityActivityFinish') {
+    if (!host || run.room !== (req.roomId || null) || !room && run.host !== req.player) throw Error('Seul l’hôte confirme les résultats.');
+    if (req.checkpoint !== undefined) {
+      const n = req.checkpoint;
+      if (run.kind !== 'zombie' || !Number.isInteger(n) || n < 1 || n > 30 || now - run.started < n * 25000) throw Error('Palier zombie invalide.');
+      run.checkpoint = Math.max(run.checkpoint, n);
+    } else if (!run.done) {
+      if (now - run.started < (run.kind === 'bracelet' ? 2000 : 10000) || !Array.isArray(req.completed) || req.completed.some(p => !run.participants.includes(p))) throw Error('Fin d’activité invalide.');
+      const winner = req.winner || null;
+      if (winner && !req.completed.includes(winner)) throw Error('Gagnant invalide.');
+      if (run.kind === 'bracelet') {
+        if (req.braceletRounds !== undefined) {
+          const rounds = req.braceletRounds;
+          if (!Array.isArray(rounds) || rounds.length !== 3 || rounds.some((r, n) => r.round !== n + 1 || r.winner && !run.participants.includes(r.winner) || !Number.isFinite(r.seconds) || r.seconds < 0 || r.seconds > 180 || !r.scores || Array.isArray(r.scores) || Object.keys(r.scores).length > 6 || Object.entries(r.scores).some(([id, v]) => !run.participants.includes(id) || !Number.isInteger(v) || v < 0 || v > 10) || r.winner && r.scores[r.winner] !== 10)) throw Error('Manches invalides.');
+          const rank = BrawlCore.braceletRank(run.participants.filter(id => req.completed.includes(id)), rounds), expected = rank[0]?.wins > 0 ? rank[0].id : null;
+          if (winner !== expected) throw Error('Classement invalide.');
+          run.braceletRound = 3;
+        }
+        if (winner && JSON.stringify(req.bracelet) !== JSON.stringify(BrawlCore.braceletPattern(run.gameId, run.braceletRound || 1))) throw Error('Bracelet incorrect.');
+      }
+      run.done = true;
+      run.completed = [...new Set(req.completed)];
+      run.winner = winner;
+    }
+    await props.setProperty(key, JSON.stringify(run));
+    return {
+      ok: true
+    };
+  }
+  if (!run.participants.includes(req.player)) throw Error('Tu ne participes pas à cette activité.');
+  const record = await profileRecord(req.player), p = record.profile, who = req.player;
+  let amount = 0, label = '';
+  if (req.reward === 'bracelet') {
+    if (run.kind !== 'bracelet' || !run.done || run.winner !== who) throw Error('Ce bracelet ne t’appartient pas.');
+    if (!run.sold[who]) {
+      amount = 1;
+      run.sold[who] = true;
+      p.bracelets = (p.bracelets || []).filter(b => b.id !== id);
+      label = 'Bracelet revendu';
+    }
+  } else if (req.reward === 'zombie') {
+    if (run.kind !== 'zombie') throw Error('Palier invalide.');
+    const last = run.claimed[who]?.wave || 0;
+    for (let n = last + 1; n <= run.checkpoint; n++) amount += BrawlCore.cityZombieReward(n);
+    run.claimed[who] = {
+      ...run.claimed[who],
+      wave: run.checkpoint
+    };
+    label = 'Survie zombies · paliers de 5 vagues';
+  } else {
+    if (!run.done || !run.completed.includes(who)) throw Error('Activité en cours.');
+    if (!run.claimed[who]?.finish) {
+      amount = 1;
+      run.claimed[who] = {
+        ...run.claimed[who],
+        finish: true
+      };
+      label = 'Activité terminée · ' + run.kind;
+      if (run.kind === 'bracelet' && run.winner === who && !run.sold[who]) {
+        p.bracelets = p.bracelets || [];
+        if (!p.bracelets.some(b => b.id === id)) p.bracelets.push({
+          id,
+          pattern: BrawlCore.braceletPattern(run.gameId, run.braceletRound || 1),
+          value: 1
+        });
+      }
+    }
+  }
+  if (amount) {
+    p.coins += amount;
+    p.revision++;
+    p.history.unshift({
+      day: Utilities.formatDate(new Date(), TZ, 'yyyy-MM-dd'),
+      label,
+      coins: amount,
+      xp: 0
+    });
+    p.history = p.history.slice(0, 100);
+    await saveRecord(record);
+  }
+  await props.setProperty(key, JSON.stringify(run));
+  return {
+    ok: true,
+    profile: await publicProfile(p),
+    amount,
+    checkpoint: run.claimed[who]?.wave || 0
+  };
+}
+async function handleCityLiving(req, record, day) {
+  if (!['cityLivingStart', 'cityLivingFinish', 'cityLivingCancel', 'cityLivingPulse'].includes(req.action)) return null;
+  if (!BrawlCore.cityStandalone) throw Error('Le jeu autonome est désactivé.');
+  const p = BrawlCore.upgrade(record.profile), now = Date.now();
+  const save = async () => {
+    p.revision++;
+    record.profile = p;
+    await saveRecord(record);
+    return {
+      ok: true,
+      profile: await publicProfile(p),
+      interaction: p.cityLiving.active || null
+    };
+  };
+  if (req.action === 'cityLivingPulse') {
+    const elapsed = p.cityLiving.lastTick && req.active === true ? Math.max(0, Math.min(60, (now - p.cityLiving.lastTick) / 1000)) : 0;
+    p.cityLiving.lastTick = now;
+    for (const [need, rate] of Object.entries({
+      food: 1.1,
+      energy: .65,
+      clean: .5,
+      bladder: 1,
+      fun: .6
+    })) {
+      p.needs[need] = Math.max(0, (p.needs[need] ?? 70) - rate * elapsed / 60);
+      if (p.household?.player) p.household.player[need] = p.needs[need];
+    }
+    return await save();
+  }
+  if (req.action === 'cityLivingCancel') {
+    delete p.cityLiving.active;
+    return await save();
+  }
+  if (!p.cityEstate.owned) throw Error('Tu ne possèdes pas encore de terrain.');
+  const active = p.cityLiving.active, action = req.action === 'cityLivingStart' ? req.kind : active?.kind, item = req.action === 'cityLivingStart' ? req.item : active?.item, placed = p.room.items.find(i => i.id === item), point = req.position;
+  if (!placed || !BrawlCore.cityLivingAllowed(p, action, item)) throw Error('Ce meuble ne permet pas cette action.');
+  const bounds = BrawlCore.placedBounds(p.room, placed), dx = point && Math.max(bounds.x - point.x, 0, point.x - bounds.x - bounds.w), dy = point && Math.max(bounds.y - point.y, 0, point.y - bounds.y - bounds.d);
+  if (!point || ![point.x, point.y].every(Number.isFinite) || point.x < 0 || point.y < 0 || point.x >= p.room.size || point.y >= p.room.size || Math.hypot(dx, dy) > 1.8) throw Error('Approche du meuble dans ta maison.');
+  if (req.action === 'cityLivingStart') {
+    if (active && now < active.ends + 60000) throw Error('Termine ou annule ton action actuelle.');
+    if (action === 'fridge' && p.coins < 1) throw Error('Les ingrédients coûtent 1 $.');
+    if (action === 'stove' && !p.cityLiving.prepared) throw Error('Prends les ingrédients au frigo.');
+    if (action === 'eat' && !p.cityLiving.meal) throw Error('Prépare le repas à la cuisinière.');
+    p.cityLiving.active = {
+      id: Utilities.getUuid(),
+      kind: action,
+      item,
+      started: now,
+      ends: now + BrawlCore.cityLivingActions[action].seconds * 1000
+    };
+    return await save();
+  }
+  if (!active || active.id !== req.interactionId) throw Error('Interaction introuvable.');
+  if (now < active.ends) throw Error('L’action n’est pas encore terminée.');
+  if (now > active.ends + 60000) throw Error('Cette interaction a expiré.');
+  const result = BrawlCore.cityLivingFinish(p, active.kind);
+  delete result.cityLiving.active;
+  result.revision++;
+  record.profile = result;
+  await saveRecord(record);
+  return {
+    ok: true,
+    profile: await publicProfile(result),
+    interaction: null
+  };
+}
+async function handleCityFire(req, record, day) {
+  if (!['cityFireStart', 'cityFireStatus', 'cityFireSpray', 'cityFireCancel'].includes(req.action)) return null;
+  if (!BrawlCore.cityStandalone) throw Error('Le service pompier est désactivé.');
+  const p = BrawlCore.upgrade(record.profile), now = Date.now();
+  let duty = p.cityFireDuty;
+  const result = async () => ({
+    ok: true,
+    profile: await publicProfile(record.profile),
+    duty: record.profile.cityFireDuty || null,
+    serverNow: now
+  });
+  const save = async () => {
+    p.revision++;
+    record.profile = p;
+    await saveRecord(record);
+    return await result();
+  };
+  if (req.action === 'cityFireCancel') {
+    if (duty && duty.state === 'running') duty.state = 'abandoned';
+    return await save();
+  }
+  if (duty?.state === 'running' && now >= duty.deadline) {
+    duty.state = 'failed';
+    await save();
+  }
+  if (req.action === 'cityFireStatus') return await result();
+  const point = req.position;
+  if (!point || ![point.x, point.y].every(Number.isFinite)) throw Error('Position invalide.');
+  if (req.action === 'cityFireStart') {
+    if (duty?.state === 'running') return await result();
+    const base = p.cityFireReturn || ({
+      x: 1750,
+      y: -700
+    });
+    if (Math.hypot(point.x - base.x, point.y - base.y) > 180) throw Error('Approche de la caserne pour prendre le camion.');
+    const avoid = Array.isArray(req.avoid) ? req.avoid.slice(0, 20) : [], targets = BrawlCore.cityFireTargets.filter(t => !avoid.includes(t.id) && t.id !== duty?.target.id);
+    if (!targets.length) throw Error('Les bâtiments sont en reconstruction. Réessaie dans un moment.');
+    const id = Utilities.getUuid(), n = id.split('').reduce((a, c) => a + c.charCodeAt(0), 0) % targets.length, seconds = BrawlCore.cityFireDuration(p.cityFireSaved || 0);
+    p.cityFireDuty = {
+      id,
+      target: targets[n],
+      started: now,
+      deadline: now + seconds * 1000,
+      seconds,
+      water: 0,
+      lastSpray: 0,
+      state: 'running'
+    };
+    return await save();
+  }
+  if (!duty || duty.id !== req.dutyId || duty.state !== 'running') return await result();
+  const t = duty.target, dx = Math.max(t.x - point.x, 0, point.x - t.x - t.w), dy = Math.max(t.y - point.y, 0, point.y - t.y - t.d);
+  if (Math.hypot(dx, dy) > 170) throw Error('Approche du bâtiment pour utiliser la lance.');
+  if (!duty.lastSpray) {
+    duty.lastSpray = now;
+    return await save();
+  }
+  const delta = Math.max(0, Math.min(1500, now - duty.lastSpray));
+  if (delta < 500) throw Error('La lance est déjà prise en compte.');
+  duty.lastSpray = now;
+  duty.water = Math.min(10, duty.water + delta / 1000);
+  if (duty.water >= 10) {
+    duty.state = 'saved';
+    p.coins++;
+    p.cityFireSaved = (p.cityFireSaved || 0) + 1;
+    p.cityFireReturn = {
+      x: point.x,
+      y: point.y
+    };
+    p.history.unshift({
+      day,
+      label: 'Pompier · bâtiment sauvé',
+      coins: 1,
+      xp: 0
+    });
+    p.history = p.history.slice(0, 100);
+  }
+  return await save();
+}
+async function handleWordLists(req) {
+  if (!['wordLists', 'wordListSave', 'wordListArchive', 'wordListMerge', 'wordListApply', 'wordListUnassign'].includes(req.action)) return null;
+  if (!requestParent || requestParent === 'legacy') throw Error('Connecte un compte parent.');
+  const key = 'WORD_LISTS_' + requestFamily, props = await properties(), library = JSON.parse(props.getProperty(key) || '{"version":0,"lists":[]}');
+  if (req.action === 'wordLists') return {
+    ok: true,
+    library
+  };
+  if (req.version !== library.version) throw Error('Les listes ont changé. Actualise la bibliothèque.');
+  const words = values => {
+    if (!Array.isArray(values) || values.length > 100) throw Error('Maximum 100 mots par liste.');
+    const seen = new Set(), out = [];
+    for (const value of values) {
+      if (typeof value !== 'string' || !value.trim() || value.trim().length > 60) throw Error('Mot invalide (60 caractères maximum).');
+      const word = value.trim().normalize('NFC'), stamp = word.toLocaleLowerCase('fr-CA');
+      if (!seen.has(stamp)) {
+        seen.add(stamp);
+        out.push(word);
+      }
+    }
+    return out;
+  };
+  if (req.action === 'wordListSave') {
+    const name = String(req.name || '').trim().slice(0, 80);
+    if (!name) throw Error('Nomme ta liste.');
+    const existing = library.lists.find(l => l.id === req.listId);
+    if (existing) {
+      existing.name = name;
+      existing.words = await words(req.words);
+    } else {
+      if (library.lists.length >= 100) throw Error('Maximum 100 listes.');
+      library.lists.push({
+        id: Utilities.getUuid(),
+        name,
+        words: await words(req.words),
+        archived: false
+      });
+    }
+  }
+  if (req.action === 'wordListArchive') {
+    const list = library.lists.find(l => l.id === req.listId);
+    if (!list) throw Error('Liste introuvable.');
+    list.archived = req.archived === true;
+  }
+  if (req.action === 'wordListMerge') {
+    const target = library.lists.find(l => l.id === req.target), source = library.lists.find(l => l.id === req.source);
+    if (!target || !source || target.id === source.id) throw Error('Choisis deux listes différentes.');
+    target.words = await words(target.words.concat(source.words));
+  }
+  if (req.action === 'wordListUnassign') {
+    if (!Array.isArray(req.children) || !req.children.length && !req.replaceChildren || req.children.length > 30 || typeof req.week !== 'string' || BrawlCore.weekOf(req.week) !== req.week) throw Error('Choisis une semaine et un enfant.');
+    for (const id of [...new Set(req.children)]) {
+      const record = await profileRecord(id);
+      record.profile = BrawlCore.apply(record.profile, {
+        type: 'dictationList',
+        id: Utilities.getUuid(),
+        week: req.week,
+        words: []
+      }, Utilities.formatDate(new Date(), TZ, 'yyyy-MM-dd'), true);
+      await saveRecord(record);
+      if (library.assignments?.[req.week]) delete library.assignments[req.week][id];
+    }
+  }
+  if (req.action === 'wordListApply') {
+    const list = library.lists.find(l => l.id === req.listId);
+    if (!list || !Array.isArray(req.children) || !req.children.length && !req.replaceChildren || req.children.length > 30) throw Error('Choisis une liste et au moins un enfant.');
+    if (typeof req.week !== 'string' || !(/^\d{4}-\d{2}-\d{2}$/).test(req.week) || BrawlCore.weekOf(req.week) !== req.week) throw Error('Choisis le lundi de la semaine.');
+    if (list.words.length > 50) throw Error('Une dictée hebdomadaire peut contenir au maximum 50 mots.');
+    library.assignments = library.assignments || ({});
+    const assigned = library.assignments[req.week] || (library.assignments[req.week] = {});
+    if (req.replaceChildren) for (const id of Object.keys(assigned)) {
+      if (assigned[id] !== list.id || req.children.includes(id)) continue;
+      const record = await profileRecord(id);
+      record.profile = BrawlCore.apply(record.profile, {
+        type: 'dictationList',
+        id: Utilities.getUuid(),
+        week: req.week,
+        words: []
+      }, Utilities.formatDate(new Date(), TZ, 'yyyy-MM-dd'), true);
+      await saveRecord(record);
+      delete assigned[id];
+    }
+    for (const id of [...new Set(req.children)]) {
+      const record = await profileRecord(id);
+      record.profile = BrawlCore.apply(record.profile, {
+        type: 'dictationList',
+        id: Utilities.getUuid(),
+        week: req.week,
+        words: list.words
+      }, Utilities.formatDate(new Date(), TZ, 'yyyy-MM-dd'), true);
+      await saveRecord(record);
+      assigned[id] = list.id;
+    }
+  }
+  library.version++;
+  await props.setProperty(key, JSON.stringify(library));
+  return {
+    ok: true,
+    library
+  };
+}
+async function handleWritingCheck(req, record, day) {
+  if (typeof req.requestId !== 'string' || req.requestId.length > 80 || typeof req.target !== 'string' || req.target.length > 16) throw Error('Exercice d’écriture invalide.');
+  let p = record.profile;
+  if (!BrawlCore.studyEnabled(p, 'writing')) throw Error('L’écriture est désactivée par le parent.');
+  if (p._lastWriting && p._lastWriting.id === req.requestId && p._lastWriting.target === req.target) return {
+    ok: true,
+    result: p._lastWriting.result,
+    profile: await publicProfile(p)
+  };
+  const result = req.ocr ? HandwritingRecognizer.evaluateOCR(req.segments, req.target, req.ocr) : HandwritingRecognizer.evaluateWord(req.segments, req.target);
+  result.awarded = false;
+  if (result.accepted && !p.seen.includes(req.requestId)) {
+    p = BrawlCore.apply(p, {
+      type: 'writing',
+      id: req.requestId,
+      symbol: req.target
+    }, day, false);
+    result.awarded = true;
+  }
+  if (result.accepted) {
+    p._lastWriting = {
+      id: req.requestId,
+      target: req.target,
+      result
+    };
+    record.profile = p;
+    await saveRecord(record);
+  }
+  return {
+    ok: true,
+    result,
+    profile: await publicProfile(p)
+  };
+}
+
+return {doGet,doPost};
+}

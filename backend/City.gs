@@ -4,13 +4,13 @@ function cityPublicMember(req){const p=profileRecord(req.player).profile;const k
  if(x>=prime||y>=prime||(y*y-(x*x*x-3n*x+b))%prime!==0n)throw Error('Clé de partie invalide.');
  return {id:p.id,name:p.name,skin:p.skin,useCustomAppearance:p.useCustomAppearance,appearance:BrawlCore.effectiveAppearance(p),publicKey:{kty:'EC',crv:'P-256',x:key.x,y:key.y,ext:true},seen:Date.now(),vehicle:p.garage?.selected||'',cars:p.garage?.cars||{}};}
 function handleCityAction(req){
- if(!String(req.action).startsWith('city'))return null;if(requestParent)throw Error('Choisis un profil enfant.');
+ if(!String(req.action).startsWith('city')||/^city(?:Living|Fire)/.test(String(req.action)))return null;if(requestParent)throw Error('Choisis un profil enfant.');
  const reward=handleCityGameRewards(req);if(reward)return reward;const loot=handleCityLoot(req);if(loot)return loot;
  const activity=typeof handleCityActivities==='function'?handleCityActivities(req):null;if(activity)return activity;
  const cache=CacheService.getScriptCache(),now=Date.now();
  if(req.action==='cityDriveStart'){const p=profileRecord(req.player).profile;if(!p.garage?.cars[req.car])throw Error('Voiture indisponible.');const id=Utilities.getUuid();cache.put('drive:'+req.player,JSON.stringify({id,car:req.car,started:now,used:0}),7200);return {ok:true,driveId:id};}
  if(req.action==='cityDriveSave'){const grant=JSON.parse(cache.get('drive:'+req.player)||'null');if(!grant||grant.id!==req.driveId||!Number.isFinite(req.seconds)||req.seconds<0||req.seconds>120||typeof req.requestId!=='string'||req.requestId.length>100)throw Error('Séance de conduite invalide.');const record=profileRecord(req.player);if(record.profile.seen.includes(req.requestId))return {ok:true,profile:publicProfile(record.profile)};if(grant.used+req.seconds>(now-grant.started)/1000+2)throw Error('Durée de conduite invalide.');const event={type:'carUse',car:grant.car,seconds:req.seconds,id:req.requestId};if(!record.profile.seen.includes(event.id)){record.profile=BrawlCore.apply(record.profile,event,Utilities.formatDate(new Date(),TZ,'yyyy-MM-dd'),false);saveRecord(record);grant.used+=req.seconds;cache.put('drive:'+req.player,JSON.stringify(grant),7200);}return {ok:true,profile:publicProfile(record.profile)};}
- const family=authFamilyOf(req.player),familyKey='city-family:'+(family==='legacy'?'player:'+req.player:family);
+ const family=authFamilyOf(req.player),familyKey=BrawlCore.cityStandalone?'city-world:standalone':'city-family:'+(family==='legacy'?'player:'+req.player:family);
  if(req.action==='cityPartyAuto'){
   const member=cityPublicMember(req);let id=cache.get(familyKey),room=id?JSON.parse(cache.get('city:'+id)||'null'):null;
   if(room){room.members=room.members.filter(m=>now-m.seen<24000);if(!room.members.some(m=>m.id===room.host)){room.host=room.members[0]?.id;room.term=(room.term||0)+1;}}

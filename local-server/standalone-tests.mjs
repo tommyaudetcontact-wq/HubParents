@@ -1,0 +1,64 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';import os from 'node:os';import path from 'node:path';import {createRequire} from 'node:module';import {randomUUID,createHash} from 'node:crypto';
+import {webcrypto} from 'node:crypto';import {WebSocket} from 'ws';
+import {createServer} from './server.mjs';import {BrawlCore as C} from './engine/domain.js';
+const require=createRequire(import.meta.url),{fixture}=require('../auth-test-support.cjs'),f=fixture();f.register('seed@example.test','Seed');
+const root=fs.mkdtempSync(path.join(os.tmpdir(),'brawl-standalone-test-'));for(const name of ['data-ville','web','releases'])fs.mkdirSync(path.join(root,name));
+fs.writeFileSync(path.join(root,'standalone.json'),JSON.stringify({enabled:true}));fs.writeFileSync(path.join(root,'web/index.html'),'<h1>Brawl Ville</h1>');
+fs.writeFileSync(path.join(root,'data-ville/export-initial.json'),JSON.stringify({settings:Object.fromEntries(f.props),sheets:Object.entries(f.sheets).map(([name,s])=>({name,headers:s.rows[0]})),rows:Object.entries(f.sheets).flatMap(([sheet,s])=>s.rows.slice(1).map((cells,i)=>({sheet,row_no:i+2,cells})))}));
+const sockets=[];const app=createServer({root,port:0});await app.listen();const base='http://127.0.0.1:'+app.server.address().port;
+const call=async(action,payload={})=>(await fetch(base+'/api',{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action,player:'__parent__',...payload})})).json();
+try{
+ const account=await call('authRegister',{name:'City Test',email:'ville@example.test',salt:'b'.repeat(32),proof:'c'.repeat(64)});assert(account.ok,account.error);
+ const admin=(action,data={})=>call(action,{parentToken:account.token,familyId:account.familyId,...data});const created=await admin('familyCreate',{patch:{name:'Ville',grade:4}});assert(created.ok,created.error);const child=await admin('authPlayChild',{childId:created.profiles[0].id});assert(child.ok,child.error);
+ let p=child.profile;const player=(action,data={})=>call(action,{player:p.id,token:child.token,...data});const event=async e=>{const r=await player('event',{event:{...e,id:randomUUID(),revision:p.revision}});if(r.ok)p=r.profile;return r;};
+ assert.equal(p.coins,50);assert.equal(p.cityEstate.owned,false);assert((await event({type:'cityLandBuy'})).ok);assert.equal(p.coins,20);assert(p.cityEstate.owned);assert(!(await event({type:'cityLandBuy'})).ok);
+ assert(!(await event({type:'claim',key:'daily:2026-10-26'})).ok,'Educational rewards are disabled');assert(!(await event({type:'simTick',seconds:60})).ok,'Legacy instant simulation is disabled');
+ const mutate=fn=>{const row=app.db.prepare("SELECT row_no,cells FROM sheet_rows WHERE sheet='Profils' AND json_extract(cells,'$[0]')=?").get(p.id),cells=JSON.parse(row.cells),profile=JSON.parse(cells[3]);fn(profile);cells[3]=JSON.stringify(profile);app.db.prepare("UPDATE sheet_rows SET cells=? WHERE sheet='Profils' AND row_no=?").run(JSON.stringify(cells),row.row_no);p=profile;};
+ mutate(q=>{q.room.items.push({id:'stove',x:2,y:2,rotation:0},{id:'table',x:4,y:2,rotation:0});q.inventory.push('stove','table');q.needs.food=15;});
+ const fridge=p.room.items.find(i=>i.id==='fridge'),position={x:fridge.x,y:fridge.y};let r=await player('cityLivingStart',{kind:'stove',item:'stove',position:{x:2,y:2}});assert(!r.ok,'Cooking needs fridge ingredients first');
+ r=await player('cityLivingStart',{kind:'fridge',item:'fridge',position});assert(r.ok,r.error);p=r.profile;let active=r.interaction;assert(!(await player('cityLivingFinish',{interactionId:active.id,position})).ok,'Early completion is rejected');
+ const complete=async(kind,item,at)=>{let start=await player('cityLivingStart',{kind,item,position:at});assert(start.ok,start.error);p=start.profile;const id=start.interaction.id;mutate(q=>{q.cityLiving.active.started-=15000;q.cityLiving.active.ends-=15000;});const done=await player('cityLivingFinish',{interactionId:id,position:at});assert(done.ok,done.error);p=done.profile;return done;};
+ mutate(q=>{q.cityLiving.active.started-=15000;q.cityLiving.active.ends-=15000;});r=await player('cityLivingFinish',{interactionId:active.id,position});assert(r.ok,r.error);p=r.profile;assert(p.cityLiving.prepared);assert.equal(p.coins,19);
+ await complete('stove','stove',{x:2,y:2});assert(p.cityLiving.meal);await complete('eat','table',{x:4,y:2});assert.equal(p.needs.food,75);assert(!p.cityLiving.meal);
+ const beforeNeeds=p.needs.energy;mutate(q=>{q.cityLiving.lastTick=Date.now()-3600000;});r=await player('cityLivingPulse',{active:true});assert(r.ok,r.error);p=r.profile;assert(p.needs.energy<beforeNeeds&&p.needs.energy>=beforeNeeds-.66,'Real-time needs decay is bounded to active time, never hours offline');
+ const place=C.cityPlaces.find(a=>a.job==='taxi'),origin=C.cityRoadSnap(place);r=await player('cityJobStart',{kind:'taxi',requestId:randomUUID(),position:origin});assert(r.ok,r.error);p=r.profile;const job=r.job;assert(job.tripDistance>=1600);const beforeTaxi=p.coins;
+ for(let n=0;n<job.points.length;n++){mutate(q=>{q.cityWork.active.started-=600000;});r=await player('cityJobCheckpoint',{jobId:job.id,index:n,position:job.points[n]});assert(r.ok,r.error);p=r.profile;}assert.equal(p.coins,beforeTaxi+1,'A complete taxi ride pays exactly one dollar');
+ r=await player('cityFireStart',{position:{x:1750,y:-700},avoid:[]});assert(r.ok,r.error);p=r.profile;const fire=r.duty;assert.equal(fire.seconds,60);assert(!(await player('cityFireSpray',{dutyId:fire.id,position:{x:0,y:0}})).ok,'Remote spraying is rejected');const at={x:fire.target.x,y:fire.target.y};const beforeFire=p.coins;
+ for(let n=0;n<12;n++){mutate(q=>{q.cityFireDuty.lastSpray=Date.now()-1100;});r=await player('cityFireSpray',{dutyId:fire.id,position:at});assert(r.ok,r.error);p=r.profile;}
+ assert.equal(p.cityFireDuty.state,'saved');assert.equal(p.coins,beforeFire+1);assert.equal(p.cityFireSaved,1);r=await player('cityFireSpray',{dutyId:fire.id,position:at});assert(r.ok);assert.equal(r.profile.coins,p.coins,'Replaying a saved fire never pays twice');
+ r=await player('cityFireStart',{position:at,avoid:[]});assert(r.ok,r.error);p=r.profile;assert.equal(r.duty.seconds,56);mutate(q=>{q.cityFireDuty.deadline=Date.now()-1;});r=await player('cityFireStatus');assert.equal(r.duty.state,'failed');assert.equal(r.profile.coins,p.coins,'Failed fires pay nothing');
+
+ // Protected controls apply across accounts and the live relay, not only the menu.
+ const second=await call('authRegister',{name:'Friend',email:'friend@example.test',salt:'e'.repeat(32),proof:'f'.repeat(64)});assert(second.ok,second.error);
+ const secondProfile=await call('familyCreate',{parentToken:second.token,familyId:second.familyId,patch:{name:'Friend'}});assert(secondProfile.ok,secondProfile.error);
+ const friend=await call('authPlayChild',{parentToken:second.token,familyId:second.familyId,childId:secondProfile.profiles[0].id});assert(friend.ok,friend.error);
+ const parentExtra={parentToken:account.token,familyId:account.familyId};
+ assert(!(await player('cityParentalSetPin',{salt:'1'.repeat(32),proof:'2'.repeat(64)})).ok,'Child session cannot set the parental PIN');
+ let controls=await player('cityParentalSetPin',{...parentExtra,salt:'1'.repeat(32),proof:'2'.repeat(64)});assert(controls.ok,controls.error);let parentalToken=controls.parentalToken;
+ assert(!(await player('cityParentalUnlock',{proof:'3'.repeat(64)})).ok);
+ controls=await player('cityParentalUnlock',{proof:'2'.repeat(64)});assert(controls.ok,controls.error);parentalToken=controls.parentalToken;
+ const policy={voice:false,multiplayer:true,invites:false,weapons:false,dailyMinutes:0,quietEnabled:false,quietStart:1320,quietEnd:420};
+ assert(!(await player('cityParentalSave',{policy,all:true})).ok,'PIN ticket required');
+ controls=await player('cityParentalSave',{parentalToken,policy,all:true});assert(controls.ok,controls.error);assert.equal(controls.policy.voice,false);
+ assert(!(await admin('familyCreate',{patch:{name:'Bypass'}})).ok,'Cannot bypass parental limits by making another character');
+ const protectedNew=await admin('familyCreate',{parentalToken,patch:{name:'Protected'}});assert(protectedNew.ok,protectedNew.error);assert.equal(protectedNew.profiles.at(-1).cityParental.voice,false);
+ assert(!(await player('cityParentalSetPin',{...parentExtra,salt:'4'.repeat(32),proof:'5'.repeat(64)})).ok,'Account password cannot reset an existing PIN');
+ assert(!(await player('cityParentalSave',{parentalToken,policy,targetId:friend.profile.id})).ok,'Cannot change another account controls');
+ const key=await webcrypto.subtle.generateKey({name:'ECDSA',namedCurve:'P-256'},true,['sign','verify']),publicKey=await webcrypto.subtle.exportKey('jwk',key.publicKey),rooms=[];
+ const next=ws=>new Promise((resolve,reject)=>{const t=setTimeout(()=>reject(Error('Relay timeout')),3000);ws.once('message',data=>{clearTimeout(t);resolve(JSON.parse(data));});});
+ for(const childAccount of [child,friend]){const room=await call('cityPartyAuto',{player:childAccount.profile.id,token:childAccount.token,publicKey});assert(room.ok,room.error);rooms.push(room);const ws=new WebSocket(base.replace('http','ws')+'/realtime');sockets.push(ws);await new Promise(resolve=>ws.once('open',resolve));const ready=next(ws);ws.send(JSON.stringify({event:'phx_join',topic:'realtime:city-'+room.room.id,ref:'1',payload:{localAuth:{ticket:room.realtimeTicket}}}));assert.equal((await ready).payload.status,'ok');}
+ assert.equal(rooms[0].room.id,rooms[1].room.id,'Separate fresh accounts share the city');
+ let seq=0;async function send(kind,data){const body=JSON.stringify({from:p.id,seq:++seq,kind,data}),signature=Buffer.from(await webcrypto.subtle.sign({name:'ECDSA',hash:'SHA-256'},key.privateKey,new TextEncoder().encode(body))).toString('base64');sockets[0].send(JSON.stringify({event:'broadcast',topic:'realtime:city-'+rooms[0].room.id,payload:{event:'game',payload:{body,signature}}}));}
+ const received=[];sockets[1].on('message',d=>received.push(JSON.parse(d)));
+ await send('voice',{type:'invite'});await send('activity',{action:'inventory-fire'});await send('activity',{action:'invite-create'});await send('input',{x:.5,y:0});await new Promise(resolve=>setTimeout(resolve,150));assert.equal(received.length,1,'Blocked voice, weapons and invitations never reach peer');assert.equal(JSON.parse(received[0].payload.payload.body).kind,'input');
+ controls=await player('cityParentalSave',{parentalToken,policy:{...policy,multiplayer:false},all:true});assert(controls.ok,controls.error);assert(!(await player('cityPartyAuto',{publicKey})).ok);
+ controls=await player('cityParentalSave',{parentalToken,policy:{...policy,quietEnabled:true,quietStart:0,quietEnd:0},all:true});assert(controls.ok);assert(controls.blocked);assert(!(await player('cityFireStart',{position:{x:1750,y:-700}})).ok);
+ const recovery=await call('authRecover',{email:'ville@example.test',recoveryCode:account.recoveryCode,salt:'6'.repeat(32),proof:'7'.repeat(64)});assert(recovery.ok,recovery.error);const recovered=await player('cityParentalBegin');assert.equal(recovered.pinConfigured,false,'Verified account recovery resets forgotten parental PIN');
+ assert(!(await player('state')).profile?._cityPlayClock,'Private play clock is never returned in public profile');
+ console.log('Parental: PIN protection, inherited restrictions, cross-account isolation, recovery, quiet hours, multiplayer admission and signed voice/weapon/invitation relay filtering passed.');
+
+ const bytes=Buffer.alloc(2048,5),release={applicationId:'com.brawlville.game',versionCode:2,versionName:'0.1.1',minimumVersionCode:1,file:'Brawl-Ville.apk',apkPath:'/app/apk',size:bytes.length,sha256:createHash('sha256').update(bytes).digest('hex')};fs.writeFileSync(path.join(root,'releases/Brawl-Ville.apk'),bytes);fs.writeFileSync(path.join(root,'releases/latest.json'),JSON.stringify(release));
+ assert.equal((await fetch(base+'/app/version',{headers:{Origin:'https://appassets.androidplatform.net'}})).status,200);const manifest=await (await fetch(base+'/app/version')).json();assert.equal(manifest.versionCode,2);assert(!manifest.file);assert.equal((await (await fetch(base+'/app/apk')).arrayBuffer()).byteLength,bytes.length);assert.equal((await fetch(base+'/releases/latest.json')).status,404);
+ console.log('Standalone SQLite: fresh accounts, bounded active-time needs, land purchase, no educational grants, timed fridge/cook/eat chain, exact one-dollar long taxi rides, fire proximity/time/reward checks, escalating difficulty and public signed-release metadata/download passed.');
+}finally{for(const ws of sockets)ws.terminate();await app.close();C.setCityStandalone(false);}

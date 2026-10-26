@@ -1,0 +1,158 @@
+[
+  {
+    "name": "AccesEnfants",
+    "headers": [
+      "enfant_id",
+      "preuve_hachee",
+      "code_hache",
+      "modifie_iso"
+    ]
+  },
+  {
+    "name": "ConnexionsEnfants",
+    "headers": [
+      "code_hache",
+      "enfant_id",
+      "famille_id",
+      "expire_ms",
+      "statut"
+    ]
+  },
+  {
+    "name": "Duels",
+    "headers": [
+      "id",
+      "hote",
+      "invite",
+      "statut",
+      "cree_ms"
+    ]
+  },
+  {
+    "name": "Echanges_V2",
+    "headers": [
+      "id",
+      "de",
+      "vers",
+      "carte_offerte",
+      "carte_demandee",
+      "statut",
+      "cree_iso"
+    ]
+  },
+  {
+    "name": "EnfantsFamilles",
+    "headers": [
+      "enfant_id",
+      "famille_id"
+    ]
+  },
+  {
+    "name": "EtatsProfils",
+    "headers": [
+      "version_id",
+      "fragment",
+      "json"
+    ]
+  },
+  {
+    "name": "Familles",
+    "headers": [
+      "id",
+      "nom",
+      "cree_iso"
+    ]
+  },
+  {
+    "name": "Invitations",
+    "headers": [
+      "id",
+      "de",
+      "vers",
+      "offre",
+      "reponse",
+      "statut",
+      "cree_ms"
+    ]
+  },
+  {
+    "name": "InvitationsParents",
+    "headers": [
+      "code_hache",
+      "famille_id",
+      "courriel",
+      "expire_ms",
+      "statut",
+      "cree_par"
+    ]
+  },
+  {
+    "name": "Journal",
+    "headers": [
+      "date_iso",
+      "profil_id",
+      "requete_id",
+      "action",
+      "pieces_apres",
+      "xp_apres",
+      "revision"
+    ]
+  },
+  {
+    "name": "Lobby",
+    "headers": [
+      "profil",
+      "derniere_presence",
+      "actif"
+    ]
+  },
+  {
+    "name": "Parents",
+    "headers": [
+      "id",
+      "courriel",
+      "nom",
+      "sel",
+      "preuve_hachee",
+      "recuperation_hachee",
+      "cree_iso"
+    ]
+  },
+  {
+    "name": "ParentsFamilles",
+    "headers": [
+      "parent_id",
+      "famille_id"
+    ]
+  },
+  {
+    "name": "Profils",
+    "headers": [
+      "id",
+      "prenom",
+      "annee",
+      "etat_json",
+      "maj_iso"
+    ]
+  },
+  {
+    "name": "ProfilsArchives",
+    "headers": [
+      "id",
+      "prenom",
+      "annee",
+      "etat_archive",
+      "suppression_iso"
+    ]
+  },
+  {
+    "name": "Sessions",
+    "headers": [
+      "jeton_hache",
+      "type",
+      "compte_id",
+      "famille_id",
+      "expire_ms"
+    ]
+  }
+]
