@@ -6,6 +6,7 @@ import {randomBytes} from 'node:crypto';
 import {DatabaseSync} from 'node:sqlite';
 import {WebSocketServer} from 'ws';
 import {createParental} from './parental.mjs';
+import {createSuperuser} from './superuser.mjs';
 import {initialize,importBackup,runtime} from './runtime.js';
 import {createEngine} from './engine/engine.js';
 import {BrawlCore} from './engine/domain.js';
@@ -18,7 +19,7 @@ export function createServer({root=path.resolve(path.dirname(fileURLToPath(impor
  if(!db.prepare("SELECT value FROM settings WHERE key='AUTH_PEPPER'").get())throw Error('Base incomplète : secret de connexion manquant.');
  let queue=Promise.resolve(),stopping=false;const tickets=new Map(),clients=new Set(),rates=new Map();
  const serial=fn=>{const next=queue.then(fn);queue=next.catch(()=>{});return next;};
- const parental=createParental({db,enabled:standalone,upgrade:BrawlCore.upgrade});
+ const parental=createParental({db,enabled:standalone,upgrade:BrawlCore.upgrade}),superuser=createSuperuser({db,enabled:standalone,upgrade:BrawlCore.upgrade});
  const notifyParental=ids=>{for(const id of ids){const rooms=new Set([...clients].filter(c=>c.player===id).map(c=>c.room));for(const ws of clients)if(ws.readyState===1&&(ws.player===id||rooms.has(ws.room)))ws.send(JSON.stringify({topic:ws.topic,event:'parental-policy',payload:{player:id,...parental.status(id)}}));}};
  const room=id=>{const row=db.prepare('SELECT value FROM cache WHERE key=? AND expires_at>?').get('city:'+id,Date.now());try{return row?JSON.parse(row.value):null;}catch{return null;}};
  const json=(res,status,value,origin)=>{res.writeHead(status,{'Content-Type':'application/json;charset=utf-8','Cache-Control':'no-store',...(origin?{'Access-Control-Allow-Origin':origin,'Vary':'Origin'}:{})});res.end(JSON.stringify(value));};
@@ -33,7 +34,7 @@ export function createServer({root=path.resolve(path.dirname(fileURLToPath(impor
    if(req.method!=='POST')return json(res,405,{ok:false,error:'Méthode invalide.'},origin);
    let length=0,chunks=[];for await(const chunk of req){length+=chunk.length;if(length>300000)return json(res,413,{ok:false,error:'Requête trop volumineuse.'},origin);chunks.push(chunk);}const text=Buffer.concat(chunks).toString('utf8');let body;try{body=JSON.parse(text);}catch{return json(res,400,{ok:false,error:'JSON invalide.'},origin);}if(!body||Array.isArray(body)||typeof body.action!=='string')return json(res,400,{ok:false,error:'Requête invalide.'},origin);
    const ip=req.headers['cf-connecting-ip']||req.socket.remoteAddress,auth=body.action.startsWith('auth'),period=auth?900000:60000,key=ip+':'+auth+':'+Math.floor(Date.now()/period),rate=rates.get(key)||{hits:0,until:Date.now()+period};rate.hits++;rates.set(key,rate);if(rate.hits>(auth?120:1200))return json(res,429,{ok:false,error:'Trop de requêtes.'},origin);
-   const value=await serial(async()=>{db.exec('BEGIN IMMEDIATE');try{const engine=createEngine(runtime(db)),direct=await parental.handle(body,engine),result=direct||await engine.doPost({postData:{contents:text}});if(!result.ok){db.exec('ROLLBACK');return result;}const denied=parental.gate(body,result);if(denied){db.exec('ROLLBACK');return {ok:false,error:denied};}if(body.action==='authRecover')parental.resetRecovered(result.parent?.id);const changed=result._policyChanged||[];delete result._policyChanged;db.exec('COMMIT');if(changed.length)notifyParental(changed);if(result.room?.id&&String(body.action).startsWith('cityParty')){const ticket=randomBytes(32).toString('hex');tickets.set(ticket,{room:result.room.id,player:body.player,until:Date.now()+30000});result.realtimeTicket=ticket;}return result;}catch(e){db.exec('ROLLBACK');throw e;}});return json(res,200,value,origin);
+   const value=await serial(async()=>{db.exec('BEGIN IMMEDIATE');try{const engine=createEngine(runtime(db)),direct=await superuser.handle(body,engine)||await parental.handle(body,engine),result=direct||await engine.doPost({postData:{contents:text}});if(!result.ok){db.exec('ROLLBACK');return result;}const denied=parental.gate(body,result);if(denied){db.exec('ROLLBACK');return {ok:false,error:denied};}if(body.action==='authRecover')parental.resetRecovered(result.parent?.id);const changed=result._policyChanged||[];delete result._policyChanged;db.exec('COMMIT');if(changed.length)notifyParental(changed);if(result.room?.id&&String(body.action).startsWith('cityParty')){const ticket=randomBytes(32).toString('hex');tickets.set(ticket,{room:result.room.id,player:body.player,until:Date.now()+30000});result.realtimeTicket=ticket;}return result;}catch(e){db.exec('ROLLBACK');throw e;}});return json(res,200,value,origin);
   }
   if(!['GET','HEAD'].includes(req.method))return json(res,405,{ok:false,error:'Méthode invalide.'},origin);
   if(url.pathname==='/config.js'){res.writeHead(200,{'Content-Type':mime['.js'],'Cache-Control':'no-store'});return res.end("window.BRAWL_CONFIG=Object.freeze({endpoint:location.origin+'/api',realtimeUrl:location.origin.replace(/^http/,'ws')+'/realtime',backend:'local',standalone:"+JSON.stringify(standalone)+"});window.BRAWL_SERVER_READY=Promise.resolve();");}

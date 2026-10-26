@@ -12,6 +12,13 @@ try{
  const account=await call('authRegister',{name:'City Test',email:'ville@example.test',salt:'b'.repeat(32),proof:'c'.repeat(64)});assert(account.ok,account.error);
  const admin=(action,data={})=>call(action,{parentToken:account.token,familyId:account.familyId,...data});const created=await admin('familyCreate',{patch:{name:'Ville',grade:4}});assert(created.ok,created.error);const child=await admin('authPlayChild',{childId:created.profiles[0].id});assert(child.ok,child.error);
  let p=child.profile;const player=(action,data={})=>call(action,{player:p.id,token:child.token,...data});const event=async e=>{const r=await player('event',{event:{...e,id:randomUUID(),revision:p.revision}});if(r.ok)p=r.profile;return r;};
+
+ assert.equal((await player('cityAdminStatus')).superuser,false);assert(!(await player('cityAdminMoney',{amount:1000,mode:'add',requestId:randomUUID()})).ok,'Ordinary account cannot grant itself money');
+ app.db.prepare('INSERT INTO settings(key,value) VALUES(?,?)').run('CITY_SUPERUSER_PARENTS',JSON.stringify([account.parent.id]));assert.equal((await player('cityAdminStatus')).superuser,true);
+ const moneyRequest=randomUUID(),give=()=>player('cityAdminMoney',{amount:1234,mode:'add',requestId:moneyRequest});let money=await give();assert(money.ok,money.error);assert.equal(money.profile.coins,1284);money=await give();assert.equal(money.profile.coins,1284,'Retry never grants money twice');assert(money.replay);
+ for(const amount of [-1,1.5,1000000001])assert(!(await player('cityAdminMoney',{amount,mode:'add',requestId:randomUUID()})).ok,'Invalid amount rejected');assert(!(await call('cityAdminMoney',{player:p.id,token:'wrong',amount:1000,mode:'add',requestId:randomUUID()})).ok,'Forged session denied');
+ const concurrent=await Promise.all([1,2].map(()=>player('cityAdminMoney',{amount:1,mode:'add',requestId:randomUUID()})));assert(concurrent.every(r=>r.ok));assert.equal(Math.max(...concurrent.map(r=>r.profile.coins)),1286,'Concurrent grants serialize without losing money');
+ money=await player('cityAdminMoney',{amount:50,mode:'set',requestId:randomUUID()});assert(money.ok,money.error);p=money.profile;assert.equal(app.db.prepare('SELECT count(*) n FROM admin_money_log').get().n,4);
  assert.equal(p.coins,50);assert.equal(p.cityEstate.owned,false);assert((await event({type:'cityLandBuy'})).ok);assert.equal(p.coins,20);assert(p.cityEstate.owned);assert(!(await event({type:'cityLandBuy'})).ok);
  assert(!(await event({type:'claim',key:'daily:2026-10-26'})).ok,'Educational rewards are disabled');assert(!(await event({type:'simTick',seconds:60})).ok,'Legacy instant simulation is disabled');
  const mutate=fn=>{const row=app.db.prepare("SELECT row_no,cells FROM sheet_rows WHERE sheet='Profils' AND json_extract(cells,'$[0]')=?").get(p.id),cells=JSON.parse(row.cells),profile=JSON.parse(cells[3]);fn(profile);cells[3]=JSON.stringify(profile);app.db.prepare("UPDATE sheet_rows SET cells=? WHERE sheet='Profils' AND row_no=?").run(JSON.stringify(cells),row.row_no);p=profile;};
@@ -31,8 +38,8 @@ try{
 
  // Protected controls apply across accounts and the live relay, not only the menu.
  const second=await call('authRegister',{name:'Friend',email:'friend@example.test',salt:'e'.repeat(32),proof:'f'.repeat(64)});assert(second.ok,second.error);
- const secondProfile=await call('familyCreate',{parentToken:second.token,familyId:second.familyId,patch:{name:'Friend'}});assert(secondProfile.ok,secondProfile.error);
- const friend=await call('authPlayChild',{parentToken:second.token,familyId:second.familyId,childId:secondProfile.profiles[0].id});assert(friend.ok,friend.error);
+ const secondProfile=await call('familyCreate',{parentToken:second.token,familyId:second.familyId,patch:{name:'Tommy'}});assert(secondProfile.ok,secondProfile.error);
+ const friend=await call('authPlayChild',{parentToken:second.token,familyId:second.familyId,childId:secondProfile.profiles[0].id});assert(friend.ok,friend.error);assert.equal((await call('cityAdminStatus',{player:friend.profile.id,token:friend.token})).superuser,false,'Matching Tommy nickname never grants privileges');assert(!(await call('cityAdminMoney',{player:friend.profile.id,token:friend.token,amount:999999,mode:'add',requestId:randomUUID(),superuser:true,parentId:account.parent.id})).ok,'Client cannot spoof account privilege');
  const parentExtra={parentToken:account.token,familyId:account.familyId};
  assert(!(await player('cityParentalSetPin',{salt:'1'.repeat(32),proof:'2'.repeat(64)})).ok,'Child session cannot set the parental PIN');
  let controls=await player('cityParentalSetPin',{...parentExtra,salt:'1'.repeat(32),proof:'2'.repeat(64)});assert(controls.ok,controls.error);let parentalToken=controls.parentalToken;
@@ -56,6 +63,7 @@ try{
  controls=await player('cityParentalSave',{parentalToken,policy:{...policy,quietEnabled:true,quietStart:0,quietEnd:0},all:true});assert(controls.ok);assert(controls.blocked);assert(!(await player('cityFireStart',{position:{x:1750,y:-700}})).ok);
  const recovery=await call('authRecover',{email:'ville@example.test',recoveryCode:account.recoveryCode,salt:'6'.repeat(32),proof:'7'.repeat(64)});assert(recovery.ok,recovery.error);const recovered=await player('cityParentalBegin');assert.equal(recovered.pinConfigured,false,'Verified account recovery resets forgotten parental PIN');
  assert(!(await player('state')).profile?._cityPlayClock,'Private play clock is never returned in public profile');
+ console.log('Superuser: immutable-account grant, denied name spoof/session spoof, amount bounds, idempotent retries, serialized concurrent credits and audited balance setting passed.');
  console.log('Parental: PIN protection, inherited restrictions, cross-account isolation, recovery, quiet hours, multiplayer admission and signed voice/weapon/invitation relay filtering passed.');
 
  const bytes=Buffer.alloc(2048,5),release={applicationId:'com.brawlville.game',versionCode:2,versionName:'0.1.1',minimumVersionCode:1,file:'Brawl-Ville.apk',apkPath:'/app/apk',size:bytes.length,sha256:createHash('sha256').update(bytes).digest('hex')};fs.writeFileSync(path.join(root,'releases/Brawl-Ville.apk'),bytes);fs.writeFileSync(path.join(root,'releases/latest.json'),JSON.stringify(release));
