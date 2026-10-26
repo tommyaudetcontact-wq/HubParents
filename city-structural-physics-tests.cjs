@@ -19,6 +19,17 @@ assert.equal(rebuilds,0,'Moving rubble reuses its local BSP instead of repartiti
 
 M.mount(api);sc.CityArt.buildings=Array.from({length:20},(_,n)=>({...b,x:800+n*700}));for(const home of sc.CityArt.buildings)M.blast(home.x+80,560,300,500);assert(M.rubble().length<=64,'Simultaneous city-wide destruction shares a global physical-piece budget');const bytes=Buffer.byteLength(JSON.stringify(M.snapshot()));assert(bytes<60000,'Building snapshots leave space for the rest of the shared city');console.log('Twenty demolished buildings: '+M.rubble().length+' coherent pieces, '+bytes+' structural snapshot bytes.');
 
+const partition=sc.CityCarDepth.build;let chipPartitions=0;sc.CityCarDepth.build=(...args)=>{chipPartitions++;return partition(...args);};for(let i=0;i<48;i++)M.paintDebris(c,{i:8,w:10,l:14,x:20+i*4,y:80,z:8,tilt:i*.1,angle:i*.15,color:'#aca79c'},sc.CityArt.project);assert.equal(chipPartitions,0,'Convex masonry chips do not build partition trees every frame');sc.CityCarDepth.build=partition;
+
+// Settled rubble and unchanged wall cells rasterize once, then return to live
+// geometry immediately when a real impulse wakes the body.
+M.mount(api);sc.CityArt.buildings=[b];M.blast(880,560,300,500);for(let i=0;i<450;i++)M.tick(.02);
+const sleeping=M.rubble().find(r=>r.body.rest).body,depth=sc.CityArt.project(sleeping.x,sleeping.y).y,stable=M.nodes(b).find(n=>n.depth===depth).buildingPiece;
+assert.equal(M.nodes(b).find(n=>n.depth===depth).buildingPiece,stable,'Sleeping pieces reuse transformed geometry');let images=0,fills=0;const recorder={drawImage(){images++;},beginPath(){},moveTo(){},lineTo(){},closePath(){},fill(){fills++;}};
+M.paint(recorder,stable);M.paint(recorder,stable);assert.equal(images,2);assert.equal(fills,0,'Settled rubble uses its cached image instead of issuing each polygon again');
+M.impulse(sleeping.x-10,sleeping.y,60,100);M.tick(.02);const awake=M.nodes(b).find(n=>n.depth===sc.CityArt.project(sleeping.x,sleeping.y).y).buildingPiece;assert.notEqual(awake,stable);images=fills=0;M.paint(recorder,awake);assert(fills>0&&images===0,'An awakened body immediately redraws its live physical pose');
+assert.equal(M.nodes(b,{left:100000,top:100000,width:200,height:200}).length,0,'Offscreen rubble does not submit any polygons');assert.equal(M.rubble(()=>false).length,0,'Perspective culling runs before transforming the debris mesh');const stream=M.snapshot();M.mount({...api,host:()=>false});assert(M.receive(stream));const receivedFaces=M.rubble()[0].faces;assert(M.receive(stream));assert.equal(M.rubble()[0].faces,receivedFaces,'Unchanged guest snapshots retain cached rubble geometry');
+
 // Settled pieces are sleeping physical bodies, not frozen decorations.
 M.mount(api);sc.CityArt.buildings=[b];sc.CityDamage.mount(api);M.blast(880,560,300,500);for(let i=0;i<350;i++)M.tick(.02);let piece=M.rubble().find(r=>r.body.rest).body;const oldX=piece.x,oldY=piece.y;M.impulse(piece.x-20,piece.y,120,160);assert(!piece.rest&&piece.vx>0&&piece.vz>0,'An explosion wakes a settled piece');for(let i=0;i<10;i++)M.tick(.02);assert(Math.hypot(piece.x-oldX,piece.y-oldY)>1,'Awakened rubble keeps linear momentum');
 const chip=sc.CityDamage.inspect()[0];if(chip){Object.assign(chip,{vx:0,vy:0,vz:0});M.impulse(chip.x-15,chip.y,100,100);assert(chip.vx>0&&chip.vz>0,'Small physical chips also react to blast impulses');}
