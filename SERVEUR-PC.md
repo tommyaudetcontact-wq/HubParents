@@ -23,3 +23,5 @@ L’APK signé est sur le Bureau dans `Brawl-Ville-Android/Brawl-Ville.apk`. Son
 Le compte superutilisateur est accordé par une liste privée d’identifiants de comptes dans le réglage SQLite `CITY_SUPERUSER_PARENTS`, jamais d’après un pseudo ou un champ envoyé par le joueur. Son menu « Superutilisateur · Argent » permet d’ajouter de l’argent ou de fixer son propre solde (0 à 1 milliard). Les opérations sont authentifiées, sérialisées, idempotentes et inscrites dans `admin_money_log`. Les droits sont conservés avec la base SQLite, hors Git.
 
 À partir de l’APK 0.1.2, la vérification automatique se fait aussi toutes les deux minutes au premier plan. L’ouverture et le retour dans l’application déclenchent également une vérification (au plus une par minute). « Plus tard » repousse les rappels de cette version de trente minutes; la vérification manuelle reste disponible. Le PC doit être en marche et Android confirme toujours l’installation.
+
+L’APK 0.1.3 et le web essaient une seconde lecture GitHub si l’adresse publiée est encore en cache ou si l’ancien relais ne répond plus. Seul un serveur HTTPS approuvé et joignable est accepté.
