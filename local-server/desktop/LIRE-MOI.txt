@@ -1,0 +1,26 @@
+BRAWL - SERVEUR SUR TON PC
+
+1. Double-clique DEMARRER.cmd et garde sa fenêtre ouverte.
+2. Attends SERVEUR EN MARCHE. Le jeu s'ouvre avec ton lien habituel :
+   https://tommyaudetcontact-wq.github.io/HubParents/
+3. Utilise ARRETER.cmd pour arrêter le serveur.
+
+Aucun lien compliqué à partager : le lanceur relie automatiquement le lien
+habituel à ton PC. Une connexion Internet et la connexion GitHub déjà configurée
+sur cet ordinateur sont nécessaires au démarrage.
+
+Les connexions parent/enfant existantes et les sauvegardes sont conservées.
+La base est dans data\brawl.sqlite. Les copies automatiques sont dans sauvegardes
+(à chaque démarrage et toutes les 6 heures). Ne partage jamais ces dossiers.
+N'efface pas les fichiers brawl.sqlite-wal/shm lorsque le serveur fonctionne.
+
+PC éteint, serveur arrêté, connexion Internet coupée ou PC en veille : le jeu
+en ligne est indisponible. Le relais gratuit est destiné à cet hébergement
+temporaire et n'offre pas de garantie de disponibilité.
+
+Pour récupérer une nouvelle version du code publiée sur GitHub :
+arrête le serveur, double-clique METTRE-A-JOUR.cmd, puis redémarre.
+La mise à jour conserve data et sauvegardes.
+
+Supabase ne reçoit plus les requêtes du jeu. Sa copie existante n'est pas effacée.
+Les journaux utiles sont dans journaux. Aucun mot de passe n'y est écrit.

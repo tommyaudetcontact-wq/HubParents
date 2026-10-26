@@ -1,2 +1,3 @@
-// URL publique du backend Supabase. Aucun secret dans le frontend.
-window.BRAWL_CONFIG=Object.freeze({endpoint:'https://wodtiksnxpeqiipvpbdv.supabase.co/functions/v1/hubparents',realtimeKey:'sb_publishable_dNPYSLolJB4VG6asvqIFeQ_0qJgmYEk'});
+// Le lien du jeu reste fixe. Le PC publie uniquement son adresse de connexion.
+window.BRAWL_CONFIG=Object.freeze({backend:'local',endpoint:'',realtimeUrl:''});
+window.BRAWL_SERVER_READY=(async()=>{try{const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),8000);let response;try{response=await fetch('https://raw.githubusercontent.com/tommyaudetcontact-wq/HubParents/main/server-location.json?t='+Date.now(),{cache:'no-store',signal:controller.signal});}finally{clearTimeout(timer);}if(!response.ok)return;const info=await response.json();if(info.online&&/^https:\/\/[a-z0-9-]+\.trycloudflare\.com$/.test(info.origin)){window.BRAWL_CONFIG=Object.freeze({backend:'local',endpoint:info.origin+'/api',realtimeUrl:info.origin.replace(/^http/,'ws')+'/realtime'});}}catch{/* Le PC peut être éteint; aucune connexion vers un ancien backend. */}})();

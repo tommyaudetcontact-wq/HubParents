@@ -4,3 +4,10 @@
 .private/
 node_modules/
 supabase/.temp/
+
+local-server/engine/
+
+/data/
+/sauvegardes/
+/journaux/
+/settings.json
