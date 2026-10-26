@@ -10,10 +10,12 @@
  for(const y of northY.slice(0,-1))for(let n=1;n<coreX.length;n++)downtownRoads.push({a:{x:coreX[n-1],y},b:{x:coreX[n],y}});
  M.minY=-1300;
  M.downtown={x:20,y:-1260,w:1810,h:1300,roads:downtownRoads,buildings:[]};
- for(let row=0;row<3;row++)for(let col=0;col<3;col++){
-  const n=row*3+col,w=[175,205,160][(col+row)%3],d=row===2?110:165;
-  M.downtown.buildings.push({x:coreX[col]+150+(col===1?30:0),y:northY[row]+(row===2?110:135),w,d,h:[190,245,165,220,180,255,155,210,175][n],color:['#b0c4ca','#a9b5c5','#c3c9c1'][n%3],roof:['#536878','#5d6477','#627875'][n%3],downtown:true});
+ const towers=[[95,115,245,180,190],[210,100,165,235,245],[110,180,260,145,165],[200,110,155,230,220],[100,170,270,155,180],[230,110,170,220,255],[100,110,235,110,155],[230,95,155,145,210],[115,120,260,105,175]];
+ for(let n=0;n<towers.length;n++){const [dx,dy,w,d,h]=towers[n],row=Math.floor(n/3),col=n%3;
+  M.downtown.buildings.push({x:coreX[col]+dx,y:northY[row]+dy,w,d,h,color:['#b0c4ca','#aeb9cd','#d2c7b5','#a7beb8','#c8ada1','#95b4c8','#cabfce','#b9c4b0','#c9c8b7'][n],roof:['#536878','#626279','#657b72'][n%3],facade:n%3,downtown:true});
  }
+ // A pair of slim towers shares one block; the southeast block opens into a plaza.
+ Object.assign(M.downtown.buildings[8],{x:190,y:-500,w:95,d:115});M.downtown.plaza={x:1290,y:-150,w:370,d:170};
  M.minX=-7580;M.residential={layoutVersion:3,revision:'',roads:[],lots:[],entry:{x:-300,y:1000}};
  C.configureResidential=(members=[])=>{const homes=members.slice(0,6).sort((a,b)=>a.id.localeCompare(b.id)),key=JSON.stringify(homes.map(h=>[h.id,h.size]));if(M.residential.revision===key)return false;const lots=Array.from({length:8},(_,n)=>{const owner=n>=2?homes[n-2]:null,extent=owner?Math.max(7,Math.min(40,owner.size||14))*40:0,w=extent||325,d=extent||305;return {id:'lot-'+n,n,npc:n<2,owner:owner?.id||null,w,d,extent,house:{w:245,d:170,h:76,color:colors[n%4],roof:roofs[n%4]}};});
  const rowWidths=[0,1].map(row=>lots.slice(row*4,row*4+4).reduce((sum,l)=>sum+l.w+32,0)),left=-300-Math.max(...rowWidths)-160,ys=[100];
