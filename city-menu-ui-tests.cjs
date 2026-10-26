@@ -11,6 +11,7 @@ modal.open=false;assert(sc.CityUI.back());assert.equal(backCatalogue,1,'Native b
 for(const category of ['vehicles','style','furniture','cards','companions'])assert(sc.CityUI.catalogHome().includes('data-arg="shop/'+category+'"'));
 assert(sc.CityUI.roomsHTML('bath').includes('aria-pressed="true"'));assert.deepEqual(Array.from(sc.CityUI.roomKinds('bath')),['bath','shower','sink','toilet']);assert.equal(sc.CityUI.roomKinds('unknown').length,0);
 sc.CityNavigation.menu('settings');for(const name of ['Contrôle parental','Mises à jour','Sons','Déconnexion'])assert(html.includes(name));
+modal.open=true;sc.App.route=()=> 'login';assert(sc.CityUI.back());assert.equal(modal.open,false,'Account dialogs can close before the city is mounted');sc.App.route=()=> 'city';
 // A drawer category must open the inventory, even after the global close-tools listener runs.
 const inventory={hidden:true,innerHTML:'',querySelector:()=>null,querySelectorAll:()=>[]},stage={classList:{add(){},toggle(){},remove(){},contains:()=>false}},apt={c:{parentElement:stage},mode:'furnish'},profile=C.upgrade(C.makeProfile('drawer','Test',4));profile.inventory=[];
 sc.document.getElementById=id=>id==='room-controls'?inventory:null;sc.document.querySelector=()=>null;sc.document.querySelectorAll=()=>[];sc.App.toast=message=>{throw Error(message);};sc.App.apartment=()=>apt;sc.App.profile=()=>profile;sc.Apartment={prototype:{setMode(){},click(){}}};sc.HouseDraft={paint(){}};sc.setInterval=()=>1;sc.queueMicrotask=()=>{};
