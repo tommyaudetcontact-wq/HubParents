@@ -15,7 +15,7 @@ try {
  Write-Host 'Connexion du lien habituel à cet ordinateur...'
  $tunnel=Start-Process -FilePath (Join-Path $root 'outils\cloudflared.exe') -ArgumentList 'tunnel','--no-autoupdate','--url','http://127.0.0.1:4173','--protocol','http2' -WorkingDirectory $root -WindowStyle Hidden -PassThru -RedirectStandardOutput (Join-Path $root 'journaux\tunnel.log') -RedirectStandardError (Join-Path $root 'journaux\tunnel-erreurs.log')
  $origin=$null
- for($i=0;$i -lt 180;$i++){Start-Sleep -Milliseconds 500;$tunnel.Refresh();if($tunnel.HasExited){throw 'Le relais Internet a quitté. Voir journaux\tunnel-erreurs.log.'};$log=Get-Content -LiteralPath (Join-Path $root 'journaux\tunnel-erreurs.log') -Raw -ErrorAction SilentlyContinue;if($log -match 'https://[a-z0-9-]+\.trycloudflare\.com'){$origin=$Matches[0];break}}
+ for($i=0;$i -lt 180;$i++){Start-Sleep -Milliseconds 500;$tunnel.Refresh();if($tunnel.HasExited){throw 'Le relais Internet a quitté. Voir journaux\tunnel-erreurs.log.'};$log=Get-Content -LiteralPath (Join-Path $root 'journaux\tunnel-erreurs.log') -Raw -ErrorAction SilentlyContinue;$tunnelAddress=[regex]::Match(($log -join "`n"),'https://[a-z0-9-]+\.trycloudflare\.com');if($tunnelAddress.Success){$origin=$tunnelAddress.Value;break}}
  if(-not $origin){throw 'Le relais Internet ne répond pas.'}
  $ready=$false
  for($i=0;$i -lt 20;$i++){try{if((Invoke-RestMethod ($origin+'/health') -TimeoutSec 4).app -eq 'HubParents-local'){$ready=$true;break}}catch{};Start-Sleep -Seconds 1}
