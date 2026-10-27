@@ -19,3 +19,6 @@ local-server/engine/
 
 /data-ville/
 /sauvegardes-ville/
+
+__pycache__/
+*.pyc
