@@ -12,7 +12,7 @@ for name in sorted(set(files)):
  p=Path(name)
  if p.parts[0] in ['supabase','backend','backend-engine','scripts','local-server','android','.github'] or p.name.startswith('.') or p.suffix.lower() not in extensions or not (repo/p).is_file():continue
  target=dest/'web'/p;target.parent.mkdir(parents=True,exist_ok=True);shutil.copy2(repo/p,target)
-for name in ['server.mjs','runtime.js','parental.mjs','superuser.mjs','city-trades.mjs','publish.mjs','package.json']:
+for name in ['server.mjs','runtime.js','parental.mjs','superuser.mjs','city-trades.mjs','patrol.mjs','publish.mjs','package.json']:
  shutil.copy2(repo/'local-server'/name,dest/'serveur'/name)
 for name in ['engine.js','domain.js']:shutil.copy2(repo/'backend-engine'/name,dest/'serveur/engine'/name)
 (dest/'serveur/engine/runtime.js').write_text("export {asyncArray} from '../runtime.js';\n",encoding='utf-8')

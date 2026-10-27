@@ -20,3 +20,13 @@ Le contrôle parental et la récupération du compte fonctionnent sur le backend
 - Aucun chantier ni ouvrier tant qu’un feu actif brûle sur la bâtisse. La reconstruction normale reprend après extinction/fin du feu.
 - Correction du maintien en ville autonome entre comptes distincts : le heartbeat ne rejette plus les autres familles; l’isolation reste active pour l’ancienne plateforme éducative.
 - Vérifications : suites backend, échanges HTTP sur SQLite avec deux nouveaux comptes, concurrence/doublons, fonds insuffisants, expiration et contrôle parental; simulation de la lance hôte/invité et blocage des chantiers; test visuel d’envoi/acceptation avec comptes de démonstration.
+
+## Métier policier — APK 0.1.12 (13)
+
+Menu → Métiers → Policier : choisir une intervention de 1 à 4 voitures, ou une patrouille aléatoire de 1–2 voitures. Primes : 1 $, 2,50 $, 4,50 $, 7 $. Véhicule de service plafonné à 129,6 km/h et bandits à 111,6 km/h. Un repère suit la cible la plus proche. Chaque voiture a sa propre barre de résistance : au moins six impacts distincts et suffisamment forts, avec une seconde entre les impacts. Ensuite le suspect sort, avec sa propre barre de vie : coups de poing/pied en combo ou pistolet de service s’il est armé.
+
+Sur mobile : boutons Frapper/Pistolet et Menotter. Clavier : J ou Espace pour combattre, E pour menotter. Manette : RB combat, X action/menottes, Y descendre. Le menottage dure 2,5 secondes, s’interrompt si l’agent s’éloigne, et utilise une pose accroupie avec les deux mains vers les poignets; le suspect reste agenouillé, mains derrière le dos. Tous les suspects doivent être menottés. Aucun paiement pour une simple voiture détruite ou un suspect mis à terre.
+
+SQLite attribue les cibles et contrôle la séquence, les délais, les distances, les six contacts, le type de combat, le menottage et le paiement unique. L’hôte simule les bandits/impacts; les invités prédisent leur conduite, reçoivent les mêmes jauges et peuvent prendre le service. Les états et événements non validés survivent au changement d’hôte. Reprise de l’intervention lors d’une reconnexion, expiration après 20 minutes et annulation depuis le menu. Les versements fractionnaires restent utilisables dans les échanges et les ajouts du superutilisateur.
+
+Tests : collisions physiques réelles, combats et projectiles, deux jauges par suspect, menottage interrompu/complet, six clients en réseau avec changement d’hôte, contrats et récompenses serveur, répétitions et faux événements, paiements fractionnaires. Le backend reste exclusivement sur le PC.
