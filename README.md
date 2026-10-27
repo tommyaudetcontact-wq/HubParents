@@ -1,3 +1,18 @@
+# Brawl Ville — téléchargements Android
+
+**[Ouvrir la page de téléchargement : APK 2D et APK 3D](https://tommyaudetcontact-wq.github.io/HubParents/android.html)**
+
+- [Télécharger Brawl Ville 2D — version 0.1.13](https://github.com/tommyaudetcontact-wq/HubParents/raw/refs/heads/main/downloads/Brawl-Ville-2D.apk)
+- [Télécharger Brawl Academy 3D — prototype 3D-0.3](https://github.com/tommyaudetcontact-wq/HubParents/raw/refs/heads/main/downloads/Brawl-Academy-3D.apk)
+
+Android 8 minimum. Les deux applications peuvent être installées ensemble. Le téléchargement fonctionne même lorsque le PC est éteint ; le serveur **Brawl-Serveur sur le PC** doit être lancé pour se connecter et jouer en ligne. L’essai 3D est encore en développement.
+
+Les APK signées, leurs versions et leurs [empreintes SHA-256](downloads/SHA256.txt) sont dans `downloads/`. Pour publier une nouvelle version, remplacer l’APK concernée et actualiser `downloads/versions.json`, `downloads/SHA256.txt` ainsi que les libellés de version de cette page et de `android.html`.
+
+Le backend actuel utilise le serveur local du PC et SQLite. Les notes Supabase ci-dessous sont historiques.
+
+---
+
 ## Backend Supabase — API 17
 
 Le backend `hubparents` est déployé dans le projet `wodtiksnxpeqiipvpbdv`.

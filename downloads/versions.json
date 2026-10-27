@@ -1,0 +1,18 @@
+{
+  "2d": {
+    "applicationId": "com.brawlville.game",
+    "versionCode": 14,
+    "versionName": "0.1.13",
+    "file": "Brawl-Ville-2D.apk",
+    "size": 12989693,
+    "sha256": "5d243299a75d025fe33cac440220dc22fd4b4e38110bb3151bb9a3ecb594a15d"
+  },
+  "3d": {
+    "applicationId": "com.brawlacademy.preview",
+    "versionCode": 3,
+    "versionName": "3D-0.3",
+    "file": "Brawl-Academy-3D.apk",
+    "size": 13822400,
+    "sha256": "b53a2b19efa6c9777ca4fbdb7e0b22e0c0827d13aeeb8e61e650038496ffd400"
+  }
+}
