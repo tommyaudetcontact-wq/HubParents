@@ -11,3 +11,12 @@ Objectifs autorisés : ville autonome; logement et personnalisation intégrés �
 Les nouveaux comptes de l’expérience utilisent exclusivement `data-ville/` et les clés de session `brawl-ville-*`. Les comptes éducatifs, leur base `data/`, et la sauvegarde de retour demeurent séparés. Les nouveaux comptes commencent avec 50 $, le terrain coûte 30 $.
 
 Le contrôle parental et la récupération du compte fonctionnent sur le backend local; aucun appel à un service Supabase n’est nécessaire. Le code de récupération affiché à la création du compte doit être conservé : aucun envoi par courriel n’est configuré.
+
+## Échanges et pompier — APK 0.1.10 (11)
+
+- Amis → Échanges : argent et jusqu’à 12 objets rangés de chaque côté (meubles, vêtements/skins, livres et véhicules non sélectionnés). Une proposition peut être un cadeau. Le destinataire examine puis accepte/refuse; l’expéditeur peut annuler; expiration après 15 minutes. Les biens équipés/placés doivent être rangés avant l’échange.
+- Les deux comptes doivent être présents dans la même ville. Le serveur SQLite authentifie, vérifie de nouveau les soldes et inventaires et transfère les deux profils dans une seule transaction. Les reprises de requêtes et doubles acceptations n’ajoutent aucun gain. Les contrôles parentaux s’appliquent. Aucun transfert d’argent réel.
+- Pompier : bouton 💦 LANCE visible pendant le service, utilisable à pied et depuis le camion. S’approcher si le bouton indique APPROCHE-TOI. Maintenir le bouton ou la gâchette droite; E ouvre/ferme l’eau. Jet animé et progression d’extinction.
+- Aucun chantier ni ouvrier tant qu’un feu actif brûle sur la bâtisse. La reconstruction normale reprend après extinction/fin du feu.
+- Correction du maintien en ville autonome entre comptes distincts : le heartbeat ne rejette plus les autres familles; l’isolation reste active pour l’ancienne plateforme éducative.
+- Vérifications : suites backend, échanges HTTP sur SQLite avec deux nouveaux comptes, concurrence/doublons, fonds insuffisants, expiration et contrôle parental; simulation de la lance hôte/invité et blocage des chantiers; test visuel d’envoi/acceptation avec comptes de démonstration.

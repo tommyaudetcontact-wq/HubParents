@@ -1855,7 +1855,7 @@ async function handleCityAction(req) {
     room.host = room.members[0]?.id;
     room.term = (room.term || 0) + 1;
   }
-  if (room.automatic && room.family !== family) throw Error('Ce quartier appartient à une autre famille.');
+  if (room.automatic && !BrawlCore.cityStandalone && room.family !== family) throw Error('Ce quartier appartient à une autre famille.');
   if (req.action === 'cityPartyJoin') {
     const member = await cityPublicMember(req), old = room.members.findIndex(m => m.id === req.player);
     if (old < 0 && room.members.length >= 6) throw Error('Cette partie est complète (6 joueurs).');
