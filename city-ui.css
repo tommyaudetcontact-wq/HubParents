@@ -50,3 +50,6 @@ body.city-game-shopping{background:#c6e9f8}.city-game-shopping .topbar{display:n
 .city-trades>h2{padding-left:36px;padding-right:22px}
 
 .city-patrol-hud{position:absolute;top:calc(138px + env(safe-area-inset-top,0px));left:12px;z-index:715;padding:7px 12px;border:2px solid white;border-radius:12px;background:#214d6be8;color:#fff;font-size:12px;font-weight:800;max-width:calc(100% - 24px);pointer-events:none}.city-patrol-controls{position:absolute;right:calc(12px + env(safe-area-inset-right,0px));bottom:calc(150px + env(safe-area-inset-bottom,0px));z-index:760;display:flex;gap:8px}.city-patrol-controls[hidden],.city-patrol-hud[hidden]{display:none}.city-patrol-controls button{height:64px;min-width:76px;max-width:110px;padding:6px;border:3px solid white;border-radius:22px;background:#2c83b6;color:white;font-weight:800;touch-action:manipulation}.city-patrol-controls button:disabled{opacity:.45}.city-patrol-missions{display:grid;grid-template-columns:1fr 1fr;gap:12px}@media(max-height:500px){.city-patrol-hud{top:118px;font-size:10px}.city-patrol-controls{bottom:100px}.city-patrol-controls button{height:54px}}
+
+/* The transparent input canvas must stay below the editor heading controls. */
+.city-town-construction .city-editor-heading{z-index:900}
