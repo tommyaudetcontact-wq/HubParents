@@ -3,7 +3,7 @@
 **[Ouvrir la page de téléchargement : APK 2D et APK 3D](https://tommyaudetcontact-wq.github.io/HubParents/android.html)**
 
 - [Télécharger Brawl Ville 2D — version 0.1.13](https://github.com/tommyaudetcontact-wq/HubParents/raw/refs/heads/main/downloads/Brawl-Ville-2D.apk)
-- [Télécharger Brawl Academy 3D — prototype 3D-0.3](https://github.com/tommyaudetcontact-wq/HubParents/raw/refs/heads/main/downloads/Brawl-Academy-3D.apk)
+- [Télécharger Brawl Academy 3D — prototype 3D-0.4](https://github.com/tommyaudetcontact-wq/HubParents/raw/refs/heads/main/downloads/Brawl-Academy-3D.apk)
 
 Android 8 minimum. Les deux applications peuvent être installées ensemble. Le téléchargement fonctionne même lorsque le PC est éteint ; le serveur **Brawl-Serveur sur le PC** doit être lancé pour se connecter et jouer en ligne. L’essai 3D est encore en développement.
 
