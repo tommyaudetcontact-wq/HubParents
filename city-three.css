@@ -1,0 +1,4 @@
+body.city-three-minigame-active .city-needs-strip,body.city-three-minigame-active #city-wallet,body.city-three-minigame-active .city-toolbar [data-inventory-menu]{display:none!important}
+body.city-three-minigame-active .city-game>header{padding-top:54px;min-height:96px;box-sizing:border-box}
+body.city-three-minigame-active .city-game>header b{line-height:1.35;white-space:normal}
+body.city-three-minigame-active .city-toolbar{width:auto;max-width:calc(100% - 16px)}

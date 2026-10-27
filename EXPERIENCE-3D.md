@@ -6,7 +6,7 @@ Cette branche `experiment/3d-third-person` contient un prototype 3D séparé. Le
 
 Installer `Brawl-Academy-3D.apk` depuis le dossier du même nom sur le Bureau. Android 8 minimum, WebGL requis. Le serveur habituel `Brawl-Serveur` doit fonctionner : les comptes, achats et parties utilisent toujours le serveur local du PC. Aucun retour à Supabase.
 
-Identifiant Android : `com.brawlacademy.preview`. Les mises à jour 2D automatiques sont désactivées pour cette application expérimentale. Le script `PRODUIRE-NOUVELLE-VERSION.cmd` reconstruit et signe la prochaine version 3D ; il ne publie rien sur le serveur de production.
+Identifiant Android : `com.brawlacademy.preview`. À partir de 3D-0.4, les nouvelles versions 3D sont vérifiées au démarrage, au retour dans l’application et toutes les deux minutes. Le manifeste et l’APK sont publiés sur GitHub Pages, même quand le serveur du PC est éteint. Le téléchargement est contrôlé par taille, SHA-256, identifiant et signature Android. Android demande confirmation avant l’installation. Une installation manuelle de 3D-0.4 est nécessaire pour les anciens essais, qui ne contenaient pas encore ce mécanisme. Le canal 2D reste séparé. Le script `PRODUIRE-NOUVELLE-VERSION.cmd` reconstruit et signe la prochaine version 3D ; il ne publie rien sur le serveur de production.
 
 ## Réalisation
 
@@ -37,3 +37,7 @@ Bibliothèques : Three.js r160 (MIT), Cannon-es 0.20.0 (MIT). Licences dans `ven
 Pour rejouer en 2D : ouvrir Brawl Ville avec son icône originale. Le code 2D reste dans le dépôt `HubParents`, au commit de départ `b0b4c4403b300314e44731b4a21fae37f2da39ff`.
 
 Sauvegarde complète avant l'expérience : `C:/Users/recto/Desktop/Brawl-Backup-2D-2026-10-27` (source Git, serveur, bases SQLite vérifiées et APK). La demande « revenir à la 2D » désigne ce point, distinct de l'ancienne sauvegarde de la plateforme éducative.
+
+## Corrections 3D-0.4
+
+Proportions du personnage revues avec retargeting conservant les mains et pieds, carrosseries et roues retravaillées, vrais pilotes éjectés rendus dans les parcours et en ville, outils distincts, départ des tirs aligné sur les armes sans changer la simulation. Terrains mis en cache, scènes de tennis/hockey/Tailblazer et autres activités mieux différenciées. Vérifications réelles dans le navigateur : pilote moto éjecté et ragdoll sur le terrain, chute PNJ séparée de sa moto, hockey, tennis et Tailblazer. La validation sur appareils Android physiques reste à faire.
