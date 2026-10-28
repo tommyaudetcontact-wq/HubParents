@@ -1,8 +1,11 @@
 {
+  "renderedKneeFrames": 960,
+  "turnedFlexionCases": 12,
+  "walkJogBlendTested": true,
   "maxWeightError": 2.9802322387695312e-8,
   "maxBindDelta": 0.000002270195883499972,
-  "maxDisplacement": 1.3495383564811465,
-  "samples": 78960,
+  "maxDisplacement": 1.5004278569091372,
+  "samples": 79195,
   "poses": 235,
   "drawBatches": 13,
   "frozenGeometryPreserved": true,

@@ -28,8 +28,8 @@
         "arm-l",
         "neck"
       ],
-      "before": "7c42b3dc4407d870c01e6a3f009546168d21d3b9baf4146c403ba8bb58d5583a",
-      "after": "7c42b3dc4407d870c01e6a3f009546168d21d3b9baf4146c403ba8bb58d5583a",
+      "before": "159c14ac644c3b0224b1fbf2b57db579d7104fcf2549f96929b1bb8b6e29789e",
+      "after": "159c14ac644c3b0224b1fbf2b57db579d7104fcf2549f96929b1bb8b6e29789e",
       "unchanged": true
     },
     {
@@ -65,8 +65,8 @@
       "parts": [
         "arm-r"
       ],
-      "before": "8e1064497fc5db2be8b8e1b6c5c913927c53c97c0d98d1d7ed9c762324f87d7d",
-      "after": "8e1064497fc5db2be8b8e1b6c5c913927c53c97c0d98d1d7ed9c762324f87d7d",
+      "before": "23df40403e2a85e40c3e8cddebd6e607f80e7813fc5deb7ecdc524002f5aef6c",
+      "after": "23df40403e2a85e40c3e8cddebd6e607f80e7813fc5deb7ecdc524002f5aef6c",
       "unchanged": true
     },
     {
@@ -118,8 +118,8 @@
         "cap",
         "cap-brim"
       ],
-      "before": "b0db3742c8f44a4b0dacc8d91c2f97cf88738e511be6ef30d8ef3343d4280edf",
-      "after": "b0db3742c8f44a4b0dacc8d91c2f97cf88738e511be6ef30d8ef3343d4280edf",
+      "before": "f2f4c7b7f9d46b8269ba100075542399553c7147ef4283e4a62986c0c104c08f",
+      "after": "f2f4c7b7f9d46b8269ba100075542399553c7147ef4283e4a62986c0c104c08f",
       "unchanged": true
     },
     {
@@ -132,8 +132,8 @@
         "fringe-4",
         "fringe-back"
       ],
-      "before": "bd0d164f4516628981b9a986958acd50d04a7ec67ca46a7564f01e17f8e1e769",
-      "after": "bd0d164f4516628981b9a986958acd50d04a7ec67ca46a7564f01e17f8e1e769",
+      "before": "169591c4bd2b30534da401378c57587aa965d7e760401980ae4d6305d54be709",
+      "after": "169591c4bd2b30534da401378c57587aa965d7e760401980ae4d6305d54be709",
       "unchanged": true
     },
     {

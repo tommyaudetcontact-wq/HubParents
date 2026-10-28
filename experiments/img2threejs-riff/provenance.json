@@ -8,16 +8,16 @@
   "scope": "one original image-driven Riff character integrated into the 3D APK; 2D unchanged",
   "files": {
     "reference-isolated.png": "12783d2856746c4ab536039cff886e4bc1d4b01dfd92b8c4f3c904e773b130c1",
-    "sculpt-spec.json": "7fd8ff6d85ffa9bb3503bf6d5c7fd64e5a2278ddf094345440eaddb96ed409bd",
-    "createRiffModel.ts": "27331fd47621a6c522023193deede5e7e7f6d4f0e7d73aef92043bec2c54ead4",
-    "createRiffModel.js": "c1dcc31417fce73aac41672d0852c16ced0970fbdd75847a26afc8bca5c7ec63",
+    "sculpt-spec.json": "e83a44bf66ba667366a303654ff4067ba51b479bb41ba4d8a127e3f2c0d21ffa",
+    "createRiffModel.ts": "f8d4252c291eb943b14b643db78edbdec2fa4d29691ee6553c0132bdd4bae8be",
+    "createRiffModel.js": "b386a68b53c0eff29af32de02678ccc06f6ba68250d71388bc483b634f6b57ae",
     "front.png": "604282539c4808c7216cf3d614a6fec05decb0d38186f14a9ba470ccdc4c950f",
     "right.png": "d12da5b63604615663770f3f2b7b6fd3eebfcf27eee0b9f3a8663b35b0d909f7",
     "rear.png": "d0e1c20d502f2b759f97c21374def12fcd6530732f6ee4526716ab508a2eac70",
     "left.png": "750eaecec0e63a8d9ab8d53e06ad87915c17931245a6233ee90aff3e9fef892b",
-    "refine-emitter.cjs": "5b71e50d6d2ba34b11b77d9e8d4ce0e1b33092759f278116af06e25e3e240278",
-    "animation-evidence.json": "b8f4fd578a9cfdd4a83add30458d0050b65d907d00ab7947fa89dcf457625816",
-    "mesh-parity.json": "54ab76a35ac81efb572664680e701ce877eba0543399b96caff2e523c0fd1f01",
+    "refine-emitter.cjs": "14094d210f0ebf94ea9934dbee43ca9b4f74bf377e66055d2887da82f5a39f49",
+    "animation-evidence.json": "587faa806f9a5aa1c43a8a45d06cde96698598a120984bf4f47f95a018edb70a",
+    "mesh-parity.json": "af50ae99a12e38d0653905782abdd59ad30d296ce51c4bf4114f3bb7e62c60eb",
     "user-acceptance.json": "d03978b6eb5b101f6ae8743e8e5428cc06070b5f9b9694425d8f22315e86c8b8"
   }
 }

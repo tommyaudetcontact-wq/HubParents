@@ -5,13 +5,14 @@ let source=fs.readFileSync(path.join(dir,'createRiffModel.js'),'utf8').replace(/
 const U=62,rest={hip:[0,0,58.28],chest:[0,0,88.04],head:[0,0,105.4],ls:[-12.53,0,86.8],rs:[12.53,0,86.8],le:[-16.53,0,68.2],re:[16.53,0,68.2],lh:[-17.12,0,54.56],rh:[17.12,0,54.56],ll:[-6.86,0,52.7],rl:[6.49,0,52.7],lk:[-9.145,0,30.38],rk:[7.75,0,30.38],lf:[-10.96,0,4],rf:[8.32,0,4]};
 const defs=[['hip','chest'],['chest','head'],['head',null],['ls','le'],['le','lh'],['ll','lk'],['lk','lf'],['rs','re'],['re','rh'],['rl','rk'],['rk','rf']].map(([start,end])=>({start,end,a:rest[start],b:end?rest[end]:[0,0,118]}));
 defs.push(...['l','r'].map(hand=>({start:hand+'h',end:null,a:rest[hand+'h'],b:[rest[hand+'h'][0],rest[hand+'h'][1],rest[hand+'h'][2]-8],hand})));
+defs.push(...['l','r'].map(foot=>({start:foot+'f',end:null,a:rest[foot+'f'],b:[rest[foot+'f'][0],rest[foot+'f'][1]+8,rest[foot+'f'][2]],foot})));
 const smooth=(x,a,b)=>{const t=Math.max(0,Math.min(1,(x-a)/(b-a)));return t*t*(3-2*t);};
 function influence(id,x,y,z){
  if(/^(head|ear-|eye-|glasses|temple-|mouth|cap|fringe)/.test(id))return [[2,1]];
  if(id==='neck')return [[1,1]];
  const positive=x>=0,upper=positive?7:3,lower=positive?8:4,thigh=positive?9:5,calf=positive?10:6;
  if(id.startsWith('hand-'))return [[positive?12:11,1]];
- if(/^(shoe-|sole-|lace-)/.test(id))return [[calf,1]];
+ if(/^(shoe-|sole-|lace-)/.test(id))return [[positive?14:13,1]];
  if(id.startsWith('arm-')){const f=smooth(y,65,72),hand=1-smooth(y,52.5,56.5);return [[upper,f*(1-hand)],[lower,(1-f)*(1-hand)],[positive?12:11,hand]];}
  if(id==='pants'){const knee=smooth(y,27,34),hip=smooth(y,48,61);const h=Math.max(hip,(1-smooth(Math.abs(x),1,4))*smooth(y,45,53));return [[0,h],[thigh,(1-h)*knee],[calf,(1-h)*(1-knee)]];}
  if(id.startsWith('sleeve-'))return [[upper,1]];if(id==='shirt'){const f=smooth(Math.abs(x),9,14.2)*(1-smooth(y,79,88.3));return [[0,1-f],[upper,f]];}
@@ -22,7 +23,7 @@ const groups=new Map(),frozen=[];
 for(const [id,mesh]of Object.entries(model.userData.sculptRuntime.meshes)){
  if(id==='root')continue;const geo=mesh.geometry.clone();geo.applyMatrix4(mesh.matrixWorld);if(/^(head|ear-|eye-|glasses|temple-|mouth|cap|fringe)/.test(id)){const unpose=new T.Matrix4().makeTranslation(0,1.7,0).multiply(new T.Matrix4().makeRotationZ(.105)).multiply(new T.Matrix4().makeRotationY(-.48)).multiply(new T.Matrix4().makeTranslation(0,-1.7,0));geo.applyMatrix4(unpose);}geo.applyMatrix4(new T.Matrix4().makeRotationY(Math.PI));const p=geo.attributes.position,n=geo.attributes.normal,ink=geo.attributes.tattooCoord,mat=mesh.material,inked=id==='arm-r';const key=[slot(id),mat.color.getHexString(),inked?'tattoo':'plain'].join(':');
  let out=groups.get(key);if(!out){out={slot:slot(id),parts:[],positions:[],normals:[],indices:[],skinIndex:[],skinWeight:[],tattooCoord:[],gripDelta:[],hasGrip:false,material:{color:'#'+mat.color.getHexString(),roughness:mat.roughness,metalness:mat.metalness},tattoo:inked};groups.set(key,out);}out.parts.push(id);const base=out.positions.length/3;
- for(let i=0;i<p.count;i++){const x=p.getX(i)*U,y=p.getY(i)*U,z=p.getZ(i)*U;out.positions.push(x,y,z);out.normals.push(n.getX(i),n.getY(i),n.getZ(i));let dy=0,dz=0;if(id.startsWith('hand-')||id.startsWith('arm-')){const h=p.getY(i),length=Math.max(0,.815-h),a=Math.min(1,length/.055)*1.8;dy=length*(1-Math.cos(a))*U;dz=-length*Math.sin(a)*U;out.hasGrip=true;}out.gripDelta.push(0,dy,dz);if(inked)out.tattooCoord.push(ink.getX(i),ink.getY(i),ink.getZ(i));const weights=influence(id,x,y,z),indices=[0,0,0,0],values=[0,0,0,0];weights.forEach(([b,w],j)=>{indices[j]=b;values[j]=w;});const sum=values.reduce((a,b)=>a+b,0);if(Math.abs(sum-1)>1e-7)throw Error('weights not normalized '+id);out.skinIndex.push(...indices);out.skinWeight.push(...values);}
+ for(let i=0;i<p.count;i++){const x=p.getX(i)*U,y=p.getY(i)*U,z=p.getZ(i)*U;out.positions.push(x,y,z);out.normals.push(n.getX(i),n.getY(i),n.getZ(i));let dy=0,dz=0;if(id.startsWith('hand-')||id.startsWith('arm-')){const h=p.getY(i),length=Math.max(0,.825-h),a=Math.min(2.6,length/.070*2.6),radius=.070/2.6,thumb=(1-smooth(Math.abs(x),.300*.86*U,.315*.86*U))*smooth(h,.795,.815)*(1-smooth(h,.86,.895));dy=(length-radius*Math.sin(a)-thumb*.010)*U;dz=(radius*(1-Math.cos(a))+thumb*.018)*U;out.hasGrip=true;}out.gripDelta.push(0,dy,dz);if(inked)out.tattooCoord.push(ink.getX(i),ink.getY(i),ink.getZ(i));const weights=influence(id,x,y,z),indices=[0,0,0,0],values=[0,0,0,0];weights.forEach(([b,w],j)=>{indices[j]=b;values[j]=w;});const sum=values.reduce((a,b)=>a+b,0);if(Math.abs(sum-1)>1e-7)throw Error('weights not normalized '+id);out.skinIndex.push(...indices);out.skinWeight.push(...values);}
  const indices=geo.index?.array||Array.from({length:p.count},(_,i)=>i);for(const i of indices)out.indices.push(base+i);geo.dispose();
 }
 const packed=(v,Type)=>Buffer.from(new Type(v).buffer).toString('base64'),hash=v=>crypto.createHash('sha256').update(v).digest('hex');

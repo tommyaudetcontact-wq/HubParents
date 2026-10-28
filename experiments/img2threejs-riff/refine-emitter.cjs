@@ -34,6 +34,9 @@ src=src.replace('    bevelEnabled: false,','    bevelEnabled: profile.bevelEnabl
 // Standalone image-driven sculpt constraints; appended before runtime publication.
 const insert=`
   // Head planes are deformed on ONE surface in model coordinates.
+  // Fit the cap to the rounded occiput; the skull must remain inside the cloth shell.
+  const capFit=meshes['cap'].userData.sculptComponent.geometryDescriptor.backFit;
+  if(capFit){const p=meshes['cap'].geometry.getAttribute('position');for(let i=0;i<p.count;i++){const x=p.getX(i),y=p.getY(i),z=p.getZ(i);if(z<capFit.centreZ)p.setZ(i,z-capFit.depth*Math.exp(-(((y-capFit.centreY)/capFit.heightRadius)**2))*Math.min(1,(capFit.centreZ-z)/.065));}p.needsUpdate=true;meshes['cap'].geometry.computeVertexNormals();}
   const faceSpec = meshes['head'].userData.sculptComponent.geometryDescriptor.faceSculpt;
   const headGeom = meshes['head'].geometry;
   const hp = headGeom.getAttribute('position');
