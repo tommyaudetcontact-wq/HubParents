@@ -4820,9 +4820,9 @@
       "role": "body",
       "importance": 0.7,
       "confidence": 0.86,
-      "primitive": "tube",
-      "topologyClass": "assembled-solid",
-      "topologyRationale": "Independent rigid mechanical component, not the body silhouette.",
+      "primitive": "plane-card",
+      "topologyClass": "conforming-shell",
+      "topologyRationale": "Flattened stamped window frame with overlapping ends, not a circular tube.",
       "geometryDescriptor": {
         "normalStrategy": "smooth vertex normals",
         "uvStrategy": "generated procedural coordinates",
@@ -4832,7 +4832,8 @@
           "segments": 3
         },
         "deformationStack": [],
-        "tubePath": {
+        "carSurface": {
+          "kind": "frame",
           "points": [
             [
               -0.84,
@@ -4845,8 +4846,9 @@
               -0.1
             ]
           ],
-          "radius": 0.028,
-          "closed": false
+          "side": -1,
+          "width": 0.055,
+          "depth": 0.018
         }
       },
       "parent": "root",
@@ -5002,9 +5004,9 @@
       "role": "body",
       "importance": 0.7,
       "confidence": 0.86,
-      "primitive": "tube",
-      "topologyClass": "assembled-solid",
-      "topologyRationale": "Independent rigid mechanical component, not the body silhouette.",
+      "primitive": "plane-card",
+      "topologyClass": "conforming-shell",
+      "topologyRationale": "Flattened stamped window frame with overlapping ends, not a circular tube.",
       "geometryDescriptor": {
         "normalStrategy": "smooth vertex normals",
         "uvStrategy": "generated procedural coordinates",
@@ -5014,21 +5016,23 @@
           "segments": 3
         },
         "deformationStack": [],
-        "tubePath": {
+        "carSurface": {
+          "kind": "frame",
           "points": [
             [
               -0.68,
-              1.28,
+              1.267,
               -0.1
             ],
             [
               -0.68,
-              1.28,
+              1.267,
               0.76
             ]
           ],
-          "radius": 0.025,
-          "closed": false
+          "side": -1,
+          "width": 0.035,
+          "depth": 0.012
         }
       },
       "parent": "root",
@@ -5184,9 +5188,9 @@
       "role": "body",
       "importance": 0.7,
       "confidence": 0.86,
-      "primitive": "tube",
-      "topologyClass": "assembled-solid",
-      "topologyRationale": "Independent rigid mechanical component, not the body silhouette.",
+      "primitive": "plane-card",
+      "topologyClass": "conforming-shell",
+      "topologyRationale": "Flattened stamped window frame with overlapping ends, not a circular tube.",
       "geometryDescriptor": {
         "normalStrategy": "smooth vertex normals",
         "uvStrategy": "generated procedural coordinates",
@@ -5196,7 +5200,8 @@
           "segments": 3
         },
         "deformationStack": [],
-        "tubePath": {
+        "carSurface": {
+          "kind": "frame",
           "points": [
             [
               -0.84,
@@ -5209,8 +5214,9 @@
               0.46
             ]
           ],
-          "radius": 0.018,
-          "closed": false
+          "side": -1,
+          "width": 0.035,
+          "depth": 0.012
         }
       },
       "parent": "root",
@@ -7161,9 +7167,9 @@
       "role": "body",
       "importance": 0.7,
       "confidence": 0.86,
-      "primitive": "tube",
-      "topologyClass": "assembled-solid",
-      "topologyRationale": "Independent rigid mechanical component, not the body silhouette.",
+      "primitive": "plane-card",
+      "topologyClass": "conforming-shell",
+      "topologyRationale": "Flattened stamped window frame with overlapping ends, not a circular tube.",
       "geometryDescriptor": {
         "normalStrategy": "smooth vertex normals",
         "uvStrategy": "generated procedural coordinates",
@@ -7173,7 +7179,8 @@
           "segments": 3
         },
         "deformationStack": [],
-        "tubePath": {
+        "carSurface": {
+          "kind": "frame",
           "points": [
             [
               0.84,
@@ -7186,8 +7193,9 @@
               -0.1
             ]
           ],
-          "radius": 0.028,
-          "closed": false
+          "side": 1,
+          "width": 0.055,
+          "depth": 0.018
         }
       },
       "parent": "root",
@@ -7343,9 +7351,9 @@
       "role": "body",
       "importance": 0.7,
       "confidence": 0.86,
-      "primitive": "tube",
-      "topologyClass": "assembled-solid",
-      "topologyRationale": "Independent rigid mechanical component, not the body silhouette.",
+      "primitive": "plane-card",
+      "topologyClass": "conforming-shell",
+      "topologyRationale": "Flattened stamped window frame with overlapping ends, not a circular tube.",
       "geometryDescriptor": {
         "normalStrategy": "smooth vertex normals",
         "uvStrategy": "generated procedural coordinates",
@@ -7355,21 +7363,23 @@
           "segments": 3
         },
         "deformationStack": [],
-        "tubePath": {
+        "carSurface": {
+          "kind": "frame",
           "points": [
             [
               0.68,
-              1.28,
+              1.267,
               -0.1
             ],
             [
               0.68,
-              1.28,
+              1.267,
               0.76
             ]
           ],
-          "radius": 0.025,
-          "closed": false
+          "side": 1,
+          "width": 0.035,
+          "depth": 0.012
         }
       },
       "parent": "root",
@@ -7525,9 +7535,9 @@
       "role": "body",
       "importance": 0.7,
       "confidence": 0.86,
-      "primitive": "tube",
-      "topologyClass": "assembled-solid",
-      "topologyRationale": "Independent rigid mechanical component, not the body silhouette.",
+      "primitive": "plane-card",
+      "topologyClass": "conforming-shell",
+      "topologyRationale": "Flattened stamped window frame with overlapping ends, not a circular tube.",
       "geometryDescriptor": {
         "normalStrategy": "smooth vertex normals",
         "uvStrategy": "generated procedural coordinates",
@@ -7537,7 +7547,8 @@
           "segments": 3
         },
         "deformationStack": [],
-        "tubePath": {
+        "carSurface": {
+          "kind": "frame",
           "points": [
             [
               0.84,
@@ -7550,8 +7561,9 @@
               0.46
             ]
           ],
-          "radius": 0.018,
-          "closed": false
+          "side": 1,
+          "width": 0.035,
+          "depth": 0.012
         }
       },
       "parent": "root",
@@ -9745,7 +9757,7 @@
       },
       "transform": {
         "position": [
-          -0.9369999999999999,
+          -0.903,
           0.32,
           -1.35
         ],
@@ -9913,14 +9925,14 @@
       },
       "dimensions": {
         "width": 0.1,
-        "height": 0.035,
+        "height": 0.024,
         "depth": 0.1,
         "units": "meters",
         "confidence": 0.84
       },
       "transform": {
         "position": [
-          -0.957,
+          -0.903,
           0.32,
           -1.35
         ],
@@ -9931,7 +9943,7 @@
         ],
         "scale": [
           0.1,
-          0.035,
+          0.024,
           0.1
         ]
       },
@@ -11570,7 +11582,7 @@
       },
       "transform": {
         "position": [
-          0.9369999999999999,
+          0.903,
           0.32,
           -1.35
         ],
@@ -11729,14 +11741,14 @@
       },
       "dimensions": {
         "width": 0.1,
-        "height": 0.035,
+        "height": 0.024,
         "depth": 0.1,
         "units": "meters",
         "confidence": 0.84
       },
       "transform": {
         "position": [
-          0.957,
+          0.903,
           0.32,
           -1.35
         ],
@@ -11747,7 +11759,7 @@
         ],
         "scale": [
           0.1,
-          0.035,
+          0.024,
           0.1
         ]
       },
@@ -13386,7 +13398,7 @@
       },
       "transform": {
         "position": [
-          -0.9369999999999999,
+          -0.903,
           0.32,
           1.3
         ],
@@ -13545,14 +13557,14 @@
       },
       "dimensions": {
         "width": 0.1,
-        "height": 0.035,
+        "height": 0.024,
         "depth": 0.1,
         "units": "meters",
         "confidence": 0.84
       },
       "transform": {
         "position": [
-          -0.957,
+          -0.903,
           0.32,
           1.3
         ],
@@ -13563,7 +13575,7 @@
         ],
         "scale": [
           0.1,
-          0.035,
+          0.024,
           0.1
         ]
       },
@@ -15202,7 +15214,7 @@
       },
       "transform": {
         "position": [
-          0.9369999999999999,
+          0.903,
           0.32,
           1.3
         ],
@@ -15361,14 +15373,14 @@
       },
       "dimensions": {
         "width": 0.1,
-        "height": 0.035,
+        "height": 0.024,
         "depth": 0.1,
         "units": "meters",
         "confidence": 0.84
       },
       "transform": {
         "position": [
-          0.957,
+          0.903,
           0.32,
           1.3
         ],
@@ -15379,7 +15391,7 @@
         ],
         "scale": [
           0.1,
-          0.035,
+          0.024,
           0.1
         ]
       },
@@ -20898,7 +20910,7 @@
       "transform": {
         "position": [
           0,
-          0.76,
+          0.745,
           -0.46
         ],
         "rotation": [
@@ -20907,9 +20919,9 @@
           0
         ],
         "scale": [
-          1.42,
-          0.14,
-          0.2
+          1.57,
+          0.19,
+          0.3
         ]
       },
       "actionProfile": {
@@ -22886,6 +22898,2022 @@
           "full-object"
         ]
       }
+    },
+    {
+      "id": "door-frame-left",
+      "name": "door-frame-left",
+      "level": "meso",
+      "role": "body",
+      "importance": 0.7,
+      "confidence": 0.86,
+      "primitive": "plane-card",
+      "topologyClass": "conforming-shell",
+      "topologyRationale": "Flattened stamped window frame with overlapping ends, not a circular tube.",
+      "geometryDescriptor": {
+        "normalStrategy": "smooth vertex normals",
+        "uvStrategy": "generated procedural coordinates",
+        "edgeTreatment": {
+          "type": "bevel",
+          "bevelRadius": 0.012,
+          "segments": 3
+        },
+        "deformationStack": [],
+        "carSurface": {
+          "kind": "doorFrame",
+          "side": -1
+        }
+      },
+      "parent": "root",
+      "attachment": {
+        "parentId": "root",
+        "parentSocket": "door-frame-left-mount",
+        "localStart": [
+          -0.84,
+          0.84,
+          -0.61
+        ],
+        "localEnd": [
+          -0.68,
+          1.28,
+          -0.1
+        ],
+        "contactType": "overlap",
+        "overlap": 0.02,
+        "gapTolerance": 0.012,
+        "evidenceRefs": [
+          "full-object"
+        ]
+      },
+      "dimensions": {
+        "width": 1,
+        "height": 1,
+        "depth": 1,
+        "units": "meters",
+        "confidence": 0.84
+      },
+      "transform": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "actionProfile": {
+        "animationRole": "rigid",
+        "pivot": {
+          "mode": "center",
+          "localPosition": [
+            0,
+            0,
+            0
+          ],
+          "axis": [
+            0,
+            1,
+            0
+          ],
+          "confidence": 0.5
+        },
+        "transformChannels": {
+          "translate": true,
+          "rotate": true,
+          "scale": true,
+          "bend": false,
+          "twist": false,
+          "detach": false,
+          "visibility": true,
+          "materialState": true
+        },
+        "sockets": [
+          {
+            "id": "door-frame-left-mount",
+            "position": [
+              0,
+              0,
+              0
+            ],
+            "axis": [
+              0,
+              1,
+              0
+            ]
+          }
+        ],
+        "collider": {
+          "type": "box",
+          "offset": [
+            0,
+            0,
+            0
+          ],
+          "scale": [
+            1,
+            1,
+            1
+          ],
+          "isTrigger": false,
+          "notes": "Replace with sphere/capsule/compound proxy when the object shape demands it."
+        },
+        "constraints": [],
+        "destruction": {
+          "breakable": true,
+          "fractureGroup": "door-left",
+          "seamRefs": [],
+          "detachableFragments": [
+            "door-frame-left"
+          ],
+          "breakImpulse": 12,
+          "debrisMaterial": "paint"
+        }
+      },
+      "material": "paint",
+      "materialLayers": [
+        "paint"
+      ],
+      "deformations": [],
+      "joints": [],
+      "seams": [],
+      "localFeatures": [],
+      "surfaceDetail": {
+        "macroRoughness": 0.0,
+        "microRoughness": 0.0,
+        "bumpAmplitude": 0.0,
+        "normalPattern": "",
+        "displacementPattern": "",
+        "occlusionPattern": "",
+        "edgeWearPattern": "",
+        "notes": ""
+      },
+      "evidenceRefs": [
+        "full-object"
+      ],
+      "details": [],
+      "fidelityTier": "blockout",
+      "colorMaterialRecipe": {
+        "dominantAlbedo": "rgba(239, 190, 43, 1)",
+        "secondaryAlbedo": "rgba(239, 190, 43, 1)",
+        "materialClass": "plastic",
+        "materialClassConfidence": 0.85,
+        "evidenceRefs": [
+          "full-object"
+        ]
+      }
+    },
+    {
+      "id": "door-frame-right",
+      "name": "door-frame-right",
+      "level": "meso",
+      "role": "body",
+      "importance": 0.7,
+      "confidence": 0.86,
+      "primitive": "plane-card",
+      "topologyClass": "conforming-shell",
+      "topologyRationale": "Flattened stamped window frame with overlapping ends, not a circular tube.",
+      "geometryDescriptor": {
+        "normalStrategy": "smooth vertex normals",
+        "uvStrategy": "generated procedural coordinates",
+        "edgeTreatment": {
+          "type": "bevel",
+          "bevelRadius": 0.012,
+          "segments": 3
+        },
+        "deformationStack": [],
+        "carSurface": {
+          "kind": "doorFrame",
+          "side": 1
+        }
+      },
+      "parent": "root",
+      "attachment": {
+        "parentId": "root",
+        "parentSocket": "door-frame-right-mount",
+        "localStart": [
+          0.84,
+          0.84,
+          -0.61
+        ],
+        "localEnd": [
+          0.68,
+          1.28,
+          -0.1
+        ],
+        "contactType": "overlap",
+        "overlap": 0.02,
+        "gapTolerance": 0.012,
+        "evidenceRefs": [
+          "full-object"
+        ]
+      },
+      "dimensions": {
+        "width": 1,
+        "height": 1,
+        "depth": 1,
+        "units": "meters",
+        "confidence": 0.84
+      },
+      "transform": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "actionProfile": {
+        "animationRole": "rigid",
+        "pivot": {
+          "mode": "center",
+          "localPosition": [
+            0,
+            0,
+            0
+          ],
+          "axis": [
+            0,
+            1,
+            0
+          ],
+          "confidence": 0.5
+        },
+        "transformChannels": {
+          "translate": true,
+          "rotate": true,
+          "scale": true,
+          "bend": false,
+          "twist": false,
+          "detach": false,
+          "visibility": true,
+          "materialState": true
+        },
+        "sockets": [
+          {
+            "id": "door-frame-right-mount",
+            "position": [
+              0,
+              0,
+              0
+            ],
+            "axis": [
+              0,
+              1,
+              0
+            ]
+          }
+        ],
+        "collider": {
+          "type": "box",
+          "offset": [
+            0,
+            0,
+            0
+          ],
+          "scale": [
+            1,
+            1,
+            1
+          ],
+          "isTrigger": false,
+          "notes": "Replace with sphere/capsule/compound proxy when the object shape demands it."
+        },
+        "constraints": [],
+        "destruction": {
+          "breakable": true,
+          "fractureGroup": "door-right",
+          "seamRefs": [],
+          "detachableFragments": [
+            "door-frame-right"
+          ],
+          "breakImpulse": 12,
+          "debrisMaterial": "paint"
+        }
+      },
+      "material": "paint",
+      "materialLayers": [
+        "paint"
+      ],
+      "deformations": [],
+      "joints": [],
+      "seams": [],
+      "localFeatures": [],
+      "surfaceDetail": {
+        "macroRoughness": 0.0,
+        "microRoughness": 0.0,
+        "bumpAmplitude": 0.0,
+        "normalPattern": "",
+        "displacementPattern": "",
+        "occlusionPattern": "",
+        "edgeWearPattern": "",
+        "notes": ""
+      },
+      "evidenceRefs": [
+        "full-object"
+      ],
+      "details": [],
+      "fidelityTier": "blockout",
+      "colorMaterialRecipe": {
+        "dominantAlbedo": "rgba(239, 190, 43, 1)",
+        "secondaryAlbedo": "rgba(239, 190, 43, 1)",
+        "materialClass": "plastic",
+        "materialClassConfidence": 0.85,
+        "evidenceRefs": [
+          "full-object"
+        ]
+      }
+    },
+    {
+      "id": "seat-pedestal--1",
+      "name": "seat-pedestal--1",
+      "level": "meso",
+      "role": "body",
+      "importance": 0.7,
+      "confidence": 0.86,
+      "primitive": "box",
+      "topologyClass": "assembled-solid",
+      "topologyRationale": "Independent rigid mechanical component, not the body silhouette.",
+      "geometryDescriptor": {
+        "normalStrategy": "smooth vertex normals",
+        "uvStrategy": "generated procedural coordinates",
+        "edgeTreatment": {
+          "type": "bevel",
+          "bevelRadius": 0.012,
+          "segments": 3
+        },
+        "deformationStack": []
+      },
+      "parent": "root",
+      "attachment": {
+        "parentId": "root",
+        "parentSocket": "seat-pedestal--1-mount",
+        "localStart": [
+          0,
+          0.76,
+          -0.46
+        ],
+        "localEnd": [
+          0,
+          0.78,
+          -0.46
+        ],
+        "contactType": "overlap",
+        "overlap": 0.02,
+        "gapTolerance": 0.012,
+        "evidenceRefs": [
+          "full-object"
+        ]
+      },
+      "dimensions": {
+        "width": 0.38,
+        "height": 0.23,
+        "depth": 0.4,
+        "units": "meters",
+        "confidence": 0.84
+      },
+      "transform": {
+        "position": [
+          -0.38,
+          0.31,
+          0.35
+        ],
+        "rotation": [
+          0,
+          0,
+          0
+        ],
+        "scale": [
+          0.38,
+          0.23,
+          0.4
+        ]
+      },
+      "actionProfile": {
+        "animationRole": "rigid",
+        "pivot": {
+          "mode": "center",
+          "localPosition": [
+            0,
+            0,
+            0
+          ],
+          "axis": [
+            0,
+            1,
+            0
+          ],
+          "confidence": 0.5
+        },
+        "transformChannels": {
+          "translate": true,
+          "rotate": true,
+          "scale": true,
+          "bend": false,
+          "twist": false,
+          "detach": false,
+          "visibility": true,
+          "materialState": true
+        },
+        "sockets": [
+          {
+            "id": "seat-pedestal--1-mount",
+            "position": [
+              0,
+              0,
+              0
+            ],
+            "axis": [
+              0,
+              1,
+              0
+            ]
+          }
+        ],
+        "collider": {
+          "type": "box",
+          "offset": [
+            0,
+            0,
+            0
+          ],
+          "scale": [
+            1,
+            1,
+            1
+          ],
+          "isTrigger": false,
+          "notes": "Replace with sphere/capsule/compound proxy when the object shape demands it."
+        },
+        "constraints": [],
+        "destruction": {
+          "breakable": true,
+          "fractureGroup": "seat-pedestal--1",
+          "seamRefs": [],
+          "detachableFragments": [
+            "seat-pedestal--1"
+          ],
+          "breakImpulse": 12,
+          "debrisMaterial": "dark"
+        }
+      },
+      "material": "dark",
+      "materialLayers": [
+        "dark"
+      ],
+      "deformations": [],
+      "joints": [],
+      "seams": [],
+      "localFeatures": [],
+      "surfaceDetail": {
+        "macroRoughness": 0.0,
+        "microRoughness": 0.0,
+        "bumpAmplitude": 0.0,
+        "normalPattern": "",
+        "displacementPattern": "",
+        "occlusionPattern": "",
+        "edgeWearPattern": "",
+        "notes": ""
+      },
+      "evidenceRefs": [
+        "full-object"
+      ],
+      "details": [],
+      "fidelityTier": "blockout",
+      "colorMaterialRecipe": {
+        "dominantAlbedo": "rgba(32, 39, 44, 1)",
+        "secondaryAlbedo": "rgba(32, 39, 44, 1)",
+        "materialClass": "plastic",
+        "materialClassConfidence": 0.85,
+        "evidenceRefs": [
+          "full-object"
+        ]
+      }
+    },
+    {
+      "id": "seat-pedestal-1",
+      "name": "seat-pedestal-1",
+      "level": "meso",
+      "role": "body",
+      "importance": 0.7,
+      "confidence": 0.86,
+      "primitive": "box",
+      "topologyClass": "assembled-solid",
+      "topologyRationale": "Independent rigid mechanical component, not the body silhouette.",
+      "geometryDescriptor": {
+        "normalStrategy": "smooth vertex normals",
+        "uvStrategy": "generated procedural coordinates",
+        "edgeTreatment": {
+          "type": "bevel",
+          "bevelRadius": 0.012,
+          "segments": 3
+        },
+        "deformationStack": []
+      },
+      "parent": "root",
+      "attachment": {
+        "parentId": "root",
+        "parentSocket": "seat-pedestal-1-mount",
+        "localStart": [
+          0,
+          0.76,
+          -0.46
+        ],
+        "localEnd": [
+          0,
+          0.78,
+          -0.46
+        ],
+        "contactType": "overlap",
+        "overlap": 0.02,
+        "gapTolerance": 0.012,
+        "evidenceRefs": [
+          "full-object"
+        ]
+      },
+      "dimensions": {
+        "width": 0.38,
+        "height": 0.23,
+        "depth": 0.4,
+        "units": "meters",
+        "confidence": 0.84
+      },
+      "transform": {
+        "position": [
+          0.38,
+          0.31,
+          0.35
+        ],
+        "rotation": [
+          0,
+          0,
+          0
+        ],
+        "scale": [
+          0.38,
+          0.23,
+          0.4
+        ]
+      },
+      "actionProfile": {
+        "animationRole": "rigid",
+        "pivot": {
+          "mode": "center",
+          "localPosition": [
+            0,
+            0,
+            0
+          ],
+          "axis": [
+            0,
+            1,
+            0
+          ],
+          "confidence": 0.5
+        },
+        "transformChannels": {
+          "translate": true,
+          "rotate": true,
+          "scale": true,
+          "bend": false,
+          "twist": false,
+          "detach": false,
+          "visibility": true,
+          "materialState": true
+        },
+        "sockets": [
+          {
+            "id": "seat-pedestal-1-mount",
+            "position": [
+              0,
+              0,
+              0
+            ],
+            "axis": [
+              0,
+              1,
+              0
+            ]
+          }
+        ],
+        "collider": {
+          "type": "box",
+          "offset": [
+            0,
+            0,
+            0
+          ],
+          "scale": [
+            1,
+            1,
+            1
+          ],
+          "isTrigger": false,
+          "notes": "Replace with sphere/capsule/compound proxy when the object shape demands it."
+        },
+        "constraints": [],
+        "destruction": {
+          "breakable": true,
+          "fractureGroup": "seat-pedestal-1",
+          "seamRefs": [],
+          "detachableFragments": [
+            "seat-pedestal-1"
+          ],
+          "breakImpulse": 12,
+          "debrisMaterial": "dark"
+        }
+      },
+      "material": "dark",
+      "materialLayers": [
+        "dark"
+      ],
+      "deformations": [],
+      "joints": [],
+      "seams": [],
+      "localFeatures": [],
+      "surfaceDetail": {
+        "macroRoughness": 0.0,
+        "microRoughness": 0.0,
+        "bumpAmplitude": 0.0,
+        "normalPattern": "",
+        "displacementPattern": "",
+        "occlusionPattern": "",
+        "edgeWearPattern": "",
+        "notes": ""
+      },
+      "evidenceRefs": [
+        "full-object"
+      ],
+      "details": [],
+      "fidelityTier": "blockout",
+      "colorMaterialRecipe": {
+        "dominantAlbedo": "rgba(32, 39, 44, 1)",
+        "secondaryAlbedo": "rgba(32, 39, 44, 1)",
+        "materialClass": "plastic",
+        "materialClassConfidence": 0.85,
+        "evidenceRefs": [
+          "full-object"
+        ]
+      }
+    },
+    {
+      "id": "console",
+      "name": "console",
+      "level": "meso",
+      "role": "body",
+      "importance": 0.7,
+      "confidence": 0.86,
+      "primitive": "box",
+      "topologyClass": "assembled-solid",
+      "topologyRationale": "Independent rigid mechanical component, not the body silhouette.",
+      "geometryDescriptor": {
+        "normalStrategy": "smooth vertex normals",
+        "uvStrategy": "generated procedural coordinates",
+        "edgeTreatment": {
+          "type": "bevel",
+          "bevelRadius": 0.012,
+          "segments": 3
+        },
+        "deformationStack": []
+      },
+      "parent": "root",
+      "attachment": {
+        "parentId": "root",
+        "parentSocket": "console-mount",
+        "localStart": [
+          0,
+          0.76,
+          -0.46
+        ],
+        "localEnd": [
+          0,
+          0.78,
+          -0.46
+        ],
+        "contactType": "overlap",
+        "overlap": 0.02,
+        "gapTolerance": 0.012,
+        "evidenceRefs": [
+          "full-object"
+        ]
+      },
+      "dimensions": {
+        "width": 0.19,
+        "height": 0.31,
+        "depth": 0.86,
+        "units": "meters",
+        "confidence": 0.84
+      },
+      "transform": {
+        "position": [
+          0,
+          0.37,
+          0.06
+        ],
+        "rotation": [
+          0,
+          0,
+          0
+        ],
+        "scale": [
+          0.19,
+          0.31,
+          0.86
+        ]
+      },
+      "actionProfile": {
+        "animationRole": "rigid",
+        "pivot": {
+          "mode": "center",
+          "localPosition": [
+            0,
+            0,
+            0
+          ],
+          "axis": [
+            0,
+            1,
+            0
+          ],
+          "confidence": 0.5
+        },
+        "transformChannels": {
+          "translate": true,
+          "rotate": true,
+          "scale": true,
+          "bend": false,
+          "twist": false,
+          "detach": false,
+          "visibility": true,
+          "materialState": true
+        },
+        "sockets": [
+          {
+            "id": "console-mount",
+            "position": [
+              0,
+              0,
+              0
+            ],
+            "axis": [
+              0,
+              1,
+              0
+            ]
+          }
+        ],
+        "collider": {
+          "type": "box",
+          "offset": [
+            0,
+            0,
+            0
+          ],
+          "scale": [
+            1,
+            1,
+            1
+          ],
+          "isTrigger": false,
+          "notes": "Replace with sphere/capsule/compound proxy when the object shape demands it."
+        },
+        "constraints": [],
+        "destruction": {
+          "breakable": true,
+          "fractureGroup": "console",
+          "seamRefs": [],
+          "detachableFragments": [
+            "console"
+          ],
+          "breakImpulse": 12,
+          "debrisMaterial": "dark"
+        }
+      },
+      "material": "dark",
+      "materialLayers": [
+        "dark"
+      ],
+      "deformations": [],
+      "joints": [],
+      "seams": [],
+      "localFeatures": [],
+      "surfaceDetail": {
+        "macroRoughness": 0.0,
+        "microRoughness": 0.0,
+        "bumpAmplitude": 0.0,
+        "normalPattern": "",
+        "displacementPattern": "",
+        "occlusionPattern": "",
+        "edgeWearPattern": "",
+        "notes": ""
+      },
+      "evidenceRefs": [
+        "full-object"
+      ],
+      "details": [],
+      "fidelityTier": "blockout",
+      "colorMaterialRecipe": {
+        "dominantAlbedo": "rgba(32, 39, 44, 1)",
+        "secondaryAlbedo": "rgba(32, 39, 44, 1)",
+        "materialClass": "plastic",
+        "materialClassConfidence": 0.85,
+        "evidenceRefs": [
+          "full-object"
+        ]
+      }
+    },
+    {
+      "id": "rear-bulkhead",
+      "name": "rear-bulkhead",
+      "level": "meso",
+      "role": "body",
+      "importance": 0.7,
+      "confidence": 0.86,
+      "primitive": "box",
+      "topologyClass": "assembled-solid",
+      "topologyRationale": "Independent rigid mechanical component, not the body silhouette.",
+      "geometryDescriptor": {
+        "normalStrategy": "smooth vertex normals",
+        "uvStrategy": "generated procedural coordinates",
+        "edgeTreatment": {
+          "type": "bevel",
+          "bevelRadius": 0.012,
+          "segments": 3
+        },
+        "deformationStack": []
+      },
+      "parent": "root",
+      "attachment": {
+        "parentId": "root",
+        "parentSocket": "rear-bulkhead-mount",
+        "localStart": [
+          0,
+          0.76,
+          -0.46
+        ],
+        "localEnd": [
+          0,
+          0.78,
+          -0.46
+        ],
+        "contactType": "overlap",
+        "overlap": 0.02,
+        "gapTolerance": 0.012,
+        "evidenceRefs": [
+          "full-object"
+        ]
+      },
+      "dimensions": {
+        "width": 1.48,
+        "height": 0.64,
+        "depth": 0.12,
+        "units": "meters",
+        "confidence": 0.84
+      },
+      "transform": {
+        "position": [
+          0,
+          0.52,
+          0.97
+        ],
+        "rotation": [
+          0,
+          0,
+          0
+        ],
+        "scale": [
+          1.48,
+          0.64,
+          0.12
+        ]
+      },
+      "actionProfile": {
+        "animationRole": "rigid",
+        "pivot": {
+          "mode": "center",
+          "localPosition": [
+            0,
+            0,
+            0
+          ],
+          "axis": [
+            0,
+            1,
+            0
+          ],
+          "confidence": 0.5
+        },
+        "transformChannels": {
+          "translate": true,
+          "rotate": true,
+          "scale": true,
+          "bend": false,
+          "twist": false,
+          "detach": false,
+          "visibility": true,
+          "materialState": true
+        },
+        "sockets": [
+          {
+            "id": "rear-bulkhead-mount",
+            "position": [
+              0,
+              0,
+              0
+            ],
+            "axis": [
+              0,
+              1,
+              0
+            ]
+          }
+        ],
+        "collider": {
+          "type": "box",
+          "offset": [
+            0,
+            0,
+            0
+          ],
+          "scale": [
+            1,
+            1,
+            1
+          ],
+          "isTrigger": false,
+          "notes": "Replace with sphere/capsule/compound proxy when the object shape demands it."
+        },
+        "constraints": [],
+        "destruction": {
+          "breakable": true,
+          "fractureGroup": "rear-bulkhead",
+          "seamRefs": [],
+          "detachableFragments": [
+            "rear-bulkhead"
+          ],
+          "breakImpulse": 12,
+          "debrisMaterial": "dark"
+        }
+      },
+      "material": "dark",
+      "materialLayers": [
+        "dark"
+      ],
+      "deformations": [],
+      "joints": [],
+      "seams": [],
+      "localFeatures": [],
+      "surfaceDetail": {
+        "macroRoughness": 0.0,
+        "microRoughness": 0.0,
+        "bumpAmplitude": 0.0,
+        "normalPattern": "",
+        "displacementPattern": "",
+        "occlusionPattern": "",
+        "edgeWearPattern": "",
+        "notes": ""
+      },
+      "evidenceRefs": [
+        "full-object"
+      ],
+      "details": [],
+      "fidelityTier": "blockout",
+      "colorMaterialRecipe": {
+        "dominantAlbedo": "rgba(32, 39, 44, 1)",
+        "secondaryAlbedo": "rgba(32, 39, 44, 1)",
+        "materialClass": "plastic",
+        "materialClassConfidence": 0.85,
+        "evidenceRefs": [
+          "full-object"
+        ]
+      }
+    },
+    {
+      "id": "rear-shelf",
+      "name": "rear-shelf",
+      "level": "meso",
+      "role": "body",
+      "importance": 0.7,
+      "confidence": 0.86,
+      "primitive": "box",
+      "topologyClass": "assembled-solid",
+      "topologyRationale": "Independent rigid mechanical component, not the body silhouette.",
+      "geometryDescriptor": {
+        "normalStrategy": "smooth vertex normals",
+        "uvStrategy": "generated procedural coordinates",
+        "edgeTreatment": {
+          "type": "bevel",
+          "bevelRadius": 0.012,
+          "segments": 3
+        },
+        "deformationStack": []
+      },
+      "parent": "root",
+      "attachment": {
+        "parentId": "root",
+        "parentSocket": "rear-shelf-mount",
+        "localStart": [
+          0,
+          0.76,
+          -0.46
+        ],
+        "localEnd": [
+          0,
+          0.78,
+          -0.46
+        ],
+        "contactType": "overlap",
+        "overlap": 0.02,
+        "gapTolerance": 0.012,
+        "evidenceRefs": [
+          "full-object"
+        ]
+      },
+      "dimensions": {
+        "width": 1.49,
+        "height": 0.045,
+        "depth": 0.38,
+        "units": "meters",
+        "confidence": 0.84
+      },
+      "transform": {
+        "position": [
+          0,
+          0.84,
+          1.12
+        ],
+        "rotation": [
+          0,
+          0,
+          0
+        ],
+        "scale": [
+          1.49,
+          0.045,
+          0.38
+        ]
+      },
+      "actionProfile": {
+        "animationRole": "rigid",
+        "pivot": {
+          "mode": "center",
+          "localPosition": [
+            0,
+            0,
+            0
+          ],
+          "axis": [
+            0,
+            1,
+            0
+          ],
+          "confidence": 0.5
+        },
+        "transformChannels": {
+          "translate": true,
+          "rotate": true,
+          "scale": true,
+          "bend": false,
+          "twist": false,
+          "detach": false,
+          "visibility": true,
+          "materialState": true
+        },
+        "sockets": [
+          {
+            "id": "rear-shelf-mount",
+            "position": [
+              0,
+              0,
+              0
+            ],
+            "axis": [
+              0,
+              1,
+              0
+            ]
+          }
+        ],
+        "collider": {
+          "type": "box",
+          "offset": [
+            0,
+            0,
+            0
+          ],
+          "scale": [
+            1,
+            1,
+            1
+          ],
+          "isTrigger": false,
+          "notes": "Replace with sphere/capsule/compound proxy when the object shape demands it."
+        },
+        "constraints": [],
+        "destruction": {
+          "breakable": true,
+          "fractureGroup": "rear-shelf",
+          "seamRefs": [],
+          "detachableFragments": [
+            "rear-shelf"
+          ],
+          "breakImpulse": 12,
+          "debrisMaterial": "dark"
+        }
+      },
+      "material": "dark",
+      "materialLayers": [
+        "dark"
+      ],
+      "deformations": [],
+      "joints": [],
+      "seams": [],
+      "localFeatures": [],
+      "surfaceDetail": {
+        "macroRoughness": 0.0,
+        "microRoughness": 0.0,
+        "bumpAmplitude": 0.0,
+        "normalPattern": "",
+        "displacementPattern": "",
+        "occlusionPattern": "",
+        "edgeWearPattern": "",
+        "notes": ""
+      },
+      "evidenceRefs": [
+        "full-object"
+      ],
+      "details": [],
+      "fidelityTier": "blockout",
+      "colorMaterialRecipe": {
+        "dominantAlbedo": "rgba(32, 39, 44, 1)",
+        "secondaryAlbedo": "rgba(32, 39, 44, 1)",
+        "materialClass": "plastic",
+        "materialClassConfidence": 0.85,
+        "evidenceRefs": [
+          "full-object"
+        ]
+      }
+    },
+    {
+      "id": "door-liner-left",
+      "name": "door-liner-left",
+      "level": "meso",
+      "role": "body",
+      "importance": 0.7,
+      "confidence": 0.86,
+      "primitive": "plane-card",
+      "topologyClass": "conforming-shell",
+      "topologyRationale": "Independent rigid mechanical component, not the body silhouette.",
+      "geometryDescriptor": {
+        "normalStrategy": "smooth vertex normals",
+        "uvStrategy": "generated procedural coordinates",
+        "edgeTreatment": {
+          "type": "bevel",
+          "bevelRadius": 0.012,
+          "segments": 3
+        },
+        "deformationStack": [],
+        "carSurface": {
+          "kind": "innerDoor",
+          "side": -1,
+          "profile": {
+            "stations": [
+              [
+                -2.2,
+                0.78,
+                0.735
+              ],
+              [
+                -2.06,
+                0.855,
+                0.7438050314465409
+              ],
+              [
+                -1.7,
+                0.9,
+                0.7664465408805031
+              ],
+              [
+                -1.35,
+                0.915,
+                0.7884591194968553
+              ],
+              [
+                -0.95,
+                0.875,
+                0.8136163522012578
+              ],
+              [
+                -0.61,
+                0.85,
+                0.835
+              ],
+              [
+                0,
+                0.85,
+                0.85
+              ],
+              [
+                0.9,
+                0.88,
+                0.87
+              ],
+              [
+                1.3,
+                0.94,
+                0.9
+              ],
+              [
+                1.75,
+                0.9,
+                0.85
+              ],
+              [
+                2.08,
+                0.85,
+                0.8
+              ],
+              [
+                2.2,
+                0.79,
+                0.775
+              ]
+            ],
+            "doorOpening": [
+              -0.575,
+              0.895
+            ],
+            "shellThickness": 0.014,
+            "cornerRadius": 0.1,
+            "axles": [
+              -1.35,
+              1.3
+            ],
+            "archRadius": 0.365,
+            "tireRadius": 0.323,
+            "wellRadius": 0.375,
+            "wellInnerX": 0.61,
+            "wheelCenterX": 0.82,
+            "wellOuterX": 0.8,
+            "hoodHalfWidth": 0.65,
+            "hoodNoseHeight": 0.735,
+            "hoodCowlHeight": 0.835,
+            "hoodCrown": 0.028
+          }
+        }
+      },
+      "parent": "root",
+      "attachment": {
+        "parentId": "root",
+        "parentSocket": "door-liner-left-mount",
+        "localStart": [
+          0,
+          0.76,
+          -0.46
+        ],
+        "localEnd": [
+          0,
+          0.78,
+          -0.46
+        ],
+        "contactType": "overlap",
+        "overlap": 0.02,
+        "gapTolerance": 0.012,
+        "evidenceRefs": [
+          "full-object"
+        ]
+      },
+      "dimensions": {
+        "width": 0.028,
+        "height": 0.49,
+        "depth": 1.38,
+        "units": "meters",
+        "confidence": 0.84
+      },
+      "transform": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "actionProfile": {
+        "animationRole": "rigid",
+        "pivot": {
+          "mode": "center",
+          "localPosition": [
+            0,
+            0,
+            0
+          ],
+          "axis": [
+            0,
+            1,
+            0
+          ],
+          "confidence": 0.5
+        },
+        "transformChannels": {
+          "translate": true,
+          "rotate": true,
+          "scale": true,
+          "bend": false,
+          "twist": false,
+          "detach": false,
+          "visibility": true,
+          "materialState": true
+        },
+        "sockets": [
+          {
+            "id": "door-liner-left-mount",
+            "position": [
+              0,
+              0,
+              0
+            ],
+            "axis": [
+              0,
+              1,
+              0
+            ]
+          }
+        ],
+        "collider": {
+          "type": "box",
+          "offset": [
+            0,
+            0,
+            0
+          ],
+          "scale": [
+            1,
+            1,
+            1
+          ],
+          "isTrigger": false,
+          "notes": "Replace with sphere/capsule/compound proxy when the object shape demands it."
+        },
+        "constraints": [],
+        "destruction": {
+          "breakable": true,
+          "fractureGroup": "door-liner-left",
+          "seamRefs": [],
+          "detachableFragments": [
+            "door-liner-left"
+          ],
+          "breakImpulse": 12,
+          "debrisMaterial": "dark"
+        }
+      },
+      "material": "dark",
+      "materialLayers": [
+        "dark"
+      ],
+      "deformations": [],
+      "joints": [],
+      "seams": [],
+      "localFeatures": [],
+      "surfaceDetail": {
+        "macroRoughness": 0.0,
+        "microRoughness": 0.0,
+        "bumpAmplitude": 0.0,
+        "normalPattern": "",
+        "displacementPattern": "",
+        "occlusionPattern": "",
+        "edgeWearPattern": "",
+        "notes": ""
+      },
+      "evidenceRefs": [
+        "full-object"
+      ],
+      "details": [],
+      "fidelityTier": "blockout",
+      "colorMaterialRecipe": {
+        "dominantAlbedo": "rgba(32, 39, 44, 1)",
+        "secondaryAlbedo": "rgba(32, 39, 44, 1)",
+        "materialClass": "plastic",
+        "materialClassConfidence": 0.85,
+        "evidenceRefs": [
+          "full-object"
+        ]
+      }
+    },
+    {
+      "id": "door-liner-right",
+      "name": "door-liner-right",
+      "level": "meso",
+      "role": "body",
+      "importance": 0.7,
+      "confidence": 0.86,
+      "primitive": "plane-card",
+      "topologyClass": "conforming-shell",
+      "topologyRationale": "Independent rigid mechanical component, not the body silhouette.",
+      "geometryDescriptor": {
+        "normalStrategy": "smooth vertex normals",
+        "uvStrategy": "generated procedural coordinates",
+        "edgeTreatment": {
+          "type": "bevel",
+          "bevelRadius": 0.012,
+          "segments": 3
+        },
+        "deformationStack": [],
+        "carSurface": {
+          "kind": "innerDoor",
+          "side": 1,
+          "profile": {
+            "stations": [
+              [
+                -2.2,
+                0.78,
+                0.735
+              ],
+              [
+                -2.06,
+                0.855,
+                0.7438050314465409
+              ],
+              [
+                -1.7,
+                0.9,
+                0.7664465408805031
+              ],
+              [
+                -1.35,
+                0.915,
+                0.7884591194968553
+              ],
+              [
+                -0.95,
+                0.875,
+                0.8136163522012578
+              ],
+              [
+                -0.61,
+                0.85,
+                0.835
+              ],
+              [
+                0,
+                0.85,
+                0.85
+              ],
+              [
+                0.9,
+                0.88,
+                0.87
+              ],
+              [
+                1.3,
+                0.94,
+                0.9
+              ],
+              [
+                1.75,
+                0.9,
+                0.85
+              ],
+              [
+                2.08,
+                0.85,
+                0.8
+              ],
+              [
+                2.2,
+                0.79,
+                0.775
+              ]
+            ],
+            "doorOpening": [
+              -0.575,
+              0.895
+            ],
+            "shellThickness": 0.014,
+            "cornerRadius": 0.1,
+            "axles": [
+              -1.35,
+              1.3
+            ],
+            "archRadius": 0.365,
+            "tireRadius": 0.323,
+            "wellRadius": 0.375,
+            "wellInnerX": 0.61,
+            "wheelCenterX": 0.82,
+            "wellOuterX": 0.8,
+            "hoodHalfWidth": 0.65,
+            "hoodNoseHeight": 0.735,
+            "hoodCowlHeight": 0.835,
+            "hoodCrown": 0.028
+          }
+        }
+      },
+      "parent": "root",
+      "attachment": {
+        "parentId": "root",
+        "parentSocket": "door-liner-right-mount",
+        "localStart": [
+          0,
+          0.76,
+          -0.46
+        ],
+        "localEnd": [
+          0,
+          0.78,
+          -0.46
+        ],
+        "contactType": "overlap",
+        "overlap": 0.02,
+        "gapTolerance": 0.012,
+        "evidenceRefs": [
+          "full-object"
+        ]
+      },
+      "dimensions": {
+        "width": 0.028,
+        "height": 0.49,
+        "depth": 1.38,
+        "units": "meters",
+        "confidence": 0.84
+      },
+      "transform": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "actionProfile": {
+        "animationRole": "rigid",
+        "pivot": {
+          "mode": "center",
+          "localPosition": [
+            0,
+            0,
+            0
+          ],
+          "axis": [
+            0,
+            1,
+            0
+          ],
+          "confidence": 0.5
+        },
+        "transformChannels": {
+          "translate": true,
+          "rotate": true,
+          "scale": true,
+          "bend": false,
+          "twist": false,
+          "detach": false,
+          "visibility": true,
+          "materialState": true
+        },
+        "sockets": [
+          {
+            "id": "door-liner-right-mount",
+            "position": [
+              0,
+              0,
+              0
+            ],
+            "axis": [
+              0,
+              1,
+              0
+            ]
+          }
+        ],
+        "collider": {
+          "type": "box",
+          "offset": [
+            0,
+            0,
+            0
+          ],
+          "scale": [
+            1,
+            1,
+            1
+          ],
+          "isTrigger": false,
+          "notes": "Replace with sphere/capsule/compound proxy when the object shape demands it."
+        },
+        "constraints": [],
+        "destruction": {
+          "breakable": true,
+          "fractureGroup": "door-liner-right",
+          "seamRefs": [],
+          "detachableFragments": [
+            "door-liner-right"
+          ],
+          "breakImpulse": 12,
+          "debrisMaterial": "dark"
+        }
+      },
+      "material": "dark",
+      "materialLayers": [
+        "dark"
+      ],
+      "deformations": [],
+      "joints": [],
+      "seams": [],
+      "localFeatures": [],
+      "surfaceDetail": {
+        "macroRoughness": 0.0,
+        "microRoughness": 0.0,
+        "bumpAmplitude": 0.0,
+        "normalPattern": "",
+        "displacementPattern": "",
+        "occlusionPattern": "",
+        "edgeWearPattern": "",
+        "notes": ""
+      },
+      "evidenceRefs": [
+        "full-object"
+      ],
+      "details": [],
+      "fidelityTier": "blockout",
+      "colorMaterialRecipe": {
+        "dominantAlbedo": "rgba(32, 39, 44, 1)",
+        "secondaryAlbedo": "rgba(32, 39, 44, 1)",
+        "materialClass": "plastic",
+        "materialClassConfidence": 0.85,
+        "evidenceRefs": [
+          "full-object"
+        ]
+      }
+    },
+    {
+      "id": "cargo-bay",
+      "name": "cargo-bay",
+      "level": "macro",
+      "role": "body",
+      "importance": 1,
+      "confidence": 0.86,
+      "primitive": "plane-card",
+      "topologyClass": "conforming-shell",
+      "topologyRationale": "Image-measured continuous curved panel with authored cross-sections.",
+      "geometryDescriptor": {
+        "normalStrategy": "smooth vertex normals",
+        "uvStrategy": "generated procedural coordinates",
+        "edgeTreatment": {
+          "type": "bevel",
+          "bevelRadius": 0.012,
+          "segments": 3
+        },
+        "deformationStack": [],
+        "carSurface": {
+          "kind": "cargoBay"
+        }
+      },
+      "parent": "root",
+      "attachment": {
+        "parentId": "root",
+        "parentSocket": "cargo-bay-mount",
+        "localStart": [
+          0,
+          0,
+          0
+        ],
+        "localEnd": [
+          0,
+          0.02,
+          0
+        ],
+        "contactType": "overlap",
+        "overlap": 0.02,
+        "gapTolerance": 0.012,
+        "evidenceRefs": [
+          "full-object"
+        ]
+      },
+      "dimensions": {
+        "width": 1,
+        "height": 1,
+        "depth": 1,
+        "units": "meters",
+        "confidence": 0.84
+      },
+      "transform": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "actionProfile": {
+        "animationRole": "rigid",
+        "pivot": {
+          "mode": "center",
+          "localPosition": [
+            0,
+            0,
+            0
+          ],
+          "axis": [
+            0,
+            1,
+            0
+          ],
+          "confidence": 0.5
+        },
+        "transformChannels": {
+          "translate": true,
+          "rotate": true,
+          "scale": true,
+          "bend": false,
+          "twist": false,
+          "detach": false,
+          "visibility": true,
+          "materialState": true
+        },
+        "sockets": [
+          {
+            "id": "cargo-bay-mount",
+            "position": [
+              0,
+              0,
+              0
+            ],
+            "axis": [
+              0,
+              1,
+              0
+            ]
+          }
+        ],
+        "collider": {
+          "type": "box",
+          "offset": [
+            0,
+            0,
+            0
+          ],
+          "scale": [
+            1,
+            1,
+            1
+          ],
+          "isTrigger": false,
+          "notes": "Replace with sphere/capsule/compound proxy when the object shape demands it."
+        },
+        "constraints": [],
+        "destruction": {
+          "breakable": true,
+          "fractureGroup": "cargo-bay",
+          "seamRefs": [],
+          "detachableFragments": [
+            "cargo-bay"
+          ],
+          "breakImpulse": 12,
+          "debrisMaterial": "paint"
+        }
+      },
+      "material": "dark",
+      "materialLayers": [
+        "dark"
+      ],
+      "deformations": [],
+      "joints": [],
+      "seams": [],
+      "localFeatures": [],
+      "surfaceDetail": {
+        "macroRoughness": 0.0,
+        "microRoughness": 0.0,
+        "bumpAmplitude": 0.0,
+        "normalPattern": "",
+        "displacementPattern": "",
+        "occlusionPattern": "",
+        "edgeWearPattern": "",
+        "notes": ""
+      },
+      "evidenceRefs": [
+        "full-object"
+      ],
+      "details": [],
+      "fidelityTier": "blockout",
+      "colorMaterialRecipe": {
+        "dominantAlbedo": "rgba(239, 190, 43, 1)",
+        "secondaryAlbedo": "rgba(239, 190, 43, 1)",
+        "materialClass": "plastic",
+        "materialClassConfidence": 0.85,
+        "evidenceRefs": [
+          "full-object"
+        ]
+      }
+    },
+    {
+      "id": "engine-mount",
+      "name": "engine-mount",
+      "level": "macro",
+      "role": "body",
+      "importance": 1,
+      "confidence": 0.86,
+      "primitive": "plane-card",
+      "topologyClass": "conforming-shell",
+      "topologyRationale": "Image-measured continuous curved panel with authored cross-sections.",
+      "geometryDescriptor": {
+        "normalStrategy": "smooth vertex normals",
+        "uvStrategy": "generated procedural coordinates",
+        "edgeTreatment": {
+          "type": "bevel",
+          "bevelRadius": 0.012,
+          "segments": 3
+        },
+        "deformationStack": [],
+        "carSurface": {
+          "kind": "engineMount"
+        }
+      },
+      "parent": "root",
+      "attachment": {
+        "parentId": "root",
+        "parentSocket": "engine-mount-mount",
+        "localStart": [
+          0,
+          0,
+          0
+        ],
+        "localEnd": [
+          0,
+          0.02,
+          0
+        ],
+        "contactType": "overlap",
+        "overlap": 0.02,
+        "gapTolerance": 0.012,
+        "evidenceRefs": [
+          "full-object"
+        ]
+      },
+      "dimensions": {
+        "width": 1,
+        "height": 1,
+        "depth": 1,
+        "units": "meters",
+        "confidence": 0.84
+      },
+      "transform": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "actionProfile": {
+        "animationRole": "rigid",
+        "pivot": {
+          "mode": "center",
+          "localPosition": [
+            0,
+            0,
+            0
+          ],
+          "axis": [
+            0,
+            1,
+            0
+          ],
+          "confidence": 0.5
+        },
+        "transformChannels": {
+          "translate": true,
+          "rotate": true,
+          "scale": true,
+          "bend": false,
+          "twist": false,
+          "detach": false,
+          "visibility": true,
+          "materialState": true
+        },
+        "sockets": [
+          {
+            "id": "engine-mount-mount",
+            "position": [
+              0,
+              0,
+              0
+            ],
+            "axis": [
+              0,
+              1,
+              0
+            ]
+          }
+        ],
+        "collider": {
+          "type": "box",
+          "offset": [
+            0,
+            0,
+            0
+          ],
+          "scale": [
+            1,
+            1,
+            1
+          ],
+          "isTrigger": false,
+          "notes": "Replace with sphere/capsule/compound proxy when the object shape demands it."
+        },
+        "constraints": [],
+        "destruction": {
+          "breakable": true,
+          "fractureGroup": "engine-mount",
+          "seamRefs": [],
+          "detachableFragments": [
+            "engine-mount"
+          ],
+          "breakImpulse": 12,
+          "debrisMaterial": "paint"
+        }
+      },
+      "material": "dark",
+      "materialLayers": [
+        "dark"
+      ],
+      "deformations": [],
+      "joints": [],
+      "seams": [],
+      "localFeatures": [],
+      "surfaceDetail": {
+        "macroRoughness": 0.0,
+        "microRoughness": 0.0,
+        "bumpAmplitude": 0.0,
+        "normalPattern": "",
+        "displacementPattern": "",
+        "occlusionPattern": "",
+        "edgeWearPattern": "",
+        "notes": ""
+      },
+      "evidenceRefs": [
+        "full-object"
+      ],
+      "details": [],
+      "fidelityTier": "blockout",
+      "colorMaterialRecipe": {
+        "dominantAlbedo": "rgba(239, 190, 43, 1)",
+        "secondaryAlbedo": "rgba(239, 190, 43, 1)",
+        "materialClass": "plastic",
+        "materialClassConfidence": 0.85,
+        "evidenceRefs": [
+          "full-object"
+        ]
+      }
     }
   ],
   "materials": [
@@ -23124,11 +25152,11 @@
         "heightCorrelation": 0.3
       },
       "roughness": {
-        "base": 0.27,
+        "base": 0.36,
         "localResponse": "constant clean material"
       },
       "metalness": {
-        "base": 0.8,
+        "base": 0.45,
         "variation": 0
       },
       "ambientOcclusion": {

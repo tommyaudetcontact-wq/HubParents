@@ -6,7 +6,7 @@ export class CoupeTestRig {
   constructor(model, scene, host) {
     this.model=model;this.scene=scene;this.host=host;
     this.runtime=model.userData.sculptRuntime;this.debris=[];this.wheels=[];
-    this.speed=0;this.steer=0;this.damage=0;this.hitCount=0;
+    this.speed=0;this.steer=0;this.damage=0;this.hitCount=0;this.zoneHits={front:0,rear:0,side:0};
     this.world=new CANNON.World({gravity:new CANNON.Vec3(0,-9.81,0)});
     this.world.allowSleep=true;
     const mat=new CANNON.Material('sheet-metal');this.physicsMaterial=mat;
@@ -33,6 +33,7 @@ export class CoupeTestRig {
     const label=document.createElement('label');label.textContent='Braquage ';
     const slider=document.createElement('input');slider.type='range';slider.min='-30';slider.max='30';slider.value='0';slider.setAttribute('aria-label','Braquage');slider.oninput=()=>this.steer=Number(slider.value)*Math.PI/180;label.append(slider);host.append(label);
     this.button('Impact avant',()=>this.dent('front'));
+    this.button('Impact arrière',()=>this.dent('rear'));
     this.button('Impact côté',()=>this.dent('side'));
     this.button('Briser les vitres',()=>this.breakGlass());
     this.button('Arracher une porte',()=>this.detachDoor());
@@ -43,19 +44,32 @@ export class CoupeTestRig {
   button(text,fn){const b=document.createElement('button');b.textContent=text;b.onclick=()=>{fn();this.report();};this.host.append(b);}
   report(){this.readout.textContent=`Essais locaux · impacts ${this.hitCount} · débris physiques ${this.debris.length} · ${this.wheels.length} roues articulées`;}
   dent(zone){
-    this.hitCount++;this.damage=Math.min(1,this.damage+.22);
-    for(const id of zone==='front'?['hood','nose','fender-left','fender-right']:['door-right','fender-right']) {
-      const entry=this.rest.get(id);if(!entry||!entry.mesh.visible)continue;
-      const a=entry.mesh.geometry.attributes.position,rest=entry.positions;
-      for(let i=0;i<a.count;i++) {
-        const x=rest[i*3],y=rest[i*3+1],z=rest[i*3+2];
-        const fall=zone==='front'?Math.exp(-((z+1.96)**2/.25+x*x/.9)):Math.exp(-((z-.12)**2/.30+(y-.52)**2/.12));
-        const amount=this.damage*fall;
-        a.setXYZ(i,x-(zone==='side'?.19*amount:0),y-(zone==='front'?.15*amount:0),z+(zone==='front'?.30*amount:0));
+    this.hitCount++;const hits=++this.zoneHits[zone],damage=Math.min(1,hits/4);this.damage=damage;
+    this.model.updateMatrixWorld(true);
+    const ids=zone==='front'?[...this.rest.keys()].filter(id=>['hood','nose','fender-left','fender-right','front-bumper','grille','engine-bay','engine-mount','engine-block'].includes(id)||id.startsWith('headlight-')||id.startsWith('grille-slat-')||id.startsWith('indicator-')||id.startsWith('lower-intake')):zone==='rear'?['trunk','tail','fender-left','fender-right','rear-bumper','tail-light--1','tail-light-1']:['door-right','door-liner-right','fender-right'];
+    for(const id of ids){
+      const entry=this.rest.get(id);if(!entry?.mesh.visible)continue;
+      const mesh=entry.mesh,attr=mesh.geometry.attributes.position,rest=entry.positions,inverse=mesh.matrixWorld.clone().invert();
+      for(let i=0;i<attr.count;i++){
+        const v=new THREE.Vector3(rest[i*3],rest[i*3+1],rest[i*3+2]).applyMatrix4(mesh.matrixWorld);
+        const z=v.z,front=zone==='front',rear=zone==='rear';
+        const longitudinal=front?THREE.MathUtils.clamp((-z-.65)/1.55,0,1):rear?THREE.MathUtils.clamp((z-.95)/1.25,0,1):Math.exp(-((z-.12)**2/.30+(v.y-.52)**2/.12));
+        const amount=damage*longitudinal;
+        if(front||rear){
+          v.z+=(front?1:-1)*.32*amount;v.y-=.075*amount;
+          v.x*=1-.035*amount;
+          // The lid creases upward across its width while its leading edge crushes inward.
+          if(id==='hood'||id==='trunk'){
+            const t=THREE.MathUtils.clamp(id==='hood'?(-z-.61)/1.59:(z-1.35)/.85,0,1);
+            v.y+=.31*damage*damage*Math.sin(Math.PI*t)**2;
+          }
+        }else v.x-=.20*amount;
+        v.applyMatrix4(inverse);attr.setXYZ(i,v.x,v.y,v.z);
       }
-      a.needsUpdate=true;entry.mesh.geometry.computeVertexNormals();entry.mesh.geometry.computeBoundingSphere();
+      attr.needsUpdate=true;mesh.geometry.computeVertexNormals();mesh.geometry.computeBoundingSphere();
     }
-    if(this.hitCount>=3)this.breakGlass(['windshield']);
+    if(zone==='front'&&hits===3)this.breakGlass(['windshield']);
+    if(hits>=4){if(zone==='front')this.detachParts(['hood'],[.2,2,-1.7],[1.6,.7,.5]);if(zone==='rear')this.detachParts(['trunk'],[.3,1.8,1.5],[-1.8,.6,.3]);if(zone==='side')this.detachDoor('right');}
   }
   addDebris(mesh,velocity,spin) {
     this.scene.add(mesh);mesh.updateMatrixWorld(true);
@@ -67,12 +81,21 @@ export class CoupeTestRig {
     body.velocity.set(...velocity);body.angularVelocity.set(...spin);body.linearDamping=.15;body.angularDamping=.2;body.sleepSpeedLimit=.12;body.sleepTimeLimit=1;
     this.world.addBody(body);mesh.position.copy(center);this.debris.push({mesh,body});
   }
-  detachDoor(){
-    const side=['right','left'].find(side=>this.rest.get('door-'+side)?.mesh.visible);if(!side)return;
-    const original=this.rest.get('door-'+side).mesh;original.updateWorldMatrix(true,false);
-    const geometry=original.geometry.clone(),box=new THREE.Box3().setFromBufferAttribute(geometry.attributes.position),center=box.getCenter(new THREE.Vector3());geometry.translate(-center.x,-center.y,-center.z);
-    const door=new THREE.Mesh(geometry,original.material);door.position.copy(center).applyMatrix4(original.matrixWorld);door.castShadow=true;door.receiveShadow=true;
-    this.addDebris(door,[side==='right'?1.4:-1.4,1.5,.7],[1.2,.4,2]);original.visible=false;
+  detachParts(ids,velocity,spin){
+    const entries=ids.map(id=>this.rest.get(id)).filter(e=>e?.mesh.visible);if(!entries.length)return;
+    this.model.updateMatrixWorld(true);
+    const group=new THREE.Group(),bounds=new THREE.Box3();
+    for(const {mesh}of entries)bounds.union(new THREE.Box3().setFromObject(mesh));
+    const center=bounds.getCenter(new THREE.Vector3());
+    for(const {mesh}of entries){
+      const geometry=mesh.geometry.clone();geometry.applyMatrix4(mesh.matrixWorld);geometry.translate(-center.x,-center.y,-center.z);
+      const part=new THREE.Mesh(geometry,mesh.material);part.castShadow=true;part.receiveShadow=true;group.add(part);mesh.visible=false;
+    }
+    group.position.copy(center);group.userData.partIds=ids;this.addDebris(group,velocity,spin);
+  }
+  detachDoor(requestedSide){
+    const side=requestedSide||['right','left'].find(side=>this.rest.get('door-'+side)?.mesh.visible);if(!side||!this.rest.get('door-'+side)?.mesh.visible)return;
+    this.detachParts(['door-','door-liner-','door-frame-','window-','b-pillar-','mirror-','mirror-stalk-','handle-'].map(id=>id+side),[side==='right'?1.4:-1.4,1.5,.7],[1.2,.4,2]);
   }
   breakGlass(only){
     const ids=only||['windshield','rear-window','window-left','window-right','window-quarter-left','window-quarter-right'];
@@ -87,9 +110,9 @@ export class CoupeTestRig {
   }
   repair(){
     for(const {mesh,positions,visible}of this.rest.values()){mesh.geometry.attributes.position.array.set(positions);mesh.geometry.attributes.position.needsUpdate=true;mesh.geometry.computeVertexNormals();mesh.geometry.computeBoundingSphere();mesh.visible=visible;}
-    this.clearDebris();this.speed=0;this.steer=0;this.damage=0;this.hitCount=0;for(const w of this.wheels){w.roll.rotation.set(0,0,0);w.holder.rotation.set(0,0,0);}
+    this.clearDebris();this.speed=0;this.steer=0;this.damage=0;this.hitCount=0;this.zoneHits={front:0,rear:0,side:0};for(const w of this.wheels){w.roll.rotation.set(0,0,0);w.holder.rotation.set(0,0,0);}
   }
-  clearDebris(){for(const {mesh,body}of this.debris){this.world.removeBody(body);this.scene.remove(mesh);mesh.geometry.dispose();if(!Object.values(this.runtime.meshes).some(m=>m.material===mesh.material))mesh.material.dispose();}this.debris=[];}
+  clearDebris(){for(const {mesh,body}of this.debris){this.world.removeBody(body);this.scene.remove(mesh);mesh.traverse(part=>{if(!part.geometry)return;part.geometry.dispose();if(!Object.values(this.runtime.meshes).some(m=>m.material===part.material))part.material.dispose();});}this.debris=[];}
   update(dt){for(const w of this.wheels){w.roll.rotation.x-=this.speed/.323*dt;w.holder.rotation.y=w.front?this.steer:0;}this.world.step(1/60,dt,4);for(const d of this.debris){d.mesh.position.copy(d.body.position);d.mesh.quaternion.copy(d.body.quaternion);}}
   dispose(){this.clearDebris();this.host.replaceChildren();}
 }

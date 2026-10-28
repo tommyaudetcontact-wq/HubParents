@@ -1,7 +1,7 @@
 {
-  "parts": 98,
-  "triangles": 45290,
+  "parts": 109,
+  "triangles": 48578,
   "invalid": 0,
-  "expectedParts": 98,
+  "expectedParts": 109,
   "pass": true
 }

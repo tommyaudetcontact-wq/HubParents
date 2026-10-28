@@ -8,6 +8,11 @@
     "six broken windows",
     "door rigid body",
     "10-second ground collision",
-    "full repair"
+    "full repair",
+    "whole-front damage",
+    "hood folding and detachment",
+    "trunk detachment",
+    "door assembly detachment",
+    "rims inside sidewalls"
   ]
 }
