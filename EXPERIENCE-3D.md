@@ -66,3 +66,13 @@ Contrainte de conception : conserver un squelette commun et des éléments sépa
 Livraison du pilote : **3D-0.7**, limité à Riff Nocturne. Validation : tests 3D généraux, identité des skins, régions modulaires et animations de Riff, physique des ragdolls et rig partagé. Les 31 géométries hors pilote ont été comparées à 3D-0.6 et sont identiques. Les mains sont séparées des cuisses dans la topologie et leurs poids ne dépendent plus des os des jambes. La longueur visuelle du cou est limitée dans les poses de conduite du pilote. Les vérifications WebGL comprennent repos, marche, conduite et chute; aucun appareil Android physique n’est connecté à cette machine pour la validation finale.
 
 En attente de l’avis du joueur sur l’APK avant d’étendre ce travail aux autres skins. Les menus et fonctionnalités de personnalisation futurs ne sont pas ajoutés.
+
+## Véhicules — 3D-0.11
+
+Carrosseries routières originales par famille : capot long des classiques, pavillon bas des sportives, cabine des utilitaires, benne ouverte des pickups et châssis surélevé des monster trucks. Les passages de roues sont ouverts, les panneaux séparés et l’habitacle reste visible après arrachement. Les vitres se fissurent puis disparaissent ; les six zones de dégâts existantes pilotent des déformations réversibles, sans changer les sauvegardes ni le protocole. Les débris de carrosserie ont une épaisseur et conservent leurs rotations physiques. Les motos, skates et trottinettes conservent leurs modèles et ancrages de pilote.
+
+Conduite routière : direction moins sensible à haute vitesse, glissement latéral distinct du frein à main, freinage avant marche arrière, accélération progressive, effet modéré des dégâts avant sur le moteur et des flancs sur l’adhérence. Petits transferts de poids visuels ; impacts moins enclins à catapulter la voiture ; propulsion maintenue sur les roues encore en contact. Le tank perd moins d’élan sur les zombies en fonction de sa masse. Les vitesses des activités, améliorations, rampes, dégâts persistants, retour des épaves et autorité hôte sont conservés.
+
+Atelier local : `http://127.0.0.1:4185/vehicles.html`, sélecteur de véhicules, chocs et réparation, conduite WASD/flèches, espace pour le frein à main. Les modèles sont ceux du jeu. Cet atelier reste exclu de l’APK.
+
+Validation : 106 suites existantes et nouvelles, avec reprise des régressions corrigées ; tests de freinage, dérive, marche arrière, usure, rejeu hôte/invité exact et 30/120 Hz. Les corps rigides conservent la simulation arcade du jeu : il ne s’agit pas d’un simulateur de pneus/suspensions complet. Essai sur téléphone et ressenti à la manette à valider par le joueur.
