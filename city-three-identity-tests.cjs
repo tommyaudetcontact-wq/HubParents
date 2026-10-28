@@ -2,7 +2,7 @@
 const assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm'),crypto=require('node:crypto');
 const T=require('./vendor/three.min.js'),C=require('./domain.js'),{createCanvas}=require('C:/Users/recto/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/@napi-rs/canvas');
 const scope={THREE:T,BrawlCore:C,atob,document:{createElement:()=>createCanvas(1,1),addEventListener(){},querySelectorAll:()=>[],getElementById:()=>null}};scope.window=scope;vm.createContext(scope);
-for(const file of ['construction.js','apartment.js','character-art.js','character-rig.js','assets3d/brawl-character.js','city-three-character-identity.js','city-three-original-character.js'])vm.runInContext(fs.readFileSync(file,'utf8'),scope,{filename:file});
+for(const file of ['construction.js','apartment.js','character-art.js','character-rig.js','assets3d/brawl-character.js','assets3d/brawl-riff-pilot.js','city-three-riff-style.js','city-three-character-identity.js','city-three-original-character.js'])vm.runInContext(fs.readFileSync(file,'utf8'),scope,{filename:file});
 const I=scope.CityThreeIdentity,R=scope.CharacterRig,V=scope.CityThreeCharacter,materials=new Map(),ctx={S:.04,material(color){if(!materials.has(color))materials.set(color,new T.MeshStandardMaterial({color}));return materials.get(color);}},faces=new Set();
 const required={'riff-nocturne':['cap','glasses'],'spectre-minuit':['hood','garment-skirt'],'ensorceleuse-prune':['witch-hat','garment-skirt'],'dame-haut-de-forme':['hat-crown','cape'],'veilleur-ardoise':['mask-ear','cape'],'princesse-rosee':['crown-point','garment-skirt'],'sentinelle-olive':['gold-visor','body-armor'],'mascotte-tropicale':['animal-ear','animal-muzzle']};
 for(const skin of C.skins){

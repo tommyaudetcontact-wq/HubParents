@@ -28,7 +28,7 @@ Ce prototype n'a pas été validé sur deux téléphones physiques. Les poses de
 
 ## Développement
 
-`npm run test:3d` exécute les quatre suites 3D. `python scripts/build-android.py --bump` produit l'APK d'essai. Le générateur `scripts/build-original-character.py` utilise numpy et scikit-image pour régénérer `assets3d/brawl-character.js`, déjà livré dans les sources.
+`npm run test:3d` exécute les cinq suites 3D. `python scripts/build-android.py --bump` produit l'APK d'essai. Le générateur `scripts/build-original-character.py` utilise numpy et scikit-image pour régénérer `assets3d/brawl-character.js`, déjà livré dans les sources.
 
 Bibliothèques : Three.js r160 (MIT), Cannon-es 0.20.0 (MIT). Licences dans `vendor/`. Les modèles téléchargés pendant la recherche ne sont pas utilisés, ni inclus dans l'APK ou dans Git.
 
@@ -55,3 +55,14 @@ Nouvelle direction inspirée des proportions et des matériaux stylisés de Fort
 Les détails opaques d’une tête ou d’un costume sont fusionnés avec couleurs par sommet. Les tests des 32 skins imposent moins de 18 objets dessinés par personnage et vérifient l’absence de texture de personnage projetée, les poses, les accessoires et l’occlusion arrière du masque. Le volume physique et la simulation de déplacement restent partagés avec les modes existants. Une pose de repos asymétrique est réservée au rendu 3D.
 
 Référence visuelle consultée : https://www.fortnite.com/news/outfit-art-update (Epic Games). Modèles et code créés pour Brawl; aucune ressource Fortnite intégrée. Les vérifications sur PC ne remplacent pas l’essai sur Android ni la validation artistique du joueur.
+
+## Pilote de validation — Riff de Tommy
+
+Le test suivant est limité au skin `skin-riff-nocturne`, équipé par Tommy au début du travail. Aucun identifiant de compte n’est nécessaire dans le client. Les autres modèles restent sur la version 3D-0.6 jusqu’à validation du joueur.
+
+Contrainte de conception : conserver un squelette commun et des éléments séparés (corps, chandail, pantalon, chaussures, cheveux, couvre-chef, lunettes, accessoires) pour permettre des skins et vêtements futurs. Ne pas ajouter de menu, de boutique ou de persistance de personnalisation dans ce test. Les animations, points de prise des armes et positions physiques restent partagés avec les modes existants. Le crâne du pilote est attaché rigidement à l’os de tête pour rester aligné avec les lunettes et la casquette en ragdoll.
+
+
+Livraison du pilote : **3D-0.7**, limité à Riff Nocturne. Validation : tests 3D généraux, identité des skins, régions modulaires et animations de Riff, physique des ragdolls et rig partagé. Les 31 géométries hors pilote ont été comparées à 3D-0.6 et sont identiques. Les mains sont séparées des cuisses dans la topologie et leurs poids ne dépendent plus des os des jambes. La longueur visuelle du cou est limitée dans les poses de conduite du pilote. Les vérifications WebGL comprennent repos, marche, conduite et chute; aucun appareil Android physique n’est connecté à cette machine pour la validation finale.
+
+En attente de l’avis du joueur sur l’APK avant d’étendre ce travail aux autres skins. Les menus et fonctionnalités de personnalisation futurs ne sont pas ajoutés.

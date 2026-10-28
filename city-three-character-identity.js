@@ -30,6 +30,7 @@
 
  }
  function attach(ctx,{member,source,head,gear,group}){
+  if(source.pilot&&root.CityThreeRiffStyle)return root.CityThreeRiffStyle.attach(ctx,{member,source,head,gear,group});
   const look=source.look,config=describe(member,source),attachments=[],S=ctx.S;
   group.userData.identity={skin:member.skin,signature:config.signature||null,...config};
   const material=color=>ctx.material(color?.isColor?'#'+color.getHexString():color),part=(parent,geometry,color,name)=>{const mesh=new T.Mesh(geometry,material(color));mesh.name=name;mesh.castShadow=true;mesh.receiveShadow=true;mesh.userData.ownedGeometry=true;parent.add(mesh);return mesh;};
