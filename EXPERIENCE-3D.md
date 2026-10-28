@@ -86,3 +86,5 @@ Vitres bleu clair transparentes : sièges, tableau de bord, colonne de direction
 À la sortie des rampes, le mouvement angulaire est conservé. Un départ proche du bord donne du roulis vers le côté qui perd son support ; les sauts centrés gardent une impulsion de tangage modérée. Les rampes de ville, de test et de course utilisent la même règle déterministe.
 
 Les régressions couvrent véhicules, dégâts, gravité, rampes, poses, prédiction, activités et police ; simulations complètes à six clients et migration d’hôte. Une immunité indue du conducteur à pied, héritée du délai de réapparition de son épave, a également été corrigée. Essais dans le navigateur ; aucune validation sur téléphone physique annoncée.
+
+Dernière finition 3D-0.13 : les optiques et leurs encadrements restent dans les ailes ; calandre resserrée sur la face avant pour supprimer les petits débordements aux coins.
