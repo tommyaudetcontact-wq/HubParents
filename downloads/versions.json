@@ -9,11 +9,11 @@
   },
   "3d": {
     "applicationId": "com.brawlacademy.preview",
-    "versionCode": 6,
-    "versionName": "3D-0.6",
+    "versionCode": 7,
+    "versionName": "3D-0.7",
     "minimumVersionCode": 1,
     "file": "Brawl-Academy-3D.apk",
-    "size": 13834850,
-    "sha256": "0dc06d26e2411c70c6bdf1a8b37fae6d96b986eef67c3d7bb6b20eab5149e486"
+    "size": 14486282,
+    "sha256": "27598bffbebba63febf8f46fc4439575b84d15b04149fccbacb6616c608f7ec8"
   }
 }
