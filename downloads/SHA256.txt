@@ -1,2 +1,2 @@
 5d243299a75d025fe33cac440220dc22fd4b4e38110bb3151bb9a3ecb594a15d  Brawl-Ville-2D.apk
-fd495683072b2fca61dada43c5f88791a2a7ea728b3fae268d4879f17b735dc4  Brawl-Academy-3D.apk
+4f5ef7f3a2a64c0c9cd9e753fdfef88e8657fe7aacfab2ddce6b1560d9cd4166  Brawl-Academy-3D.apk
