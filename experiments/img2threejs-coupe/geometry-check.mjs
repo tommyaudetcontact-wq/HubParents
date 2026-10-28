@@ -1,0 +1,22 @@
+import fs from 'node:fs';import {pathToFileURL} from 'node:url';
+const base='experiments/img2threejs-coupe/';
+const clean=s=>s.replace(/^import .*?;\r?\n/gm,'');
+const src=`import * as THREE from '${pathToFileURL(process.cwd()+'/.private/img2-preview/package/build/three.module.js').href}';\n`+clean(fs.readFileSync(base+'surfaces.js','utf8'))+'\n'+clean(fs.readFileSync(base+'createCoupeModel.js','utf8'));
+try{const module=await import('data:text/javascript;base64,'+Buffer.from(src).toString('base64'));const model=module.createCoupeJauneBrawlModel({textureSize:64});let triangles=0,invalid=0,count=0;model.traverse(o=>{if(!o.geometry)return;count++;const g=o.geometry;triangles+=(g.index?.count||g.attributes.position.count)/3;for(const a of Object.values(g.attributes))for(const v of a.array)if(!Number.isFinite(v))invalid++;});const result={parts:count,triangles,invalid,expectedParts:98,pass:invalid===0&&count===98&&triangles<60000};fs.writeFileSync(base+'geometry-check.json',JSON.stringify(result,null,2));console.log(JSON.stringify(result));
+const threeUrl=pathToFileURL(process.cwd()+'/.private/img2-preview/package/build/three.module.js').href;
+let rigSource=fs.readFileSync(base+'test-rig.js','utf8').replace("from 'three'",`from '${threeUrl}'`).replace("from './cannon-es.js'",`from '${pathToFileURL(process.cwd()+'/'+base+'cannon-es.js').href}'`);
+const {CoupeTestRig}=await import('data:text/javascript;base64,'+Buffer.from(rigSource).toString('base64'));
+const {Scene}=await import(threeUrl);
+const element=()=>({style:{},append(){},replaceChildren(){},setAttribute(){}});globalThis.document={createElement:element};
+const rig=new CoupeTestRig(model,new Scene(),element());
+const assert=(ok,why)=>{if(!ok)throw Error(why);};
+assert(rig.wheels.every(w=>w.ids.length===8),'Each wheel must own tire, rim, hub and five spokes');
+rig.speed=9;rig.steer=.4;rig.update(1/60);assert(rig.wheels[0].roll.rotation.x<0,'Wheel roll missing');assert(rig.wheels.filter(w=>w.front).every(w=>w.holder.rotation.y===.4),'Steering missing');assert(rig.wheels.filter(w=>!w.front).every(w=>w.holder.rotation.y===0),'Rear wheel steering');
+rig.dent('front');assert(rig.hitCount===1,'Dent did not apply');
+const hood=rig.rest.get('hood');assert(hood.mesh.geometry.attributes.position.array.some((v,i)=>v!==hood.positions[i]),'Hood buffer unchanged');
+rig.breakGlass();assert(rig.debris.length===48,'Six glass panels must yield 48 pieces');rig.detachDoor();assert(rig.debris.length===49,'Detached door missing');
+for(let i=0;i<600;i++)rig.update(1/60);
+assert(rig.debris.every(d=>Number.isFinite(d.body.position.y)&&d.body.position.y>-.12),'Debris fell through floor');
+rig.repair();assert(rig.debris.length===0&&rig.hitCount===0,'Repair cleanup failed');assert(hood.mesh.geometry.attributes.position.array.every((v,i)=>v===hood.positions[i]),'Repair did not restore vertices');assert([...rig.rest.values()].every(r=>r.mesh.visible===r.visible),'Repair did not restore visibility');
+fs.writeFileSync(base+'mechanical-check.json',JSON.stringify({pass:true,checks:['wheel grouping','axle rotation','front-only steering','buffer deformation','six broken windows','door rigid body','10-second ground collision','full repair']},null,2));console.log('PASS: 8 mechanical checks');rig.dispose();
+if(!result.pass)process.exitCode=1;}catch(e){console.error(e.name+': '+e.message);process.exitCode=1;}

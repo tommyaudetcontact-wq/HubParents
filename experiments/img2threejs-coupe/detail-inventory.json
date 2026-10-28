@@ -1,0 +1,147 @@
+{
+  "scanMethod": "component-zones",
+  "targetMinDetails": 10,
+  "note": "Enumerate every identity-defining small detail before authoring the spec. Each detail must map to a component.localFeatures entry or material.localOverrides entry, never prose only. Use forge/stage1_intake/build_detail_inventory.py to scan zones.",
+  "details": [
+    {
+      "id": "hood-crown",
+      "kind": "contour",
+      "mapsTo": {
+        "ref": "hood-crown"
+      },
+      "evidenceRefs": [
+        "full-object"
+      ]
+    },
+    {
+      "id": "hood-ridges",
+      "kind": "ridge",
+      "mapsTo": {
+        "ref": "hood-ridges"
+      },
+      "evidenceRefs": [
+        "full-object"
+      ]
+    },
+    {
+      "id": "arch-front-l",
+      "kind": "hole",
+      "mapsTo": {
+        "ref": "arch-front-l"
+      },
+      "evidenceRefs": [
+        "full-object"
+      ]
+    },
+    {
+      "id": "arch-front-r",
+      "kind": "hole",
+      "mapsTo": {
+        "ref": "arch-front-r"
+      },
+      "evidenceRefs": [
+        "full-object"
+      ]
+    },
+    {
+      "id": "roof-camber",
+      "kind": "contour",
+      "mapsTo": {
+        "ref": "roof-camber"
+      },
+      "evidenceRefs": [
+        "full-object"
+      ]
+    },
+    {
+      "id": "window-tint",
+      "kind": "gloss",
+      "mapsTo": {
+        "ref": "window-tint"
+      },
+      "evidenceRefs": [
+        "full-object"
+      ]
+    },
+    {
+      "id": "five-spokes",
+      "kind": "contour",
+      "mapsTo": {
+        "ref": "five-spokes"
+      },
+      "evidenceRefs": [
+        "full-object"
+      ]
+    },
+    {
+      "id": "four-headlamps",
+      "kind": "contour",
+      "mapsTo": {
+        "ref": "four-headlamps"
+      },
+      "evidenceRefs": [
+        "full-object"
+      ]
+    },
+    {
+      "id": "grille-slats",
+      "kind": "contour",
+      "mapsTo": {
+        "ref": "grille-slats"
+      },
+      "evidenceRefs": [
+        "full-object"
+      ]
+    },
+    {
+      "id": "door-seam-l",
+      "kind": "linework",
+      "mapsTo": {
+        "ref": "door-seam-l"
+      },
+      "evidenceRefs": [
+        "full-object"
+      ]
+    },
+    {
+      "id": "door-seam-r",
+      "kind": "linework",
+      "mapsTo": {
+        "ref": "door-seam-r"
+      },
+      "evidenceRefs": [
+        "full-object"
+      ]
+    },
+    {
+      "id": "silver-bumpers",
+      "kind": "gloss",
+      "mapsTo": {
+        "ref": "silver-bumpers"
+      },
+      "evidenceRefs": [
+        "full-object"
+      ]
+    },
+    {
+      "id": "tail-lenses",
+      "kind": "gloss",
+      "mapsTo": {
+        "ref": "tail-lenses"
+      },
+      "evidenceRefs": [
+        "full-object"
+      ]
+    },
+    {
+      "id": "c-pillar",
+      "kind": "contour",
+      "mapsTo": {
+        "ref": "c-pillar"
+      },
+      "evidenceRefs": [
+        "full-object"
+      ]
+    }
+  ]
+}

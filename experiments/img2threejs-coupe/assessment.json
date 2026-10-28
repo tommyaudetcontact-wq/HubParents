@@ -1,0 +1,237 @@
+{
+  "objectClass": {
+    "primaryType": "two-door retro muscle coupe",
+    "primaryDomain": "object",
+    "formLanguage": [
+      "hard-surface",
+      "continuous curved shell"
+    ],
+    "structureKind": [
+      "articulated assembly",
+      "layered shell"
+    ],
+    "motionPotential": [
+      "destructible",
+      "detachable",
+      "whole-object transform"
+    ],
+    "materialFamilies": [
+      "paint",
+      "metal",
+      "glass",
+      "rubber",
+      "plastic"
+    ],
+    "notes": "Fill from direct visual inspection before writing the final spec. Do not use fixed domain profiles. Set primaryDomain to object, character, or hybrid."
+  },
+  "complexity": {
+    "tier": "complex",
+    "scores": {
+      "silhouetteComplexity": 2,
+      "componentCount": 3,
+      "hierarchyDepth": 2,
+      "repetitionDensity": 2,
+      "materialLayerCount": 2,
+      "localDetailDensity": 1,
+      "occlusionRisk": 1,
+      "actionReadinessNeed": 3
+    },
+    "estimatedCounts": {
+      "macroComponents": 1,
+      "mesoComponents": 0,
+      "microFeatureGroups": 0,
+      "materialLayers": 1,
+      "repetitionSystems": 0
+    },
+    "reasoning": [
+      "Separate curved panels, glazing and articulated wheel assemblies with destruction."
+    ]
+  },
+  "specDepthDecision": {
+    "requiredDepth": "complex",
+    "minimumComponentLevels": [
+      "macro",
+      "meso",
+      "micro"
+    ],
+    "needsRepetitionSystems": true,
+    "needsMaterialLocalOverrides": true,
+    "needsMultipleReviewViews": true,
+    "needsActionReadyHierarchy": true,
+    "rationale": "Choose simple/moderate/complex/ultra-complex from observed structure, not from a hardcoded domain."
+  },
+  "unknownsToResolveBeforeImplementation": [],
+  "detailInventory": {
+    "scanMethod": "component-zones",
+    "targetMinDetails": 10,
+    "note": "Enumerate every identity-defining small detail before authoring the spec. Each detail must map to a component.localFeatures entry or material.localOverrides entry, never prose only. Use forge/stage1_intake/build_detail_inventory.py to scan zones.",
+    "details": [
+      {
+        "id": "hood-crown",
+        "kind": "contour",
+        "mapsTo": {
+          "ref": "hood-crown"
+        },
+        "evidenceRefs": [
+          "full-object"
+        ]
+      },
+      {
+        "id": "hood-ridges",
+        "kind": "ridge",
+        "mapsTo": {
+          "ref": "hood-ridges"
+        },
+        "evidenceRefs": [
+          "full-object"
+        ]
+      },
+      {
+        "id": "arch-front-l",
+        "kind": "hole",
+        "mapsTo": {
+          "ref": "arch-front-l"
+        },
+        "evidenceRefs": [
+          "full-object"
+        ]
+      },
+      {
+        "id": "arch-front-r",
+        "kind": "hole",
+        "mapsTo": {
+          "ref": "arch-front-r"
+        },
+        "evidenceRefs": [
+          "full-object"
+        ]
+      },
+      {
+        "id": "roof-camber",
+        "kind": "contour",
+        "mapsTo": {
+          "ref": "roof-camber"
+        },
+        "evidenceRefs": [
+          "full-object"
+        ]
+      },
+      {
+        "id": "window-tint",
+        "kind": "gloss",
+        "mapsTo": {
+          "ref": "window-tint"
+        },
+        "evidenceRefs": [
+          "full-object"
+        ]
+      },
+      {
+        "id": "five-spokes",
+        "kind": "contour",
+        "mapsTo": {
+          "ref": "five-spokes"
+        },
+        "evidenceRefs": [
+          "full-object"
+        ]
+      },
+      {
+        "id": "four-headlamps",
+        "kind": "contour",
+        "mapsTo": {
+          "ref": "four-headlamps"
+        },
+        "evidenceRefs": [
+          "full-object"
+        ]
+      },
+      {
+        "id": "grille-slats",
+        "kind": "contour",
+        "mapsTo": {
+          "ref": "grille-slats"
+        },
+        "evidenceRefs": [
+          "full-object"
+        ]
+      },
+      {
+        "id": "door-seam-l",
+        "kind": "linework",
+        "mapsTo": {
+          "ref": "door-seam-l"
+        },
+        "evidenceRefs": [
+          "full-object"
+        ]
+      },
+      {
+        "id": "door-seam-r",
+        "kind": "linework",
+        "mapsTo": {
+          "ref": "door-seam-r"
+        },
+        "evidenceRefs": [
+          "full-object"
+        ]
+      },
+      {
+        "id": "silver-bumpers",
+        "kind": "gloss",
+        "mapsTo": {
+          "ref": "silver-bumpers"
+        },
+        "evidenceRefs": [
+          "full-object"
+        ]
+      },
+      {
+        "id": "tail-lenses",
+        "kind": "gloss",
+        "mapsTo": {
+          "ref": "tail-lenses"
+        },
+        "evidenceRefs": [
+          "full-object"
+        ]
+      },
+      {
+        "id": "c-pillar",
+        "kind": "contour",
+        "mapsTo": {
+          "ref": "c-pillar"
+        },
+        "evidenceRefs": [
+          "full-object"
+        ]
+      }
+    ]
+  },
+  "anatomy": {
+    "applies": false,
+    "styleHeads": 0.0,
+    "proportions": {
+      "headUnit": 0.0,
+      "torso": 0.0,
+      "legs": 0.0,
+      "shoulderWidth": 0.0,
+      "hipWidth": 0.0
+    },
+    "pose": {
+      "type": "unassessed",
+      "jointAngles": {}
+    },
+    "faceLandmarks": {
+      "eyeLine": 0.0,
+      "eyeSpacing": 0.0,
+      "noseBase": 0.0,
+      "mouthLine": 0.0,
+      "hairline": 0.0
+    },
+    "features": [],
+    "confidence": 0.0,
+    "note": "Only meaningful when objectClass.primaryDomain is character or hybrid. Set applies=true and fill from forge/stage1_intake/extract_landmarks.py. See grimoire/character/reconstruction.md and grimoire/character/likeness_maximization.md."
+  },
+  "sourceImage": "../BrawlAcademy3D/experiments/img2threejs-coupe/reference.png"
+}

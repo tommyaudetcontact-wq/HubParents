@@ -1,0 +1,98 @@
+{
+  "angles": [
+    {
+      "azimuth": 0.0,
+      "path": "..\\BrawlAcademy3D\\experiments\\img2threejs-coupe\\blockout-02-front.png",
+      "isReference": true,
+      "segmented": true,
+      "holed": true,
+      "interiorHolePixelCount": 6045,
+      "interiorHoleFraction": 0.17121735682320285,
+      "largestHolePixelCount": 5327,
+      "largestHoleBBox": {
+        "x": 167,
+        "y": 233,
+        "width": 324,
+        "height": 46
+      },
+      "areaFraction": 0.12222445319910545,
+      "ratio": 1.0,
+      "degenerate": false
+    },
+    {
+      "azimuth": 90.0,
+      "path": "..\\BrawlAcademy3D\\experiments\\img2threejs-coupe\\blockout-02-right.png",
+      "isReference": false,
+      "segmented": true,
+      "holed": true,
+      "interiorHolePixelCount": 14008,
+      "interiorHoleFraction": 0.18314941687150255,
+      "largestHolePixelCount": 5445,
+      "largestHoleBBox": {
+        "x": 259,
+        "y": 137,
+        "width": 144,
+        "height": 59
+      },
+      "areaFraction": 0.26477695231633097,
+      "ratio": 2.1663173398289244,
+      "degenerate": false
+    },
+    {
+      "azimuth": 180.0,
+      "path": "..\\BrawlAcademy3D\\experiments\\img2threejs-coupe\\blockout-02-rear.png",
+      "isReference": false,
+      "segmented": true,
+      "holed": true,
+      "interiorHolePixelCount": 13386,
+      "interiorHoleFraction": 0.25583884408088375,
+      "largestHolePixelCount": 10407,
+      "largestHoleBBox": {
+        "x": 227,
+        "y": 126,
+        "width": 205,
+        "height": 60
+      },
+      "areaFraction": 0.18113147454493841,
+      "ratio": 1.481957740893899,
+      "degenerate": false
+    },
+    {
+      "azimuth": 270.0,
+      "path": "..\\BrawlAcademy3D\\experiments\\img2threejs-coupe\\blockout-02-left.png",
+      "isReference": false,
+      "segmented": true,
+      "holed": true,
+      "interiorHolePixelCount": 8649,
+      "interiorHoleFraction": 0.12296340527168813,
+      "largestHolePixelCount": 5364,
+      "largestHoleBBox": {
+        "x": 256,
+        "y": 137,
+        "width": 144,
+        "height": 59
+      },
+      "areaFraction": 0.24350035657165012,
+      "ratio": 1.9922392794425876,
+      "degenerate": false
+    }
+  ],
+  "referenceAzimuth": 0.0,
+  "requiredAzimuths": [
+    0.0,
+    90.0,
+    180.0,
+    270.0
+  ],
+  "azimuthTolerance": 5.0,
+  "missingAzimuths": [],
+  "covered": true,
+  "collapseRatio": 0.15,
+  "degenerate": false,
+  "allowHoles": false,
+  "holed": true,
+  "unsegmentedAzimuths": [],
+  "segmentationReliable": true,
+  "passed": false,
+  "note": "deterministic; zero token; mandatory azimuth coverage catches off-axis-only defects, interior-hole flood fill catches silhouette-enclosed background that an area-only check misses"
+}

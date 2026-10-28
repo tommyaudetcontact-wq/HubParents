@@ -1,0 +1,8 @@
+import fs from 'node:fs';import {stripTypeScriptTypes} from 'node:module';
+const base='experiments/img2threejs-coupe/',spec=JSON.parse(fs.readFileSync(base+'sculpt-spec.json'));let src=fs.readFileSync(base+'createCoupeModel.ts','utf8');src="import {buildCoupeSurface,bevelBox,rimGeometry} from './surfaces.js?revision=1793206199513951700';\n"+src;
+// The surface descriptors own their sampled positions; sockets are measured mounting metadata, not axial mesh constructors.
+src=src.replace(/const endpoint_\w+ = makeAttachmentEndpoint\([^;]+;/g,m=>m.replace(/= makeAttachmentEndpoint[\s\S]*/, '= null;'));
+for(const [i,c]of spec.componentTree.entries()){const key=c.id.replace(/[^a-zA-Z0-9_]/g,'_'),name='mesh_'+key+'_'+i+'Geometry',rx=new RegExp('const '+name+' = endpoint_[\\s\\S]*?;');if(!src.includes('const '+name+' ='))continue;let expr=null;if(c.geometryDescriptor.carSurface)expr='buildCoupeSurface('+JSON.stringify(c.geometryDescriptor.carSurface)+')';else if(c.geometryDescriptor.wheelRim)expr='rimGeometry()';else if(c.primitive==='box')expr='bevelBox()';if(expr)src=src.replace(rx,'const '+name+' = '+expr+';');}
+// Keep hidden bind groups invisible and glazing optically thin; clean scalar materials have no generated texture maps.
+src=src.replace('  root.userData.sculptRuntime =','  for(const [id,m] of Object.entries(materialMap)){m.side=THREE.DoubleSide;m.name=id;if(id===\'hidden\')m.visible=false;if(id===\'glass\'){m.transparent=true;m.opacity=.35;m.depthWrite=false;}}\n  root.userData.sculptRuntime =');
+fs.writeFileSync(base+'createCoupeModel.js',stripTypeScriptTypes(src,{mode:'strip'}));fs.writeFileSync(base+'createCoupeModel.refined.ts',src);console.log('Emitted reference-driven '+spec.sculptPipeline.currentPass+' factory');

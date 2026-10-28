@@ -1,0 +1,13 @@
+{
+  "pass": true,
+  "checks": [
+    "wheel grouping",
+    "axle rotation",
+    "front-only steering",
+    "buffer deformation",
+    "six broken windows",
+    "door rigid body",
+    "10-second ground collision",
+    "full repair"
+  ]
+}
