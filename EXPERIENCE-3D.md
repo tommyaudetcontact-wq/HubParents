@@ -28,7 +28,7 @@ Ce prototype n'a pas été validé sur deux téléphones physiques. Les poses de
 
 ## Développement
 
-`npm run test:3d` exécute les trois suites 3D. `python scripts/build-android.py --bump` produit l'APK d'essai. Le générateur `scripts/build-original-character.py` utilise numpy et scikit-image pour régénérer `assets3d/brawl-character.js`, déjà livré dans les sources.
+`npm run test:3d` exécute les quatre suites 3D. `python scripts/build-android.py --bump` produit l'APK d'essai. Le générateur `scripts/build-original-character.py` utilise numpy et scikit-image pour régénérer `assets3d/brawl-character.js`, déjà livré dans les sources.
 
 Bibliothèques : Three.js r160 (MIT), Cannon-es 0.20.0 (MIT). Licences dans `vendor/`. Les modèles téléchargés pendant la recherche ne sont pas utilisés, ni inclus dans l'APK ou dans Git.
 
@@ -41,3 +41,9 @@ Sauvegarde complète avant l'expérience : `C:/Users/recto/Desktop/Brawl-Backup-
 ## Corrections 3D-0.4
 
 Proportions du personnage revues avec retargeting conservant les mains et pieds, carrosseries et roues retravaillées, vrais pilotes éjectés rendus dans les parcours et en ville, outils distincts, départ des tirs aligné sur les armes sans changer la simulation. Terrains mis en cache, scènes de tennis/hockey/Tailblazer et autres activités mieux différenciées. Vérifications réelles dans le navigateur : pilote moto éjecté et ragdoll sur le terrain, chute PNJ séparée de sa moto, hockey, tennis et Tailblazer. La validation sur appareils Android physiques reste à faire.
+
+## Identité des personnages — 3D-0.5
+
+Les visages et les motifs des vêtements proviennent désormais des dessins 2D originaux de chaque skin. Les 31 costumes de collection ont leurs définitions propres : capuches, casquettes, chapeaux, couronnes, lunettes, armures, capes, robes et jupes. Les coupes de cheveux possèdent des volumes distincts. Les accessoires sont rattachés au squelette et regroupés par matériau pour limiter les appels de rendu. La simulation et les possessions des joueurs restent inchangées.
+
+`city-three-identity-tests.cjs` vérifie les 32 skins, les visages distincts, les pièces caractéristiques des costumes, les poses animées, les coiffures, l’occlusion arrière du masque et la conservation exacte des dessins 2D. La comparaison visuelle dans le navigateur affiche le dessin original à côté du modèle 3D. Cette passe restaure les traits distinctifs; elle ne constitue pas une validation artistique par le joueur ni un test Android physique.
