@@ -47,3 +47,11 @@ Proportions du personnage revues avec retargeting conservant les mains et pieds,
 Les visages et les motifs des vêtements proviennent désormais des dessins 2D originaux de chaque skin. Les 31 costumes de collection ont leurs définitions propres : capuches, casquettes, chapeaux, couronnes, lunettes, armures, capes, robes et jupes. Les coupes de cheveux possèdent des volumes distincts. Les accessoires sont rattachés au squelette et regroupés par matériau pour limiter les appels de rendu. La simulation et les possessions des joueurs restent inchangées.
 
 `city-three-identity-tests.cjs` vérifie les 32 skins, les visages distincts, les pièces caractéristiques des costumes, les poses animées, les coiffures, l’occlusion arrière du masque et la conservation exacte des dessins 2D. La comparaison visuelle dans le navigateur affiche le dessin original à côté du modèle 3D. Cette passe restaure les traits distinctifs; elle ne constitue pas une validation artistique par le joueur ni un test Android physique.
+
+## Direction héroïque stylisée — 3D-0.6
+
+Nouvelle direction inspirée des proportions et des matériaux stylisés de Fortnite : silhouette athlétique, visage sculpté avec de vrais yeux, iris, paupières, sourcils et lèvres, coiffures en mèches volumétriques, traits féminins affinés, armures à plaques biseautées et visières opaques. Les illustrations 2D ne sont plus projetées sur le corps ou le visage. Les motifs de costume sont des pièces et des surfaces courbes en 3D, aux couleurs de chaque identité Brawl. Les choix de visage modifient la géométrie et les traits, pas une image collée.
+
+Les détails opaques d’une tête ou d’un costume sont fusionnés avec couleurs par sommet. Les tests des 32 skins imposent moins de 18 objets dessinés par personnage et vérifient l’absence de texture de personnage projetée, les poses, les accessoires et l’occlusion arrière du masque. Le volume physique et la simulation de déplacement restent partagés avec les modes existants. Une pose de repos asymétrique est réservée au rendu 3D.
+
+Référence visuelle consultée : https://www.fortnite.com/news/outfit-art-update (Epic Games). Modèles et code créés pour Brawl; aucune ressource Fortnite intégrée. Les vérifications sur PC ne remplacent pas l’essai sur Android ni la validation artistique du joueur.

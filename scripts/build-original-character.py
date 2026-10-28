@@ -12,25 +12,29 @@ def capsule(a,b,r):
  a=np.array(a);b=np.array(b);d=b-a;t=np.clip(np.sum((p-a)*d,axis=-1)/np.dot(d,d),0,1);return np.linalg.norm(p-a-t[...,None]*d,axis=-1)-r
 def smooth(a,b,k=2.5):return np.minimum(a,b)-np.maximum(k-np.abs(a-b),0)**2/(4*k)
 # A tailored torso uses anatomical sections instead of a barrel made from overlapping lobes.
-z=p[...,2];levels=np.array([54,60,68,76,85,90,93]);width=np.interp(z,levels,[12,12.3,12.8,14.1,16,13,4]);depth=np.interp(z,levels,[7.2,6.8,7,7.8,7.8,6.7,3.2])
+z=p[...,2];levels=np.array([54,60,68,76,85,90,93]);width=np.interp(z,levels,[12,11.4,11.8,15.1,17.6,14.5,4.5]);depth=np.interp(z,levels,[7.4,6.8,7.2,8.1,8.9,7.1,3.7])
 radial=(np.abs(p[...,0]/width)**2.6+np.abs(p[...,1]/depth)**2.6)**(1/2.6)-1
 field=np.maximum(radial*np.minimum(width,depth),np.maximum(54-z,z-93))
-for c,r in [([0,0,55],[12.2,7.2,10]),([0,-.1,107],[6.65,6.15,8.1]),([0,1.0,101.4],[5.4,5.1,4.3]),([0,6.5,106],[1.25,2.1,2.0]),([-6.6,0,105],[1.1,1.5,2.4]),([6.6,0,105],[1.1,1.5,2.4])]:field=smooth(field,ellipsoid(c,r),2.2)
-field=smooth(field,capsule([0,0,89],[0,0,101],2.9),2)
+# Head cross-sections define a clear brow, cheek plane and tapered jaw instead of merged blobs.
+hlevels=np.array([96,98,101,105,109,113,116]);hw=np.interp(z,hlevels,[2.8,4.1,5.9,6.9,6.8,5.6,.5]);hd=np.interp(z,hlevels,[2.9,4.1,5.6,6.0,5.8,4.8,.4]);hc=np.interp(z,hlevels,[.5,.5,.6,.2,-.2,-.5,-.5])
+hradial=(np.abs(p[...,0]/hw)**2.35+np.abs((p[...,1]-hc)/hd)**2.35)**(1/2.35)-1
+head=np.maximum(hradial*np.minimum(hw,hd),np.maximum(96-z,z-116));field=smooth(field,head,1.2)
+for c,r in [([0,0,55],[12.2,7.4,10]),([0,5.5,106.5],[1.2,1.8,3.1]),([0,7.1,104.8],[1.45,1.55,1.3]),([-7,0,105],[1.0,1.3,2.3]),([7,0,105],[1.0,1.3,2.3])]:field=smooth(field,ellipsoid(c,r),1.25)
+field=smooth(field,capsule([0,0,89],[0,0,101],3.5),1.5)
 rest={'hip':[0,0,48],'chest':[0,0,88],'head':[0,0,104],'ls':[-16,0,84],'rs':[16,0,84],'le':[-20,0,65],'re':[20,0,65],'lh':[-17,0,47],'rh':[17,0,47],'ll':[-7,0,46],'rl':[7,0,46],'lk':[-7,0,25],'rk':[7,0,25],'lf':[-7,0,4],'rf':[7,0,4]}
 source_rest={k:v[:] for k,v in rest.items()}
 rest.update(hip=[0,0,56],chest=[0,0,90],head=[0,0,106],ls=[-16,0,86],rs=[16,0,86],le=[-20,0,67],re=[20,0,67],ll=[-7,0,54],rl=[7,0,54],lk=[-7,0,28],rk=[7,0,28])
 bones=[['hip','chest',13],['chest','head',6],['head',[0,0,121],12]]
 for s,sign in [('l',-1),('r',1)]:
- for a,b,r in [(s+'s',s+'e',4.0),(s+'e',s+'h',2.9),(s+'l',s+'k',5.3),(s+'k',s+'f',3.8)]:
+ for a,b,r in [(s+'s',s+'e',4.7),(s+'e',s+'h',3.7),(s+'l',s+'k',5.7),(s+'k',s+'f',4.1)]:
   field=smooth(field,capsule(rest[a],rest[b],r),1.8);bones.append([a,b,r])
- field=smooth(field,ellipsoid([sign*17,0,45],[2.7,1.9,3.6]),1.2)
+ field=smooth(field,ellipsoid([sign*17,0,45],[3.1,2.2,4.1]),1.2)
  for x in [15.2,16.4,17.6,18.8]:field=smooth(field,capsule([sign*x,0,44],[sign*x,0,39+(x%2)*.5],.64),.6)
  field=smooth(field,capsule([sign*14,0,46],[sign*13,1.5,43],1),.8)
- field=smooth(field,ellipsoid([sign*7,4,4.4],[4.3,8.2,3.2]),1.6)
+ field=smooth(field,ellipsoid([sign*7,4,4.4],[4.7,8.7,3.7]),1.6)
 # Eye sockets and a lip crease are sculpted into the surface, not floating primitives.
-for x in [-2.8,2.8]:field=np.maximum(field,-ellipsoid([x,5.7,109],[1.5,1.0,.7]))
-field=np.maximum(field,-ellipsoid([0,5.9,102],[2.0,.65,.3]));field=np.maximum(field,1-p[...,2]);field=gaussian_filter(field,.35)
+for x in [-2.8,2.8]:field=np.maximum(field,-ellipsoid([x,5.6,108.2],[1.9,1.2,1.0]))
+field=np.maximum(field,-ellipsoid([0,5.9,101.5],[2.1,.55,.25]));field=np.maximum(field,1-p[...,2]);field=gaussian_filter(field,.35)
 vertices,faces,normals,_=marching_cubes(field,0,spacing=(step,step,step),gradient_direction='ascent');vertices+=origin
 # Every vertex blends at most four rigid bones. GPU skinning makes joints continuous.
 dist=[];definition=[]
