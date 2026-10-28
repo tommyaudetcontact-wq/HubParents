@@ -1,12 +1,19 @@
 {
+  "contactSoleRange": [
+    0.3863600227981709,
+    0.4000000089812435
+  ],
+  "plantedFraction": 0.8416666666666667,
+  "peakKnee": 33.560613352945126,
+  "peakHeel": 15.46167240059357,
   "renderedKneeFrames": 960,
   "turnedFlexionCases": 12,
   "walkJogBlendTested": true,
   "maxWeightError": 2.9802322387695312e-8,
   "maxBindDelta": 0.000002270195883499972,
-  "maxDisplacement": 1.5004278569091372,
-  "samples": 79195,
-  "poses": 235,
+  "maxDisplacement": 1.5004278568951852,
+  "samples": 96045,
+  "poses": 285,
   "drawBatches": 13,
   "frozenGeometryPreserved": true,
   "otherSkinsUnchanged": 31,

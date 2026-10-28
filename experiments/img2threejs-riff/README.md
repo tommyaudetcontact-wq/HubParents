@@ -4,7 +4,7 @@ Modele original du deuxieme personnage du concept, integre au skin Riff dans le 
 
 La direction visuelle a ete acceptee par l'utilisateur : voir user-acceptance.json. Cette acceptation ne transforme pas l'ancien diagnostic de silhouette (IoU 0,6024) en controle reussi. Les captures statiques et diagnostics historiques sont conserves tels quels.
 
-L'apercu animated.html utilise le veritable moteur de personnage du jeu, le meme modele et le meme ragdoll Cannon que l'APK. Le modele contient 44 360 sommets / 79 812 triangles, regroupes en 13 lots partageant un squelette. Le test city-three-riff-image-tests.cjs mesure les poids, la liaison au repos, la geometrie preservee et les deplacements reels sur 235 poses. Les mains sont connectees aux avant-bras; les doigts ont une morphologie de prise. Le crane et les cheveux arriere sont fermes et les jambes utilisent des contours lisses. Le skate garde une posture de cote et le fusil une prise a deux mains.
+L'apercu animated.html utilise le veritable moteur de personnage du jeu, le meme modele et le meme ragdoll Cannon que l'APK. Le modele contient 44 360 sommets / 79 812 triangles, regroupes en 13 lots partageant un squelette. Le test city-three-riff-image-tests.cjs mesure les poids, la liaison au repos, la geometrie preservee et les deplacements reels sur 285 poses. Les mains sont connectees aux avant-bras; les doigts ont une morphologie de prise. Le crane et les cheveux arriere sont fermes et les jambes utilisent des contours lisses. Le skate garde une posture de cote et le fusil une prise a deux mains.
 
 Les genoux physiques sont des charnieres limitees a 0-2,6 radians, avec correction apres chaque pas de simulation. city-three-physics-tests.mjs mesure les angles pendant 5 760 images sur 24 chutes. Aucun test sur telephone Android physique n'a ete effectue; les performances mobiles doivent encore etre observees en jeu.
 
@@ -48,3 +48,15 @@ Les pieds disposent de deux os independants du mollet pour garder les semelles p
 Reference de jogging observee : https://www.youtube.com/watch?v=pBReToVqB7M (SIPRC, University of Calgary), et points techniques https://www.ucalgary.ca/shred-injuries/all-sports/football/figure-8-jogging . Le coude garde environ 90 degres; le mouvement vient des epaules, amplitude reduite a 17 degres. Les mains se ferment doucement pendant le jogging et se relachent pendant la marche.
 
 Les nouveaux decks de skate ont une forme arrondie, nose/tail releves, un bord bois, un dessous colore distinct du grip et de petits trucks/roues. La trottinette a un deck etroit et un guidon ajuste a la taille du personnage. Les prises et appuis du pilote suivent ces dimensions.
+
+## 3D-0.10 - locomotion a phases de contact
+
+L'ancien pendule de jambes et les avant-bras presque paralleles ont ete remplaces par un cycle original dans city-three-locomotion.js. References visuelles consultees : GTA IV / The Lost and Damned et GTA V, sections vers 1:46 et 2:06 de https://www.youtube.com/watch?v=Jv0tLVbGXP4 . Ces images de gameplay servent de reference de posture et de rythme; les poses et la geometrie restent originales.
+
+Le cycle comporte contact, charge, poussee, retour du talon derriere le bassin puis preparation du prochain appui. Les genoux ne montent plus haut que 33,57 unites de rig au test, contre 30,38 au repos. Un pied est en appui pendant 84 % du cycle. Les semelles reelles sont mesurees apres deformation : leur point bas reste entre 0,386 et 0,400 unite pendant l'appui. Le moteur utilise l'enveloppe convexe des semelles deja gelees pour ajuster cheville et inclinaison, sans changer les buffers de geometrie.
+
+Bassin et epaules ont une petite contre-rotation; les coudes ne sont plus verrouilles a 90 degres (la note 0.9 est historique). La flexion est mesuree sur le cycle, les mains restent legerement fermees et les poignets restent de leur cote. Le melange marche/jog depend de la vitesse existante, sans modification de deplacement ni du protocole multijoueur.
+
+L'apercu dispose d'un sol, d'un ralenti, d'un curseur de cycle et d'un enregistrement canvas WebM de trois secondes. Le sol de diagnostic et ces controles sont exclus de l'APK. La video sur le Bureau est une capture du moteur, pas une generation d'images.
+
+Le cycle de jambes est aussi utilise lors des deplacements avec une arme ordinaire, tout en conservant la visee et les mains de cette arme. Les poses speciales (masse, lancer prepare, ragdoll et conduite) gardent leur routage.
