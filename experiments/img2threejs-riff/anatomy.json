@@ -1,0 +1,77 @@
+{
+  "sourceImage": "C:\\Users\\recto\\Documents\\Codex\\2026-10-15\\voic\\work\\BrawlAcademy3D\\experiments\\img2threejs-riff\\reference-riff.png",
+  "overlayImage": "C:\\Users\\recto\\Documents\\Codex\\2026-10-15\\voic\\work\\BrawlAcademy3D\\experiments\\img2threejs-riff\\landmarks.png",
+  "overlayLegend": {
+    "C": "center symmetry axis",
+    "1..N": "head-unit horizontal ticks (blue, dashed)",
+    "H": "hairline guide (default fraction of the first head-unit band)",
+    "E": "eye line guide",
+    "N": "nose base guide",
+    "M": "mouth line guide",
+    "S": "shoulder line guide (default fraction, adjust to observed pose)",
+    "P": "hip line guide (default fraction, adjust to observed pose)",
+    "grayDashed": "rule-of-thirds compositional grid"
+  },
+  "anatomy": {
+    "applies": true,
+    "styleHeads": 7.8,
+    "proportions": {
+      "headUnit": 0.128,
+      "torso": 3.45,
+      "legs": 4.35,
+      "shoulderWidth": 1.77,
+      "hipWidth": 1.21
+    },
+    "pose": {
+      "type": "relaxed standing contrapposto",
+      "jointAngles": {
+        "neck": [
+          0,
+          0,
+          -8
+        ],
+        "leftShoulder": [
+          0,
+          0,
+          8
+        ],
+        "rightShoulder": [
+          0,
+          0,
+          -8
+        ],
+        "leftKnee": [
+          0,
+          0,
+          8
+        ],
+        "rightKnee": [
+          0,
+          0,
+          0
+        ]
+      }
+    },
+    "faceLandmarks": {
+      "eyeLine": 0.42,
+      "eyeSpacing": 0.25,
+      "noseBase": 0.62,
+      "mouthLine": 0.76,
+      "hairline": 0.13,
+      "earTop": 0.38,
+      "earBottom": 0.65
+    },
+    "features": [
+      "backward black cap",
+      "dark rectangular sunglasses",
+      "gold pendant",
+      "tattoo on forearm"
+    ],
+    "confidence": 0.76,
+    "evidenceRefs": [
+      "full-object"
+    ],
+    "measurementNotes": "Approximate visual measurements of reference-isolated.png; hidden back inferred."
+  },
+  "authoringInstruction": "Open overlayImage and read the reference against its head-unit ticks, thirds grid, face-line guides, shoulder/hip lines, and center axis. Replace every null/placeholder value in anatomy with normalized coordinates or joint angles actually observed; the drawn guide lines are generic starting positions, not measurements."
+}

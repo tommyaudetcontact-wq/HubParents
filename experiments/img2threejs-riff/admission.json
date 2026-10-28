@@ -1,0 +1,16 @@
+{
+  "admitted": false,
+  "reasons": [
+    "foreground coverage 0.995 > 0.97 (no background to segment against — silhouette not isolable)"
+  ],
+  "provenance": {
+    "viewpoint": "three-quarter",
+    "sourcePath": "C:\\Users\\recto\\Documents\\Codex\\2026-10-15\\voic\\work\\BrawlAcademy3D\\experiments\\img2threejs-riff\\reference-riff.png",
+    "width": 347,
+    "height": 927,
+    "foregroundCoverage": 0.9951,
+    "largestComponentFraction": 1.0,
+    "pHash": 18121610489733907584,
+    "duplicateOfHash": null
+  }
+}

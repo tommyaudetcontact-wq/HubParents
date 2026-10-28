@@ -1,0 +1,463 @@
+{
+  "preSpecAssessment": {
+    "objectClass": {
+      "primaryType": "stylized adult male wearing backwards cap and sunglasses",
+      "primaryDomain": "character",
+      "formLanguage": [
+        "organic",
+        "fabric-like",
+        "hard-surface accessories"
+      ],
+      "structureKind": [
+        "articulated assembly",
+        "deformable surface",
+        "layered shell"
+      ],
+      "motionPotential": [
+        "articulated",
+        "bendable",
+        "whole-object transform"
+      ],
+      "materialFamilies": [
+        "skin-like",
+        "cloth",
+        "rubber",
+        "metal",
+        "plastic"
+      ],
+      "notes": "Fill from direct visual inspection before writing the final spec. Do not use fixed domain profiles. Set primaryDomain to object, character, or hybrid."
+    },
+    "complexity": {
+      "tier": "complex",
+      "scores": {
+        "silhouetteComplexity": 2,
+        "componentCount": 3,
+        "hierarchyDepth": 2,
+        "repetitionDensity": 1,
+        "materialLayerCount": 2,
+        "localDetailDensity": 2,
+        "occlusionRisk": 2,
+        "actionReadinessNeed": 3
+      },
+      "estimatedCounts": {
+        "macroComponents": 1,
+        "mesoComponents": 0,
+        "microFeatureGroups": 0,
+        "materialLayers": 1,
+        "repetitionSystems": 0
+      },
+      "reasoning": [
+        "Full body, articulated fingers, cap, eyewear, necklace, short sleeves and trouser hems observed in reference. Back and depths inferred."
+      ]
+    },
+    "specDepthDecision": {
+      "requiredDepth": "complex",
+      "minimumComponentLevels": [
+        "macro",
+        "meso",
+        "micro"
+      ],
+      "needsRepetitionSystems": true,
+      "needsMaterialLocalOverrides": true,
+      "needsMultipleReviewViews": true,
+      "needsActionReadyHierarchy": true,
+      "rationale": "Choose simple/moderate/complex/ultra-complex from observed structure, not from a hardcoded domain."
+    },
+    "unknownsToResolveBeforeImplementation": [],
+    "detailInventory": {
+      "scanMethod": "component-zones",
+      "targetMinDetails": 10,
+      "note": "Enumerate every identity-defining small detail before authoring the spec. Each detail must map to a component.localFeatures entry or material.localOverrides entry, never prose only. Use forge/stage1_intake/build_detail_inventory.py to scan zones.",
+      "details": [
+        {
+          "id": "cap-seam",
+          "kind": "seam",
+          "mapsTo": [
+            "cap-seam"
+          ],
+          "evidenceRefs": [
+            "full-object"
+          ]
+        },
+        {
+          "id": "cap-brim",
+          "kind": "contour",
+          "mapsTo": [
+            "cap-brim"
+          ],
+          "evidenceRefs": [
+            "full-object"
+          ]
+        },
+        {
+          "id": "swept-fringe",
+          "kind": "contour",
+          "mapsTo": [
+            "swept-fringe"
+          ],
+          "evidenceRefs": [
+            "full-object"
+          ]
+        },
+        {
+          "id": "neckline",
+          "kind": "seam",
+          "mapsTo": [
+            "neckline"
+          ],
+          "evidenceRefs": [
+            "full-object"
+          ]
+        },
+        {
+          "id": "sleeve-hem",
+          "kind": "seam",
+          "mapsTo": [
+            "sleeve-hem"
+          ],
+          "evidenceRefs": [
+            "full-object"
+          ]
+        },
+        {
+          "id": "trouser-hem",
+          "kind": "seam",
+          "mapsTo": [
+            "trouser-hem"
+          ],
+          "evidenceRefs": [
+            "full-object"
+          ]
+        },
+        {
+          "id": "shoe-sole",
+          "kind": "contour",
+          "mapsTo": [
+            "shoe-sole"
+          ],
+          "evidenceRefs": [
+            "full-object"
+          ]
+        },
+        {
+          "id": "lace-row",
+          "kind": "linework",
+          "mapsTo": [
+            "lace-row"
+          ],
+          "evidenceRefs": [
+            "full-object"
+          ]
+        },
+        {
+          "id": "eyewear-bridge",
+          "kind": "contour",
+          "mapsTo": [
+            "eyewear-bridge"
+          ],
+          "evidenceRefs": [
+            "full-object"
+          ]
+        },
+        {
+          "id": "smoked-lens",
+          "kind": "gloss",
+          "mapsTo": [
+            "smoked-lens"
+          ],
+          "evidenceRefs": [
+            "full-object"
+          ]
+        },
+        {
+          "id": "gold-chain",
+          "kind": "linework",
+          "mapsTo": [
+            "gold-chain"
+          ],
+          "evidenceRefs": [
+            "full-object"
+          ]
+        },
+        {
+          "id": "rectangular-pendant",
+          "kind": "bevel",
+          "mapsTo": [
+            "rectangular-pendant"
+          ],
+          "evidenceRefs": [
+            "full-object"
+          ]
+        },
+        {
+          "id": "angular-tattoo",
+          "kind": "linework",
+          "mapsTo": [
+            "angular-tattoo"
+          ],
+          "evidenceRefs": [
+            "full-object"
+          ]
+        }
+      ]
+    },
+    "anatomy": {
+      "applies": true,
+      "styleHeads": 7.8,
+      "proportions": {
+        "headUnit": 0.128,
+        "torso": 3.45,
+        "legs": 4.35,
+        "shoulderWidth": 1.77,
+        "hipWidth": 1.21
+      },
+      "pose": {
+        "type": "relaxed standing contrapposto",
+        "jointAngles": {
+          "neck": [
+            0,
+            0,
+            -8
+          ],
+          "leftShoulder": [
+            0,
+            0,
+            8
+          ],
+          "rightShoulder": [
+            0,
+            0,
+            -8
+          ],
+          "leftKnee": [
+            0,
+            0,
+            8
+          ],
+          "rightKnee": [
+            0,
+            0,
+            0
+          ]
+        }
+      },
+      "faceLandmarks": {
+        "eyeLine": 0.42,
+        "eyeSpacing": 0.25,
+        "noseBase": 0.62,
+        "mouthLine": 0.76,
+        "hairline": 0.13,
+        "earTop": 0.38,
+        "earBottom": 0.65
+      },
+      "features": [
+        "backward black cap",
+        "dark rectangular sunglasses",
+        "gold pendant",
+        "tattoo on forearm"
+      ],
+      "confidence": 0.76,
+      "evidenceRefs": [
+        "full-object"
+      ],
+      "measurementNotes": "Approximate visual measurements of reference-isolated.png; hidden back inferred."
+    },
+    "sourceImage": "../BrawlAcademy3D/experiments/img2threejs-riff/reference-riff.png",
+    "pipelineRouting": {
+      "version": 1,
+      "track": "character-v1.5",
+      "source": "explicit",
+      "status": "resolved",
+      "classification": {
+        "kind": "character",
+        "confidence": 1.0,
+        "evidenceRefs": [
+          "pipeline-routing:explicit:character-v1.5"
+        ],
+        "provider": "pipeline-routing-cli",
+        "version": "1"
+      },
+      "conflicts": []
+    }
+  },
+  "qualityContract": {
+    "qualityBar": "complex",
+    "definitionOfDone": [
+      "The rendered model matches the reference silhouette, primary proportions, visible component hierarchy, material response, and most recognizable local features for the selected fidelity tier."
+    ],
+    "minimumSpecDepth": {
+      "macroComponents": 3,
+      "mesoComponents": 8,
+      "microFeatureGroups": 5,
+      "materialLayers": 3,
+      "repetitionSystems": 1,
+      "reviewViewpoints": 4
+    },
+    "featureGroups": [
+      {
+        "id": "overall-silhouette",
+        "name": "Overall silhouette and proportions",
+        "required": true,
+        "qualityCriteria": [
+          "Bounding shape, dominant curves, negative spaces, and scale relationships are explicitly described."
+        ],
+        "evidenceRefs": [
+          "full-object"
+        ],
+        "failureModes": [
+          "model reads as a generic placeholder instead of the reference object",
+          "major proportions are guessed without evidence"
+        ]
+      },
+      {
+        "id": "primary-structure",
+        "name": "Primary structure and hierarchy",
+        "required": true,
+        "qualityCriteria": [
+          "Major parts, joints, seams, contact points, and parent-child relationships are named before code generation."
+        ],
+        "evidenceRefs": [
+          "full-object"
+        ],
+        "failureModes": [
+          "large visible parts are merged into one mesh",
+          "component hierarchy is too shallow for the observed complexity"
+        ]
+      },
+      {
+        "id": "attachment-joint-correctness",
+        "name": "Attachment and joint correctness",
+        "required": true,
+        "qualityCriteria": [
+          "Every visible child appendage, branch, limb, handle, connector, tube, cable, horn, wing, leg, or hinged part has an attachment contract with parent socket, localStart/localEnd, contact type, embed/overlap, and gap tolerance."
+        ],
+        "evidenceRefs": [
+          "full-object"
+        ],
+        "failureModes": [
+          "child part root floats away from the parent",
+          "branch/limb/tube is centered in space instead of pivoting from its root",
+          "parent-child transform mixes world and local coordinates"
+        ]
+      },
+      {
+        "id": "surface-material-response",
+        "name": "Surface material response",
+        "required": true,
+        "qualityCriteria": [
+          "Albedo zones, roughness, normal/bump/displacement intent, cavity dirt, edge wear, and local overrides are specified where visible.",
+          "Important materials define independent albedo, roughness, height/normal, and AO responses instead of reusing one texture for unrelated PBR channels.",
+          "Surface response is decomposed into macro, meso, and micro frequency bands with scale and amplitude tied to object scale."
+        ],
+        "evidenceRefs": [
+          "full-object"
+        ],
+        "failureModes": [
+          "surface looks like flat plastic",
+          "local material variation is missing or not tied to image evidence"
+        ]
+      },
+      {
+        "id": "reference-lookdev",
+        "name": "Reference color, material, and lighting response",
+        "required": true,
+        "qualityCriteria": [
+          "Material-pass names the reference-derived albedo palette, roughness variation, tactile normal/bump/displacement response, and local masks.",
+          "When a source image is available, run reference PBR extraction and require confidence >= 0.7 before treating maps as implementation-ready.",
+          "Lighting-pass names key/fill/rim or environment light, exposure, tone mapping, background, and contact shadow behavior.",
+          "Neutral, grazing-angle, and reference-matched renders prove that surface relief survives relighting and is not painted into albedo."
+        ],
+        "evidenceRefs": [
+          "full-object"
+        ],
+        "failureModes": [
+          "model has acceptable shape but reads as flat shaded or plastic",
+          "colors are a generic average instead of reference-observed local color zones",
+          "lighting is evenly ambient and cannot reproduce the source value range"
+        ]
+      }
+    ],
+    "visualDeltaChecks": [
+      "silhouette and negative-space delta",
+      "component hierarchy depth delta",
+      "repetition density and distribution delta",
+      "material albedo/roughness/normal response delta",
+      "local feature placement and scale delta"
+    ],
+    "antiShallowSpecRules": [
+      "Do not proceed to code if qualityContract.qualityBar is unassessed.",
+      "Do not proceed to code if the spec only contains a root component for a moderate or complex object.",
+      "Do not proceed to code if required featureGroups are not represented by componentTree, materials, or repetitionSystems.",
+      "Do not proceed to code if visible local features are described only in prose and not attached to components/materials/evidenceRefs.",
+      "Do not proceed past structural-pass if attached child parts lack attachment.parentSocket, localStart, localEnd, embedDepth/overlap, and gapTolerance.",
+      "Do not pass material look-dev when albedo is reused as roughness, height, normal, or AO.",
+      "Do not pass material look-dev without macro, meso, and micro surface frequency bands for close-up materials.",
+      "Do not pass reference-fidelity material look-dev from a source image without usable referencePbr maps or an explicit documented limitation.",
+      "Do not patch a spec with extracted PBR maps when extraction confidence is below the target threshold unless the user explicitly accepts lower fidelity.",
+      "Do not place adjacent separate-geometry parts below 0.02 world-unit seam overlap (source: grimoire/build/geometry_patterns.md).",
+      "Do not satisfy raised or recessed relief, fasteners, or grip structure with a map alone when the feature affects form; use geometry or displacement (source: grimoire/build/geometry_patterns.md).",
+      "Adjacent components must overlap by at least 0.02 world units at shared seams (source: grimoire/build/geometry_patterns.md).",
+      "Raised or recessed relief and fasteners must be geometry, instanced micro-parts, or displacement; a map alone is an approximation (source: grimoire/build/geometry_patterns.md)."
+    ],
+    "mustNotDo": [
+      "Do not proceed to code if qualityContract.qualityBar is unassessed.",
+      "Do not proceed to code if the spec only contains a root component for a moderate or complex object.",
+      "Do not proceed to code if required featureGroups are not represented by componentTree, materials, or repetitionSystems.",
+      "Do not proceed to code if visible local features are described only in prose and not attached to components/materials/evidenceRefs.",
+      "Do not proceed past structural-pass if attached child parts lack attachment.parentSocket, localStart, localEnd, embedDepth/overlap, and gapTolerance.",
+      "Do not pass material look-dev when albedo is reused as roughness, height, normal, or AO.",
+      "Do not pass material look-dev without macro, meso, and micro surface frequency bands for close-up materials.",
+      "Do not pass reference-fidelity material look-dev from a source image without usable referencePbr maps or an explicit documented limitation.",
+      "Do not patch a spec with extracted PBR maps when extraction confidence is below the target threshold unless the user explicitly accepts lower fidelity.",
+      "Do not place adjacent separate-geometry parts below 0.02 world-unit seam overlap (source: grimoire/build/geometry_patterns.md).",
+      "Do not satisfy raised or recessed relief, fasteners, or grip structure with a map alone when the feature affects form; use geometry or displacement (source: grimoire/build/geometry_patterns.md).",
+      "Adjacent components must overlap by at least 0.02 world units at shared seams (source: grimoire/build/geometry_patterns.md).",
+      "Raised or recessed relief and fasteners must be geometry, instanced micro-parts, or displacement; a map alone is an approximation (source: grimoire/build/geometry_patterns.md)."
+    ]
+  },
+  "localSpecSearch": {
+    "query": "humanoid anatomy head proportions clothing skinning",
+    "collection": "core_3d",
+    "index": {
+      "status": "hit",
+      "reason": "current",
+      "fingerprint": "06f0b2ece2935e441653f5c3533f91b3a4d6163f2aec4267559d7d8419bdd040",
+      "cache_path": "C:\\Users\\recto\\Documents\\Codex\\2026-10-15\\voic\\work\\img2threejs\\.cache\\spec-search\\core_3d.json"
+    },
+    "matches": [
+      {
+        "record_id": "core.measurement-source-text",
+        "file_path": "grimoire/intake/image_analysis.md",
+        "heading": "Layer 2 \u2014 Overall form & silhouette",
+        "key_path": null,
+        "score": 5.268490296339,
+        "snippets": [
+          "Record proportions relative to a named reference dimension and keep observations separate from inference."
+        ],
+        "source_refs": [
+          {
+            "path": "grimoire/intake/image_analysis.md",
+            "heading": "Layer 2 \u2014 Overall form & silhouette",
+            "key_path": null
+          },
+          {
+            "path": "grimoire/intake/image_analysis.md",
+            "heading": "The Rule",
+            "key_path": null
+          }
+        ],
+        "evidence_refs": [
+          {
+            "kind": "source",
+            "ref": "grimoire/intake/image_analysis.md"
+          },
+          {
+            "kind": "notebooklm-research",
+            "ref": "notebooklm:4b03c2f9-8393-411f-b5b4-039ab9532843",
+            "note": "Validated generic schema vocabulary; numeric claims remain backed by local source_refs."
+          }
+        ]
+      }
+    ]
+  }
+}

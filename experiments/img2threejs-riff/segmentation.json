@@ -1,0 +1,18 @@
+{
+  "purpose": "analysis-only segmentation; original reference retained",
+  "method": "blue-background chroma threshold, fill enclosed holes, largest component",
+  "source": "reference-riff.png",
+  "sourceCrop": [
+    375,
+    8,
+    722,
+    935
+  ],
+  "thresholds": {
+    "b-r": 25,
+    "b": 110,
+    "g-r": 8
+  },
+  "padding": 20,
+  "foregroundFraction": 0.5002222781803656
+}

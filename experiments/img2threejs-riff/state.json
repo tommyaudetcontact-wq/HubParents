@@ -1,0 +1,405 @@
+{
+  "schemaVersion": 1,
+  "status": "active",
+  "profile": "animated-character",
+  "currentStep": "tier1-diagnostics",
+  "currentPass": "blockout",
+  "checklist": [
+    {
+      "id": "image-analysis",
+      "scope": "setup",
+      "status": "done",
+      "evidence": [
+        "../BrawlAcademy3D/experiments/img2threejs-riff/image-analysis.md"
+      ],
+      "reason": "",
+      "command": "Read grimoire/intake/image_analysis.md and analyze {reference}"
+    },
+    {
+      "id": "reference-suitability",
+      "scope": "setup",
+      "status": "done",
+      "evidence": [
+        "../BrawlAcademy3D/experiments/img2threejs-riff/image-analysis.md"
+      ],
+      "reason": "",
+      "command": "Read grimoire/intake/validation_rubric.md and record a pass, conditional, or reject verdict for {reference}"
+    },
+    {
+      "id": "reference-admission",
+      "scope": "setup",
+      "status": "done",
+      "evidence": [
+        "../BrawlAcademy3D/experiments/img2threejs-riff/admission-isolated.json"
+      ],
+      "reason": "",
+      "command": "python3 forge/stage1_intake/check_reference_admission.py {reference} --out admission.json --probe-out probe.json"
+    },
+    {
+      "id": "character-contract-read",
+      "scope": "setup",
+      "status": "done",
+      "evidence": [
+        "..\\BrawlAcademy3D\\experiments\\img2threejs-riff\\contracts.md"
+      ],
+      "reason": "",
+      "command": "Read grimoire/character/reconstruction.md and grimoire/character/likeness_maximization.md completely"
+    },
+    {
+      "id": "character-landmarks",
+      "scope": "setup",
+      "status": "done",
+      "evidence": [
+        "..\\BrawlAcademy3D\\experiments\\img2threejs-riff\\anatomy.json"
+      ],
+      "reason": "",
+      "command": "python3 forge/stage1_intake/extract_landmarks.py {reference} --out anatomy.json --overlay landmarks.png"
+    },
+    {
+      "id": "local-spec-search",
+      "scope": "setup",
+      "status": "done",
+      "evidence": [
+        "..\\BrawlAcademy3D\\experiments\\img2threejs-riff\\local-search.json"
+      ],
+      "reason": "",
+      "command": "Run the local evidence search before authoring the assessment"
+    },
+    {
+      "id": "pre-spec-assessment",
+      "scope": "setup",
+      "status": "done",
+      "evidence": [
+        "..\\BrawlAcademy3D\\experiments\\img2threejs-riff\\assessment.json"
+      ],
+      "reason": "",
+      "command": "python3 forge/stage2_spec/new_pre_spec_assessment.py \"<name>\" --image {reference} --domain animated-character --out assessment.json"
+    },
+    {
+      "id": "detail-inventory",
+      "scope": "setup",
+      "status": "done",
+      "evidence": [
+        "..\\BrawlAcademy3D\\experiments\\img2threejs-riff\\sculpt-spec.json"
+      ],
+      "reason": "",
+      "command": "python3 forge/stage1_intake/build_detail_inventory.py {reference} --mode grid-3x3 --out-dir detail-inventory --out di.json"
+    },
+    {
+      "id": "projection-route",
+      "scope": "setup",
+      "status": "done",
+      "evidence": [
+        "..\\BrawlAcademy3D\\experiments\\img2threejs-riff\\contracts.md"
+      ],
+      "reason": "",
+      "command": "Record whether projection is required; if required run solve_camera_pose.py, delight_albedo.py, and bake_projected_texture.py, otherwise skip with a reason"
+    },
+    {
+      "id": "spec-authoring",
+      "scope": "setup",
+      "status": "done",
+      "evidence": [
+        "..\\BrawlAcademy3D\\experiments\\img2threejs-riff\\sculpt-spec.json"
+      ],
+      "reason": "",
+      "command": "python3 forge/stage2_spec/new_sculpt_spec.py \"<name>\" --image {reference} --assessment assessment.json --augmentation spec-augmentation.json --domain animated-character --out object-sculpt-spec.json"
+    },
+    {
+      "id": "material-evidence",
+      "scope": "setup",
+      "status": "done",
+      "evidence": [
+        "..\\BrawlAcademy3D\\experiments\\img2threejs-riff\\contracts.md"
+      ],
+      "reason": "",
+      "command": "python3 forge/stage1_intake/material_region_analysis.py --manifest material-regions.json --out-dir material-evidence --out material-analysis.json (single-crop route: analyze_texture.py + extract_pbr_evidence.py per verified crop; otherwise skip with a reason)"
+    },
+    {
+      "id": "material-spec-wiring",
+      "scope": "setup",
+      "status": "done",
+      "evidence": [
+        "..\\BrawlAcademy3D\\experiments\\img2threejs-riff\\sculpt-spec.json"
+      ],
+      "reason": "",
+      "command": "python3 forge/stage2_spec/apply_material_analysis.py {spec} material-analysis.json --in-place"
+    },
+    {
+      "id": "strict-validation",
+      "scope": "setup",
+      "status": "done",
+      "evidence": [
+        "..\\BrawlAcademy3D\\experiments\\img2threejs-riff\\strict-validation.txt"
+      ],
+      "reason": "",
+      "command": "python3 forge/stage2_spec/validate_sculpt_spec.py {spec} --strict-quality"
+    },
+    {
+      "id": "build-current-pass",
+      "scope": "pass",
+      "status": "done",
+      "evidence": [
+        "experiments/img2threejs-riff/createRiffModel.ts"
+      ],
+      "reason": "",
+      "command": "python3 forge/stage3_build/generate_threejs_factory.py {spec} --out src/createObjectModel.ts --pass-id {pass_id}"
+    },
+    {
+      "id": "render-capture",
+      "scope": "pass",
+      "status": "done",
+      "evidence": [
+        "experiments/img2threejs-riff/front.png",
+        "experiments/img2threejs-riff/right.png",
+        "experiments/img2threejs-riff/rear.png",
+        "experiments/img2threejs-riff/left.png"
+      ],
+      "reason": "",
+      "command": "Render {pass_id} and capture the fixed review view plus meaningful orbit views"
+    },
+    {
+      "id": "review-contract-read",
+      "scope": "pass",
+      "status": "done",
+      "evidence": [
+        "experiments/img2threejs-riff/contracts.md"
+      ],
+      "reason": "",
+      "command": "Read grimoire/review/gates_reference.md and grimoire/review/self_correction.md completely"
+    },
+    {
+      "id": "tier1-diagnostics",
+      "scope": "pass",
+      "status": "pending",
+      "evidence": [],
+      "reason": "",
+      "command": "python3 forge/stage4_review/diagnose_render.py --reference {reference} --render <shot> --spec {spec} --pass-id {pass_id} --in-place"
+    },
+    {
+      "id": "multi-angle-review",
+      "scope": "pass",
+      "status": "pending",
+      "evidence": [],
+      "reason": "",
+      "command": "python3 forge/stage4_review/diagnose_render_multi_angle.py --reference <fixed-shot> --orbit <orbit-shot> --orbit <orbit-shot>"
+    },
+    {
+      "id": "pass-gate-check",
+      "scope": "pass",
+      "status": "pending",
+      "evidence": [],
+      "reason": "",
+      "command": "python3 forge/stage3_build/orchestrate_passes.py check {spec} --pass-id {pass_id}"
+    },
+    {
+      "id": "ai-review-recorded",
+      "scope": "pass",
+      "status": "pending",
+      "evidence": [],
+      "reason": "",
+      "command": "Create the comparison sheet, inspect it with agent vision, and append exactly one review action"
+    },
+    {
+      "id": "pipeline-sync",
+      "scope": "pass",
+      "status": "pending",
+      "evidence": [],
+      "reason": "",
+      "command": "python3 forge/stage3_build/orchestrate_passes.py sync {spec} --in-place"
+    },
+    {
+      "id": "part-coverage",
+      "scope": "final",
+      "status": "pending",
+      "evidence": [],
+      "reason": "",
+      "command": "python3 forge/stage4_review/check_part_coverage.py --spec {spec} --manifest parts.json"
+    },
+    {
+      "id": "action-ready",
+      "scope": "final",
+      "status": "pending",
+      "evidence": [],
+      "reason": "",
+      "command": "Verify explodable/clickable hierarchy, pivots, sockets, and root.userData.sculptRuntime"
+    },
+    {
+      "id": "emission-target",
+      "scope": "final",
+      "status": "pending",
+      "evidence": [],
+      "reason": "",
+      "command": "python3 forge/stage3_build/emit_target.py --spec {spec} --workspace . [--target <kind> [--plugin <id>]]"
+    },
+    {
+      "id": "plugin-gates",
+      "scope": "final",
+      "status": "pending",
+      "evidence": [],
+      "reason": "",
+      "command": "python3 forge/stage3_build/run_gates.py --workspace ."
+    },
+    {
+      "id": "rig-contract-read",
+      "scope": "rig",
+      "status": "pending",
+      "evidence": [],
+      "reason": "",
+      "command": "Read C:\\Users\\recto\\.img2\\plugins\\character/reference/animation-contract.md and C:\\Users\\recto\\.img2\\plugins\\character/reference/character-rigging-animation-1.5.2.md completely"
+    },
+    {
+      "id": "glb-rig-reference",
+      "scope": "rig",
+      "status": "pending",
+      "evidence": [],
+      "reason": "",
+      "command": "Run python3 C:\\Users\\recto\\.img2\\plugins\\character/tools/rig_glb_reference.py {reference} --out glb-rig.json (skeleton, skin joint order, inverse binds and clips read FROM the GLB; skip with a reason only when there is no GLB)"
+    },
+    {
+      "id": "mesh-repair",
+      "scope": "rig",
+      "status": "pending",
+      "evidence": [],
+      "reason": "",
+      "command": "Inspect the meshes for breakage and repair them now, before the freeze; record what was repaired, or skip with a reason when nothing is broken"
+    },
+    {
+      "id": "mesh-freeze",
+      "scope": "rig",
+      "status": "pending",
+      "evidence": [],
+      "reason": "",
+      "command": "Export the mesh buffers with node runtime/scripts/export_mesh_buffers.mjs --url PREVIEW_URL --out meshes.json, then run python3 C:\\Users\\recto\\.img2\\plugins\\character/tools/rig_mesh_parity.py freeze meshes.json --out mesh-manifest.json"
+    },
+    {
+      "id": "rig-payload-validate",
+      "scope": "rig",
+      "status": "pending",
+      "evidence": [],
+      "reason": "",
+      "command": "Run python3 C:\\Users\\recto\\.img2\\plugins\\character/tools/rig_validate_payload.py --payload rig-payload.json (structural payload integrity ONLY -- never pose stress or likeness; a sculpt spec is NOT a rig payload, they are different schemas)"
+    },
+    {
+      "id": "rig-bind",
+      "scope": "rig",
+      "status": "pending",
+      "evidence": [],
+      "reason": "",
+      "command": "Bind the skeleton: ADD skeleton, skinIndex and skinWeight only. Vertex positions, normals, uvs and indices are frozen evidence"
+    },
+    {
+      "id": "mesh-parity-verify",
+      "scope": "rig",
+      "status": "pending",
+      "evidence": [],
+      "reason": "",
+      "command": "Export the post-bind buffers with node runtime/scripts/export_mesh_buffers.mjs --url PREVIEW_URL --out meshes-after.json, then run python3 C:\\Users\\recto\\.img2\\plugins\\character/tools/rig_mesh_parity.py verify mesh-manifest.json meshes-after.json"
+    },
+    {
+      "id": "clip-measure",
+      "scope": "rig",
+      "status": "pending",
+      "evidence": [],
+      "reason": "",
+      "command": "Run python3 C:\\Users\\recto\\.img2\\plugins\\character/tools/anim_clip_features.py sampled-clips.json --out clip-features.json (measure, classify, name, and decide loop from poseReturn)"
+    },
+    {
+      "id": "rig-gates",
+      "scope": "rig",
+      "status": "pending",
+      "evidence": [],
+      "reason": "",
+      "command": "Run python3 C:\\Users\\recto\\.img2\\plugins\\character/tools/gate_rigging.py --payload rig-gate-payload.json (G1-G10; an unevaluated gate is not a pass)"
+    }
+  ],
+  "loops": {
+    "perPass": {
+      "blockout": 1
+    },
+    "total": 1,
+    "maxPerPass": 3,
+    "maxTotal": 6
+  },
+  "artifacts": {
+    "reference": "C:\\Users\\recto\\Documents\\Codex\\2026-10-15\\voic\\work\\BrawlAcademy3D\\experiments\\img2threejs-riff\\reference-isolated.png",
+    "spec": "../BrawlAcademy3D/experiments/img2threejs-riff/sculpt-spec.json"
+  },
+  "passHistory": [
+    {
+      "passId": "blockout",
+      "iteration": "refine",
+      "checklist": [
+        {
+          "id": "build-current-pass",
+          "scope": "pass",
+          "status": "done",
+          "evidence": [
+            "..\\BrawlAcademy3D\\experiments\\img2threejs-riff\\createRiffModel.ts"
+          ],
+          "reason": "",
+          "command": "python3 forge/stage3_build/generate_threejs_factory.py {spec} --out src/createObjectModel.ts --pass-id {pass_id}"
+        },
+        {
+          "id": "render-capture",
+          "scope": "pass",
+          "status": "pending",
+          "evidence": [],
+          "reason": "",
+          "command": "Render {pass_id} and capture the fixed review view plus meaningful orbit views"
+        },
+        {
+          "id": "review-contract-read",
+          "scope": "pass",
+          "status": "pending",
+          "evidence": [],
+          "reason": "",
+          "command": "Read grimoire/review/gates_reference.md and grimoire/review/self_correction.md completely"
+        },
+        {
+          "id": "tier1-diagnostics",
+          "scope": "pass",
+          "status": "pending",
+          "evidence": [],
+          "reason": "",
+          "command": "python3 forge/stage4_review/diagnose_render.py --reference {reference} --render <shot> --spec {spec} --pass-id {pass_id} --in-place"
+        },
+        {
+          "id": "multi-angle-review",
+          "scope": "pass",
+          "status": "pending",
+          "evidence": [],
+          "reason": "",
+          "command": "python3 forge/stage4_review/diagnose_render_multi_angle.py --reference <fixed-shot> --orbit <orbit-shot> --orbit <orbit-shot>"
+        },
+        {
+          "id": "pass-gate-check",
+          "scope": "pass",
+          "status": "pending",
+          "evidence": [],
+          "reason": "",
+          "command": "python3 forge/stage3_build/orchestrate_passes.py check {spec} --pass-id {pass_id}"
+        },
+        {
+          "id": "ai-review-recorded",
+          "scope": "pass",
+          "status": "pending",
+          "evidence": [],
+          "reason": "",
+          "command": "Create the comparison sheet, inspect it with agent vision, and append exactly one review action"
+        },
+        {
+          "id": "pipeline-sync",
+          "scope": "pass",
+          "status": "pending",
+          "evidence": [],
+          "reason": "",
+          "command": "python3 forge/stage3_build/orchestrate_passes.py sync {spec} --in-place"
+        }
+      ]
+    }
+  ],
+  "reviewCursor": 1,
+  "iterationAction": "refine-spec",
+  "stopReason": ""
+}

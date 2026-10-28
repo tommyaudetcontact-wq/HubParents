@@ -1,0 +1,14 @@
+{
+  "admitted": true,
+  "reasons": [],
+  "provenance": {
+    "viewpoint": "reference",
+    "sourcePath": "C:\\Users\\recto\\Documents\\Codex\\2026-10-15\\voic\\work\\BrawlAcademy3D\\experiments\\img2threejs-riff\\reference-isolated.png",
+    "width": 387,
+    "height": 967,
+    "foregroundCoverage": 0.43,
+    "largestComponentFraction": 1.0,
+    "pHash": 13793653209012373128,
+    "duplicateOfHash": null
+  }
+}

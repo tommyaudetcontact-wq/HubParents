@@ -1,0 +1,19 @@
+{
+  "tool": {
+    "repository": "https://github.com/img2threejs/img2threejs",
+    "commit": "3e7099e1b7fe93e187e06db4bdbe1e1906c21a28",
+    "license": "Apache-2.0"
+  },
+  "subject": "reference concept character 2 / Riff",
+  "scope": "one original image-driven prototype, existing APK unchanged",
+  "files": {
+    "reference-isolated.png": "12783d2856746c4ab536039cff886e4bc1d4b01dfd92b8c4f3c904e773b130c1",
+    "sculpt-spec.json": "dfb44fca2f968eab3f137ac14043b0b4772ee21e932fe9a8dd79792cb7788d9a",
+    "createRiffModel.ts": "c14b408f5e6318a38e932bf6d013e628199475d0d3e56b29c803ba41486d7a62",
+    "createRiffModel.js": "8e6b04b54821f19cd38f654447273532f28c0f54d09411d1103f43ee75074cc5",
+    "front.png": "604282539c4808c7216cf3d614a6fec05decb0d38186f14a9ba470ccdc4c950f",
+    "right.png": "d12da5b63604615663770f3f2b7b6fd3eebfcf27eee0b9f3a8663b35b0d909f7",
+    "rear.png": "d0e1c20d502f2b759f97c21374def12fcd6530732f6ee4526716ab508a2eac70",
+    "left.png": "750eaecec0e63a8d9ab8d53e06ad87915c17931245a6233ee90aff3e9fef892b"
+  }
+}

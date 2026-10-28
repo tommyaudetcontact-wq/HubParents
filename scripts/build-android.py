@@ -22,7 +22,7 @@ if asset_root.exists():
  shutil.rmtree(asset_root)
 assets=asset_root/'game';assets.mkdir(parents=True,exist_ok=True)
 allowed={'.js','.css','.html','.svg','.png','.jpg','.jpeg','.webp','.mp3','.ogg','.wav','.wasm','.ttf','.woff','.woff2','.gz'}
-excluded={'.git','.private','node_modules','backend','backend-engine','supabase','local-server','scripts','android','books','data','data-ville','sauvegardes-ville','sauvegardes','journaux','releases'}
+excluded={'experiments','.git','.private','node_modules','backend','backend-engine','supabase','local-server','scripts','android','books','data','data-ville','sauvegardes-ville','sauvegardes','journaux','releases'}
 for p in repo.rglob('*'):
  rel=p.relative_to(repo)
  if not p.is_file() or any(part in excluded or part.startswith('.') for part in rel.parts) or (p.suffix.lower() not in allowed and not(rel.parts[0]=='vendor' and p.name.startswith('LICENSE'))):continue

@@ -1,0 +1,10 @@
+import fs from 'node:fs';import {pathToFileURL} from 'node:url';import path from 'node:path';import assert from 'node:assert/strict';
+const dir=path.dirname(new URL(import.meta.url).pathname.replace(/^\/([A-Z]:)/,'$1'));const root=path.resolve(dir,'../..');
+const three=pathToFileURL(path.join(root,'.private/img2-preview/package/build/three.module.js')).href;
+const file=path.join(dir,'createRiffModel.js');let source=fs.readFileSync(file,'utf8').replace(/^import .*;\r?\n/gm,'');source=`import * as THREE from ${JSON.stringify(three)};\n`+source;
+const mod=await import('data:text/javascript;base64,'+Buffer.from(source).toString('base64'));const T=await import(three);const model=mod.createRiffNocturneSingleCharacterTestModel({textureSize:128});model.updateMatrixWorld(true);
+const runtime=model.userData.sculptRuntime;let triangles=0,vertices=0,meshes=0;const names=[];
+for(const [id,m]of Object.entries(runtime.meshes)){const p=m.geometry.attributes.position,n=m.geometry.attributes.normal;assert(p&&n,id+' lacks surface');for(const x of p.array)assert(Number.isFinite(x),id+' nonfinite position');for(const x of n.array)assert(Number.isFinite(x),id+' nonfinite normal');if(m.geometry.index){for(const x of m.geometry.index.array)assert(x>=0&&x<p.count,id+' invalid index');triangles+=m.geometry.index.count/3;}else triangles+=p.count/3;vertices+=p.count;meshes++;names.push(id);}
+for(const id of ['head','shirt','pants','hand-l','hand-r','cap','cap-brim','fringe-0','glasses-1','necklace'])assert(runtime.meshes[id],id+' missing');
+const box=new T.Box3().setFromObject(model),size=box.getSize(new T.Vector3());assert(size.y>1.7&&size.y<2.05,'height out of proportion');assert(size.x>.35&&size.x<.85,'width out of proportion');
+const result={status:'geometry-check-only',vertices,triangles,meshes,size:size.toArray(),modules:names,limits:['No likeness acceptance','No rig bound','No mobile performance certification']};fs.writeFileSync(path.join(dir,'geometry-check.json'),JSON.stringify(result,null,2));console.log(JSON.stringify(result));
