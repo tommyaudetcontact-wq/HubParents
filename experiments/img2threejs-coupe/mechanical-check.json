@@ -13,6 +13,10 @@
     "hood folding and detachment",
     "trunk detachment",
     "door assembly detachment",
-    "rims inside sidewalls"
+    "rims inside sidewalls",
+    "combined damage preservation",
+    "floor inside front and rear skin",
+    "cargo wall inside rear skin",
+    "quarter glass in door rigid body"
   ]
 }

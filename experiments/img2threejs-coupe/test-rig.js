@@ -46,24 +46,21 @@ export class CoupeTestRig {
   dent(zone){
     this.hitCount++;const hits=++this.zoneHits[zone],damage=Math.min(1,hits/4);this.damage=damage;
     this.model.updateMatrixWorld(true);
-    const ids=zone==='front'?[...this.rest.keys()].filter(id=>['hood','nose','fender-left','fender-right','front-bumper','grille','engine-bay','engine-mount','engine-block'].includes(id)||id.startsWith('headlight-')||id.startsWith('grille-slat-')||id.startsWith('indicator-')||id.startsWith('lower-intake')):zone==='rear'?['trunk','tail','fender-left','fender-right','rear-bumper','tail-light--1','tail-light-1']:['door-right','door-liner-right','fender-right'];
-    for(const id of ids){
-      const entry=this.rest.get(id);if(!entry?.mesh.visible)continue;
+    // Rebuild from rest with every active damage field. The floor, liners and
+    // outer shell share the same mapping, so internals cannot remain behind the crushed body.
+    const frontDamage=Math.min(1,this.zoneHits.front/4),rearDamage=Math.min(1,this.zoneHits.rear/4),sideDamage=Math.min(1,this.zoneHits.side/4);
+    for(const [id,entry]of this.rest){
+      if(!entry.mesh.visible||id==='root'||/^(tire|rim|hub|spoke)-/.test(id))continue;
       const mesh=entry.mesh,attr=mesh.geometry.attributes.position,rest=entry.positions,inverse=mesh.matrixWorld.clone().invert();
       for(let i=0;i<attr.count;i++){
-        const v=new THREE.Vector3(rest[i*3],rest[i*3+1],rest[i*3+2]).applyMatrix4(mesh.matrixWorld);
-        const z=v.z,front=zone==='front',rear=zone==='rear';
-        const longitudinal=front?THREE.MathUtils.clamp((-z-.65)/1.55,0,1):rear?THREE.MathUtils.clamp((z-.95)/1.25,0,1):Math.exp(-((z-.12)**2/.30+(v.y-.52)**2/.12));
-        const amount=damage*longitudinal;
-        if(front||rear){
-          v.z+=(front?1:-1)*.32*amount;v.y-=.075*amount;
-          v.x*=1-.035*amount;
-          // The lid creases upward across its width while its leading edge crushes inward.
-          if(id==='hood'||id==='trunk'){
-            const t=THREE.MathUtils.clamp(id==='hood'?(-z-.61)/1.59:(z-1.35)/.85,0,1);
-            v.y+=.31*damage*damage*Math.sin(Math.PI*t)**2;
-          }
-        }else v.x-=.20*amount;
+        const v=new THREE.Vector3(rest[i*3],rest[i*3+1],rest[i*3+2]).applyMatrix4(mesh.matrixWorld),z=v.z;
+        const f=frontDamage*THREE.MathUtils.clamp((-z-.65)/1.55,0,1),r=rearDamage*THREE.MathUtils.clamp((z-.95)/1.25,0,1);
+        v.z+=.32*(f-r);v.y-=.075*(f+r);v.x*=1-.035*(f+r);
+        if(id==='hood'||id==='trunk'){
+          const t=THREE.MathUtils.clamp(id==='hood'?(-z-.61)/1.59:(z-1.35)/.85,0,1),d=id==='hood'?frontDamage:rearDamage;
+          v.y+=.31*d*d*Math.sin(Math.PI*t)**2;
+        }
+        if(['door-right','door-liner-right','fender-right'].includes(id))v.x-=.20*sideDamage*Math.exp(-((z-.12)**2/.30+(v.y-.52)**2/.12));
         v.applyMatrix4(inverse);attr.setXYZ(i,v.x,v.y,v.z);
       }
       attr.needsUpdate=true;mesh.geometry.computeVertexNormals();mesh.geometry.computeBoundingSphere();
@@ -89,13 +86,13 @@ export class CoupeTestRig {
     const center=bounds.getCenter(new THREE.Vector3());
     for(const {mesh}of entries){
       const geometry=mesh.geometry.clone();geometry.applyMatrix4(mesh.matrixWorld);geometry.translate(-center.x,-center.y,-center.z);
-      const part=new THREE.Mesh(geometry,mesh.material);part.castShadow=true;part.receiveShadow=true;group.add(part);mesh.visible=false;
+      const part=new THREE.Mesh(geometry,mesh.material);part.name=mesh.userData.sculptComponent?.id||mesh.name;part.castShadow=true;part.receiveShadow=true;group.add(part);mesh.visible=false;
     }
     group.position.copy(center);group.userData.partIds=ids;this.addDebris(group,velocity,spin);
   }
   detachDoor(requestedSide){
     const side=requestedSide||['right','left'].find(side=>this.rest.get('door-'+side)?.mesh.visible);if(!side||!this.rest.get('door-'+side)?.mesh.visible)return;
-    this.detachParts(['door-','door-liner-','door-frame-','window-','b-pillar-','mirror-','mirror-stalk-','handle-'].map(id=>id+side),[side==='right'?1.4:-1.4,1.5,.7],[1.2,.4,2]);
+    this.detachParts(['door-','door-liner-','door-frame-','window-','window-quarter-','b-pillar-','mirror-','mirror-stalk-','handle-'].map(id=>id+side),[side==='right'?1.4:-1.4,1.5,.7],[1.2,.4,2]);
   }
   breakGlass(only){
     const ids=only||['windshield','rear-window','window-left','window-right','window-quarter-left','window-quarter-right'];
