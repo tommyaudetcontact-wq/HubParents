@@ -76,3 +76,13 @@ Conduite routière : direction moins sensible à haute vitesse, glissement laté
 Atelier local : `http://127.0.0.1:4185/vehicles.html`, sélecteur de véhicules, chocs et réparation, conduite WASD/flèches, espace pour le frein à main. Les modèles sont ceux du jeu. Cet atelier reste exclu de l’APK.
 
 Validation : 106 suites existantes et nouvelles, avec reprise des régressions corrigées ; tests de freinage, dérive, marche arrière, usure, rejeu hôte/invité exact et 30/120 Hz. Les corps rigides conservent la simulation arcade du jeu : il ne s’agit pas d’un simulateur de pneus/suspensions complet. Essai sur téléphone et ressenti à la manette à valider par le joueur.
+
+## Proportions et habitacle — 3D-0.12
+
+Les voitures routières et les monster trucks passent à une échelle de 1,4 ; empreinte de collision, centre de rotation et panneaux détachés suivent la taille du modèle. Capots galbés avec sommets partagés, flancs bombés, pavillons arrondis et passages de roues intégrés remplacent les surfaces trop plates et les baguettes détachées. Les capots et portes pivotent maintenant sur leurs charnières.
+
+Vitres bleu clair transparentes : sièges, tableau de bord, colonne de direction et volant sont visibles. Les joueurs conservent leur personnage et leurs vêtements dans une pose assise ; le pilote se transforme avec la carrosserie pendant les rotations. Les voitures stationnées restent vides. La pose utilise les squelettes existants, sans modification des sommets ni des poids du personnage. 840 configurations mesurées : longueurs de membres conservées, genoux vers l’avant, mains sur le volant et dégagement de la tête.
+
+À la sortie des rampes, le mouvement angulaire est conservé. Un départ proche du bord donne du roulis vers le côté qui perd son support ; les sauts centrés gardent une impulsion de tangage modérée. Les rampes de ville, de test et de course utilisent la même règle déterministe.
+
+Les régressions couvrent véhicules, dégâts, gravité, rampes, poses, prédiction, activités et police ; simulations complètes à six clients et migration d’hôte. Une immunité indue du conducteur à pied, héritée du délai de réapparition de son épave, a également été corrigée. Essais dans le navigateur ; aucune validation sur téléphone physique annoncée.

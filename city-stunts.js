@@ -17,12 +17,12 @@ function rampPose(a,r){const co=Math.cos(a.angle||0),si=Math.sin(a.angle||0),w=(
 function jump(a,dt){if(root.CitySkatePark?.advance(a,dt))return a;if(root.CityCarnage?.rampJump(a,dt))return a;a.jumpCooldown=Math.max(0,(a.jumpCooldown||0)-dt);a.land=Math.max(0,(a.land||0)-dt);const oldRamp=ramps[(a.onRamp||0)-1],previousX=a.rampLastX??a.x,previousY=a.rampLastY??a.y;a.rampLastX=a.x;a.rampLastY=a.y;
  if(a.rigidActive)return a;
  if(!a.onRamp&&!(a.z>0)&&(a.vx||0)<0){const extent=Math.abs(Math.sin(a.angle||0))*(a.rigidLength||a.halfLength||28)+Math.abs(Math.cos(a.angle||0))*(a.rigidWidth||a.halfWidth||13);for(const r of ramps)if(a.x>=r.x+r.w&&a.x-extent<r.x+r.w&&a.y>r.y&&a.y<r.y+r.h){a.x=r.x+r.w+extent+.1;a.vx=a.speed=a.engineSpeed=0;a.wallContact=true;return a;}}
- if(oldRamp&&a.x>=oldRamp.x+oldRamp.w&&(a.vx||0)>0&&a.y>=oldRamp.y&&a.y<=oldRamp.y+oldRamp.h){const pose=rampPose({...a,x:oldRamp.x+oldRamp.w},oldRamp),slope=oldRamp.height/oldRamp.w;a.z=pose.z;a.vz=(a.vx||0)*slope;a.onRamp=0;a.jumpSpin=(a.turnRate||a.yawRate||0)*.65;a.jumpCooldown=.3;a.rigidFlight=true;a.pitchRate=0;a.rollRate=0;}
+ if(oldRamp&&a.x>=oldRamp.x+oldRamp.w&&(a.vx||0)>0&&a.y>=oldRamp.y&&a.y<=oldRamp.y+oldRamp.h){const pose=rampPose({...a,x:oldRamp.x+oldRamp.w},oldRamp),slope=oldRamp.height/oldRamp.w;a.z=pose.z;a.vz=(a.vx||0)*slope;a.onRamp=0;a.jumpSpin=(a.turnRate||a.yawRate||0)*.65;a.jumpCooldown=.3;a.rigidFlight=true;root.CityVehiclePhysics?.rampRelease(a,{along:a.vx||0,slope,lateral:a.y-oldRamp.y-oldRamp.h/2,halfWidth:oldRamp.h/2,rightX:0,rightY:1});}
  const flying=a.z>0&&!a.onRamp;
  if(flying){a.vz=(a.vz||0)-330*dt;a.z+=a.vz*dt;}
  const index=ramps.findIndex(r=>a.x>=r.x-25&&a.x<r.x+r.w&&a.y>=r.y+5&&a.y<=r.y+r.h-5),r=ramps[index];
  if(r){const pose=rampPose(a,r);if(pose.z<.0001&&!flying){a.onRamp=0;a.z=0;return a;}const landing=flying&&a.vz<=0&&a.z<=pose.z+1;if(landing&&Math.cos(a.bodyRoll||0)*Math.cos(a.bodyPitch||0)<.7){a.rigidActive=true;a.onRamp=0;return a;}if(!flying||landing){const highEntry=!a.onRamp&&previousX>=r.x+r.w&&a.x<previousX,sideEntry=!a.onRamp&&(previousY<r.y||previousY>r.y+r.h)&&pose.z>12;if(highEntry||sideEntry){a.x=previousX;a.y=previousY;a.vx=a.vy=a.speed=0;a.wallContact=true;return a;}a.onRamp=index+1;a.z=pose.z;a.vz=0;a.bodyPitch=pose.pitch;a.bodyRoll=pose.roll;a.pitchRate=a.rollRate=0;a.rigidFlight=false;if(landing)a.land=.25;return a;}}
- if(a.onRamp){a.onRamp=0;a.rigidFlight=true;a.vz=0;}
+ if(a.onRamp){const r=ramps[a.onRamp-1];a.onRamp=0;a.rigidFlight=true;a.vz=r?Math.max(0,(a.vx||0)*r.height/r.w):0;if(r)root.CityVehiclePhysics?.rampRelease(a,{along:a.vx||0,slope:r.height/r.w,lateral:a.y-r.y-r.h/2,halfWidth:r.h/2,rightX:0,rightY:1});}
  if(a.z<=0){a.z=0;a.vz=0;a.jumpSpin=0;if(flying)a.land=.25;}
  return a;}
 
