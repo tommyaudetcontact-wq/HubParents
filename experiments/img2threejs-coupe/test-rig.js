@@ -92,7 +92,7 @@ export class CoupeTestRig {
   }
   detachDoor(requestedSide){
     const side=requestedSide||['right','left'].find(side=>this.rest.get('door-'+side)?.mesh.visible);if(!side||!this.rest.get('door-'+side)?.mesh.visible)return;
-    this.detachParts(['door-','door-liner-','door-frame-','window-','window-quarter-','b-pillar-','mirror-','mirror-stalk-','handle-'].map(id=>id+side),[side==='right'?1.4:-1.4,1.5,.7],[1.2,.4,2]);
+    this.detachParts(['door-','door-liner-','door-frame-','window-','b-pillar-','mirror-','mirror-stalk-','handle-'].map(id=>id+side),[side==='right'?1.4:-1.4,1.5,.7],[1.2,.4,2]);
   }
   breakGlass(only){
     const ids=only||['windshield','rear-window','window-left','window-right','window-quarter-left','window-quarter-right'];

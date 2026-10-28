@@ -5,6 +5,9 @@ function section(z,profile){const stations=profile?.stations||defaultStations;le
 function grid(n,m,point,skip){const pos=[],ix=[];for(let i=0;i<=n;i++)for(let j=0;j<=m;j++)pos.push(...point(i/n,j/m));for(let i=0;i<n;i++)for(let j=0;j<m;j++){if(skip?.((i+.5)/n,(j+.5)/m))continue;const a=i*(m+1)+j,b=a+m+1;ix.push(a,b,a+1,a+1,b,b+1);}const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));g.setIndex(ix);g.computeVertexNormals();return g;}
 function hoodWidth(s,p){return mix(p.hoodFrontHalfWidth??.60,p.hoodRearHalfWidth??.71,s)-(p.hoodCornerCut??.045)*Math.max(0,1-s/.075);}
 function hoodCorner(u,s,p){return (p.cornerRadius??.055)*Math.max(0,(Math.abs(u)-.91)/.09)*Math.max(0,1-s/.075);}
+function roofHalf(z){return .674+.006*Math.sin(Math.PI*Math.max(0,Math.min(1,(z+.11)/.89)));}
+function roofY(x,z){const s=Math.max(0,Math.min(1,(z+.11)/.89));return 1.27+.075*(1-(x/roofHalf(z))**2)+.020*Math.sin(s*Math.PI);}
+function sideGlassPoint(kind,side,s,t,sectionAt){const quarter=kind==='windowQuarter',lowZ=mix(quarter?.474:-.585,quarter?1.18:.446,s),topZ=mix(quarter?.474:-.095,quarter?.745:.446,s),[w,h]=sectionAt(lowZ),lowX=w*.96-.004,topX=roofHalf(topZ)-.004;return [side*mix(lowX,topX,t),mix(h-.002,roofY(topX,topZ)-.006,t),mix(lowZ,topZ,t)];}
 function arch(z){return Math.max(.21,...[-1.35,1.3].map(ax=>{const d=Math.abs(z-ax),r=.365;return d<r?.32+Math.sqrt(r*r-d*d):.21;}));}
 export function buildCoupeSurface(d){const profile=d.profile,sectionAt=z=>section(z,profile),corner=profile?.cornerRadius??.1,bulge=t=>.88+.26*t-.18*t*t;
  if(d.kind==='side'){
@@ -18,17 +21,17 @@ export function buildCoupeSurface(d){const profile=d.profile,sectionAt=z=>sectio
  if(d.kind==='roof')return closedSkin(grid(32,32,(s,t)=>{const z=mix(-.11,.78,s),u=t*2-1,end=Math.sin(s*Math.PI);return [u*(.674+.006*end),1.27+.075*(1-u*u)+.020*end,z];}),.024);
  if(d.kind==='floor')return grid(48,2,(s,t)=>{const z=mix(-2.08,2.08,s),w=sectionAt(z)[0]*.84;return [mix(-w,w,t),.195,z];});
  if(d.kind==='end')return grid(32,8,(s,t)=>{const u=s*2-1,[w,h]=sectionAt(d.z);return [u*w*(.95+.01*t),mix(.20,d.z<0?profile.hoodNoseHeight+profile.hoodCrown*Math.max(0,1-(u*w*.96/hoodWidth(0,profile))**2):h+.028*(1-u*u),t),d.z+(d.z<0?hoodCorner(u,0,profile):-corner*Math.abs(u)**8)];});
- if(d.kind==='quarter')return grid(20,12,(s,t)=>{const z=mix(1.18-.435*t,1.38-.60*t,s),lowW=sectionAt(z)[0]*.96;return [d.side*mix(lowW,.68,t),mix(.863,1.28,t),z];});
- if(d.kind==='windshield'||d.kind==='rearWindow'){const front=d.kind==='windshield';return grid(18,24,(s,t)=>{const u=s*2-1,w=mix(.827,.663,t),y=mix(.849,1.274,t)+.008*(1-u*u)*Math.sin(t*Math.PI),z=mix(front?-.603:1.353,front?-.105:.777,t);return [u*w,y,z];});}
- if(d.kind==='windowSide')return grid(18,14,(s,t)=>{const z=mix(mix(-.585,.446,s),mix(-.095,.446,s),t),x=d.side*mix(.839,.676,t),y=mix(.855,1.276,t);return [x,y,z];});
- if(d.kind==='windowQuarter')return grid(18,14,(s,t)=>{const z=mix(mix(.49,1.18,s),mix(.49,.745,s),t);return [d.side*mix(.85,.677,t),mix(.867,1.275,t),z];});
+ if(d.kind==='quarter')return grid(20,12,(s,t)=>{const lowZ=mix(1.18,1.38,s),topZ=mix(.745,.78,s),[lowW,lowH]=sectionAt(lowZ),topW=roofHalf(topZ);return [d.side*mix(lowW*.96,topW,t),mix(lowH,roofY(topW,topZ)+.002,t),mix(lowZ,topZ,t)];});
+ if(d.kind==='windshield'||d.kind==='rearWindow'){const front=d.kind==='windshield',lowZ=front?-.603:1.353,topZ=front?-.108:.778,lowW=sectionAt(lowZ)[0]*.96-.012,topW=roofHalf(topZ)-.006;return grid(18,24,(s,t)=>{const u=s*2-1,lowX=u*lowW,topX=u*topW,lowY=front?profile.hoodCowlHeight+profile.hoodCrown*Math.max(0,1-(lowX/profile.hoodRearHalfWidth)**2)-.003:sectionAt(lowZ)[1]+.028*(1-u*u)-.004;return [mix(lowX,topX,t),mix(lowY,roofY(topX,topZ)-.006,t),mix(lowZ,topZ,t)];});}
+ if(d.kind==='windowSide'||d.kind==='windowQuarter')return grid(18,14,(s,t)=>sideGlassPoint(d.kind,d.side,s,t,sectionAt));
+ if(d.kind==='roofTrim')return grid(32,4,(s,t)=>{const z=mix(-.11,.78,s),x=d.side*(roofHalf(z)-.006+(t-.5)*.016);return [x,roofY(x,z)-.002,z];});
  if(d.kind==='well'){const r=profile?.wellRadius||.375,inner=profile?.wellInnerX||.61,outer=profile?.wellOuterX||.80,barrel=grid(40,8,(s,t)=>{const a=s*Math.PI;return [d.side*mix(inner,outer,t),.32+Math.sin(a)*r,d.axle+Math.cos(a)*r];}),disc=grid(40,10,(s,t)=>{const a=s*Math.PI;return [d.side*inner,.32+Math.sin(a)*r*t,d.axle+Math.cos(a)*r*t];});return combine([barrel,disc]);}
  if(d.kind==='bay'){const bottom=grid(1,1,(s,t)=>[mix(-.72,.72,s),.26,mix(-2.12,-.58,t)]),fire=grid(1,1,(s,t)=>[mix(-.78,.78,s),mix(.23,.84,t),-.57]),sides=[-1,1].map(sign=>grid(1,1,(s,t)=>[sign*.715,mix(.25,.74,t),mix(-2.1,-.59,s)]));return combine([bottom,fire,...sides]);}
  if(d.kind==='cargoBay'){const bottom=grid(1,1,(s,t)=>[mix(-.73,.73,s),.39,mix(1.04,2.035,t)]),back=grid(1,1,(s,t)=>[mix(-.74,.74,s),mix(.39,sectionAt(2.035)[1]-.035,t),2.035-.06*Math.abs(s*2-1)**8]),sides=[-1,1].map(side=>grid(1,1,(s,t)=>[side*.74,mix(.39,sectionAt(mix(1.04,1.985,s))[1]-.035,t),mix(1.04,1.985,s)]));return combine([bottom,back,...sides]);}
  if(d.kind==='engineMount'){const g=bevelBox();g.scale(1.42,.10,.16);g.translate(0,.30,-1.26);return g;}
  if(d.kind==='engine'){const g=bevelBox();g.scale(.58,.30,.65);g.translate(0,.47,-1.26);return g;}
  if(d.kind==='frame')return frameStrip(d.points,d.side,d.width,d.depth);
- if(d.kind==='doorFrame'){const a=[d.side*.841,.850,-.580],b=[d.side*.679,1.266,-.093],c=[d.side*.679,1.266,.454];return combine([frameStrip([a,b],d.side,.018,.012),frameStrip([b,c],d.side,.018,.012)]);}
+ if(d.kind==='doorFrame'){const pieces=[];for(let i=0;i<12;i++)pieces.push(frameStrip([sideGlassPoint('windowSide',d.side,0,i/12,sectionAt),sideGlassPoint('windowSide',d.side,0,(i+1)/12,sectionAt)],d.side,.018,.012));for(let i=0;i<18;i++)pieces.push(frameStrip([sideGlassPoint('windowSide',d.side,i/18,1,sectionAt),sideGlassPoint('windowSide',d.side,(i+1)/18,1,sectionAt)],d.side,.018,.012));return combine(pieces);}
  if(d.kind==='spoke'){
   const shape=new THREE.Shape(),a=d.angle,coords=[[.05,a-.34],[.205,a-.12],[.205,a+.12],[.05,a+.34]];
   coords.forEach(([r,t],i)=>shape[i?'lineTo':'moveTo'](-r*Math.sin(t),r*Math.cos(t)));shape.closePath();
@@ -36,7 +39,7 @@ export function buildCoupeSurface(d){const profile=d.profile,sectionAt=z=>sectio
  }
  throw Error('Unknown coupe surface '+d.kind);
 }
-export function bevelBox(){const g=new THREE.BoxGeometry(1,1,1,4,4,4),p=g.attributes.position;for(let n=0;n<p.count;n++){const v=new THREE.Vector3().fromBufferAttribute(p,n),inner=v.clone().clampScalar(-.42,.42);v.sub(inner).normalize().multiplyScalar(.08).add(inner);p.setXYZ(n,...v.toArray());}g.computeVertexNormals();return g;}
+export function bevelBox(segments=4){const g=new THREE.BoxGeometry(1,1,1,segments,segments,segments),p=g.attributes.position;for(let n=0;n<p.count;n++){const v=new THREE.Vector3().fromBufferAttribute(p,n),inner=v.clone().clampScalar(-.42,.42);v.sub(inner).normalize().multiplyScalar(.08).add(inner);p.setXYZ(n,...v.toArray());}g.computeVertexNormals();return g;}
 export function rimGeometry(){const g=new THREE.TorusGeometry(.485,.032,6,28);g.rotateX(Math.PI/2);return g;}
 
 function combine(gs){const p=[],n=[];for(const g of gs){const flat=g.index?g.toNonIndexed():g;for(const v of flat.attributes.position.array)p.push(v);for(const v of flat.attributes.normal.array)n.push(v);g.dispose();}const geo=new THREE.BufferGeometry();geo.setAttribute('position',new THREE.Float32BufferAttribute(p,3));geo.setAttribute('normal',new THREE.Float32BufferAttribute(n,3));return geo;}
@@ -46,5 +49,5 @@ function closedSkin(g,thickness){const p=Array.from(g.attributes.position.array)
 function frameStrip(points,side,width,depth){
  const a=new THREE.Vector3(...points[0]),b=new THREE.Vector3(...points[1]),t=b.clone().sub(a).normalize();
  const n=new THREE.Vector3(side,0,0).addScaledVector(t,-side*t.x).normalize(),cross=n.clone().cross(t).normalize();
- const g=bevelBox();g.scale(depth,a.distanceTo(b)+.012,width);g.applyMatrix4(new THREE.Matrix4().makeBasis(n,t,cross));g.translate(...a.add(b).multiplyScalar(.5).toArray());return g;
+ const g=bevelBox(2);g.scale(depth,a.distanceTo(b)+.012,width);g.applyMatrix4(new THREE.Matrix4().makeBasis(n,t,cross));g.translate(...a.add(b).multiplyScalar(.5).toArray());return g;
 }

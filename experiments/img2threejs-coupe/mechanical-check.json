@@ -17,6 +17,6 @@
     "combined damage preservation",
     "floor inside front and rear skin",
     "cargo wall inside rear skin",
-    "quarter glass in door rigid body"
+    "main door glass detaches; quarter glass stays on car, both sides"
   ]
 }

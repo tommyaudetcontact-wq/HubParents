@@ -1,0 +1,23 @@
+'use strict';
+const assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm'),T=require('./vendor/three.min.js'),C=require('./domain.js');
+const s={THREE:T,BrawlCore:C,Math,atob,Float32Array,Uint32Array,Uint8Array,performance:{now:()=>1000}};s.window=s;vm.createContext(s);
+for(const f of ['assets3d/brawl-coupe.js','assets3d/brawl-character.js','assets3d/brawl-riff-image.js','city-three-batches.js','city-three-coupe.js','city-three-vehicle.js','city-damage.js'])vm.runInContext(fs.readFileSync(f,'utf8'),s,{filename:f});
+const ctx={S:.04,personalCoupe:true,material:color=>new T.MeshStandardMaterial({color})},v=C.vehicles.find(v=>v.id==='car-inferno');
+let maxCalls=0,poses=0;
+for(const vehicle of C.vehicles.filter(v=>s.CityThreeCoupe.eligible(v,{},true))){
+ const visual=s.CityThreeVehicle.create(ctx,vehicle,vehicle.color,{});assert(visual.coupe);let calls=0;visual.group.traverse(o=>{if(o.isMesh){calls++;for(const n of o.geometry.attributes.position.array)assert(Number.isFinite(n));}});maxCalls=Math.max(maxCalls,calls);assert(calls<40,'Batching budget: '+calls);
+ for(const rest of [s.BrawlOriginalCharacter.rest,s.BrawlRiffImage.rest]){
+  const c=visual.cabin,q=s.CityThreeVehicle.driverPose(rest,c,{rigScale:.3});assert(q.head[2]*.3+14*.3<=(c.roof-.55)*c.scale);
+  for(const side of ['l','r']){assert(q[side+'k'][1]>q[side+'l'][1],vehicle.id+' '+JSON.stringify({hip:q[side+'l'],knee:q[side+'k'],foot:q[side+'f']}));for(const [a,b]of [['s','e'],['e','h'],['l','k'],['k','f']]){const distance=(a,b)=>Math.hypot(...a.map((v,i)=>v-b[i]));assert(Math.abs(distance(q[side+a],q[side+b])-distance(rest[side+a],rest[side+b]))<.001);}const sign=side==='l'?-1:1,target=[(c.seatX+sign*c.handSpan)*c.scale/.3,-c.steeringZ*c.scale/.3,c.handY*c.scale/.3];assert(Math.hypot(...target.map((v,i)=>v-q[side+'h'][i]))*.3<1.1,'Hands must reach steering wheel '+vehicle.id+' '+Math.hypot(...target.map((v,i)=>v-q[side+'h'][i]))*.3+' '+JSON.stringify({hand:q[side+'h'],target,hip:q.hip,chest:q.chest}));}
+  poses++;
+ }
+ const actor={angle:.4,speed:120,wheelAngle:1.7,turnRate:.8,damage:{parts:[60,30,40,20,0,0]}},before=JSON.stringify(actor);visual.update(actor);assert.equal(JSON.stringify(actor),before);assert.equal(visual.wheels[0].roll.rotation.x,1.7);assert.notEqual(visual.wheels[0].steering.rotation.y,0);
+ actor.damage.parts[2]=100;visual.update(actor);assert(!visual.panels[2].visible);assert(visual.group.getObjectByName('window-quarter-left').visible);actor.damage.parts.fill(0);visual.update(actor);assert(visual.panels[2].visible);
+ visual.group.traverse(o=>{if(o.userData.ownedGeometry)o.geometry.dispose();if(o.userData.ownedMaterial)o.material.dispose();});
+}
+for(const vehicle of C.vehicles.filter(v=>v.heavy||v.tank||v.body==='motorcycle'))assert(!s.CityThreeCoupe.eligible(vehicle,{},true));assert(!s.CityThreeCoupe.eligible(v,{loanVehicle:v.id},true));assert(!s.CityThreeCoupe.eligible(v,{},false));
+const parts=s.BrawlCoupeAsset.parts(),roof=parts.find(p=>p.id==='roof'),roofMesh=new T.Mesh(roof.geometry,new T.MeshBasicMaterial({side:T.DoubleSide})),ray=new T.Raycaster();roofMesh.updateMatrixWorld(true);let samples=0;
+for(const p of parts.filter(p=>/^window(-quarter)?-(left|right)$/.test(p.id)||['windshield','rear-window'].includes(p.id))){const stride=['windshield','rear-window'].includes(p.id)?25:15,a=p.geometry.attributes.position;for(let i=stride-1;i<a.count;i+=stride){const v=new T.Vector3().fromBufferAttribute(a,i);ray.set(v.clone().add(new T.Vector3(0,.1,0)),new T.Vector3(0,-1,0));const hit=ray.intersectObject(roofMesh)[0];assert(hit&&Math.abs(hit.point.y-v.y)<.014,p.id+' must follow roof');samples++;}}
+for(const p of parts)p.geometry.dispose();roofMesh.material.dispose();
+const host={id:'p',x:100,y:100,driving:true,angle:0,vx:0,vy:-200},member={id:'p',cars:{}};s.CityDamage.mount({host:()=>true,members:()=>[member]});s.CityDamage.bind(host,v);assert(host.coupeVisual);assert.equal(host.damageDoors,2);for(let i=0;i<4;i++)s.CityDamage.impact(host,300,0,-1);const wire=s.CityDamage.snapshot();assert(wire.some(r=>r[16]===1));s.CityDamage.mount({host:()=>false,members:()=>[member]});s.CityDamage.receive(wire);assert(s.CityDamage.inspect().some(p=>p.coupe===1));const piece=s.CityDamage.inspect()[0],loose=s.CityThreeCoupe.createDebris({S:.04},piece);assert(loose.children.length>0);s.CityDamage.receive(wire.map(r=>r.slice(0,16)));assert(s.CityDamage.inspect().every(p=>!p.coupe));
+console.log(`Coupe integration: ${poses} driver poses, ${samples} roof/glass contacts, max ${maxCalls} mesh calls; personal-only selection, animated wheels, reversible shared damage, fixed quarter glass, real loose panels and old/new debris packets passed.`);

@@ -88,3 +88,11 @@ Vitres bleu clair transparentes : sièges, tableau de bord, colonne de direction
 Les régressions couvrent véhicules, dégâts, gravité, rampes, poses, prédiction, activités et police ; simulations complètes à six clients et migration d’hôte. Une immunité indue du conducteur à pied, héritée du délai de réapparition de son épave, a également été corrigée. Essais dans le navigateur ; aucune validation sur téléphone physique annoncée.
 
 Dernière finition 3D-0.13 : les optiques et leurs encadrements restent dans les ailes ; calandre resserrée sur la face avant pour supprimer les petits débordements aux coins.
+
+## Coupé personnel expérimental — 3D-0.14
+
+Le coupé de l’atelier img2threejs remplace le rendu des voitures personnelles routières dans le prototype 3D. L’identité de la voiture possédée, ses améliorations, sa couleur, son aura et ses paramètres de conduite restent ceux de la sauvegarde. Les véhicules prêtés des activités, les motos, les tanks, les poids lourds et le trafic conservent leurs modèles.
+
+Le modèle possède un habitacle fermé, une position assise ajustée, quatre roues articulées, des vitres conformes au toit et des panneaux déformables pilotés par les six zones de dégâts du jeu. La petite custode reste sur la caisse. Les panneaux détachés utilisent la forme du modèle et les déplacements physiques partagés de CityDamage ; leur rendu repose au sol. Le marquage facultatif des débris du coupé est synchronisé ; le nouveau client accepte aussi les anciens paquets de débris.
+
+Géométrie regroupée par matériau et partie mobile : au plus 33 maillages pour le véhicule, 70 poses de conducteur vérifiées et 114 contacts vitre/toit mesurés. Le modèle reste une expérimentation artistique ; la validation du rendu et du ressenti sur téléphone est laissée au joueur. Aucune donnée de compte ni aucun bien n’a été modifié pour le test.

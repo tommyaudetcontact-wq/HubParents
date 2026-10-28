@@ -31,6 +31,12 @@ Les boutons d’impact touchent les ensembles avant/arrière. Le capot et la val
 
 ## Corrections vitrage et doublures
 
-La vitre de custode rejoint désormais le même corps physique que la porte. Toutes les surfaces fixes non roulantes partagent les champs de déformation avant et arrière, calculés depuis les sommets d’origine. Le plancher suit le contour inférieur de la coque et les doublures restent en retrait du panneau extérieur. Les impacts dans une autre zone ne réinitialisent plus les dégâts précédents.
+La petite vitre de custode reste sur la carrosserie ; seule la grande vitre de porte appartient au corps physique de la porte. Toutes les surfaces fixes non roulantes partagent les champs de déformation avant et arrière, calculés depuis les sommets d’origine. Le plancher suit le contour inférieur de la coque et les doublures restent en retrait du panneau extérieur. Les impacts dans une autre zone ne réinitialisent plus les dégâts précédents.
 
-Régression vérifiée sur quatre intensités : plancher en retrait à l’avant et à l’arrière, doublure du coffre en retrait, conservation des dommages cumulés, présence réelle de la vitre de custode dans le groupe mobile de porte. Nouvelle vue « Capot vu de dessus » pour vérifier sa forme effilée et ses raccords.
+Régression vérifiée sur quatre intensités : plancher en retrait à l’avant et à l’arrière, doublure du coffre en retrait, conservation des dommages cumulés, grande vitre présente dans la porte détachée et petite custode immobile sur la carrosserie, des deux côtés. Nouvelle vue « Capot vu de dessus » pour vérifier sa forme effilée et ses raccords.
+
+## Vitres ajustées et APK de test
+
+Les bords supérieurs des six vitres suivent désormais la surface du pavillon ; les bords inférieurs suivent la ceinture de caisse. Le cadre supérieur des portes suit aussi cette courbure, tandis que les petites custodes restent fixes. Le test d’intégration mesure 114 contacts vitre/toit.
+
+Le modèle est exporté dans assets3d/brawl-coupe.js pour l’APK expérimentale 3D-0.14. Le banc autonome reste disponible séparément. Les mesures mécaniques ne constituent pas une validation artistique complète du pipeline ni une validation sur appareil Android physique.
