@@ -96,3 +96,9 @@ Le coupé de l’atelier img2threejs remplace le rendu des voitures personnelles
 Le modèle possède un habitacle fermé, une position assise ajustée, quatre roues articulées, des vitres conformes au toit et des panneaux déformables pilotés par les six zones de dégâts du jeu. La petite custode reste sur la caisse. Les panneaux détachés utilisent la forme du modèle et les déplacements physiques partagés de CityDamage ; leur rendu repose au sol. Le marquage facultatif des débris du coupé est synchronisé ; le nouveau client accepte aussi les anciens paquets de débris.
 
 Géométrie regroupée par matériau et partie mobile : au plus 33 maillages pour le véhicule, 70 poses de conducteur vérifiées et 114 contacts vitre/toit mesurés. Le modèle reste une expérimentation artistique ; la validation du rendu et du ressenti sur téléphone est laissée au joueur. Aucune donnée de compte ni aucun bien n’a été modifié pour le test.
+
+## Tanks approuvés — 3D-0.15
+
+Le modèle approuvé dans l’atelier en direct remplace le rendu des trois tanks : Bastion, Scorpion et Spectre. La coque inclinée, les plaques latérales, les boulons, les grilles moteur, les trappes, les optiques et les chenilles continues appartiennent à la même structure. Les patins et les roues tournent dans le sens de marche. La bouche du canon coïncide avec l’origine des tirs du jeu ; recul et éclair de bouche réagissent aussi aux tirs prédits de l’invité, sans rejouer la confirmation.
+
+Les prix, vitesses, masses, dégâts, commandes et mécanismes d’autorité restent inchangés. Le modèle comporte 28 maillages et environ 23 600 triangles, avec chenilles et roues regroupées par instanciation. L’atelier `experiments/tank-lab` reste séparé de l’application ; ses commandes de tourelle sont des outils de prévisualisation.

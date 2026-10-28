@@ -1,0 +1,35 @@
+{
+  "pass": true,
+  "checks": [
+    "finite geometry",
+    "mesh and triangle budgets",
+    "forward track direction",
+    "closed track loop",
+    "unchanged input actor",
+    "correct muzzle position",
+    "aimed muzzle direction",
+    "recoil and recovery",
+    "elevation limits",
+    "finite instance transforms"
+  ],
+  "models": [
+    {
+      "length": 53,
+      "width": 30,
+      "calls": 28,
+      "triangles": 23621
+    },
+    {
+      "length": 49,
+      "width": 28,
+      "calls": 28,
+      "triangles": 23621
+    },
+    {
+      "length": 55,
+      "width": 31,
+      "calls": 28,
+      "triangles": 23621
+    }
+  ]
+}
