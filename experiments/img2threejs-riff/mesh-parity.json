@@ -1,0 +1,150 @@
+{
+  "frozenAfterCorrections": true,
+  "skinningOnlyAddsAttributes": true,
+  "parts": [
+    {
+      "slot": "shirt",
+      "parts": [
+        "shirt",
+        "sleeve-l",
+        "sleeve-r"
+      ],
+      "before": "cd22d6e8b90a14b51e8820d031f9f72e8cb51ea1229b863db8d7169dd180305c",
+      "after": "cd22d6e8b90a14b51e8820d031f9f72e8cb51ea1229b863db8d7169dd180305c",
+      "unchanged": true
+    },
+    {
+      "slot": "pants",
+      "parts": [
+        "pants"
+      ],
+      "before": "02f0182d2bb96ba9247b3ede184a95979a89921a210112cffbfb85c4f6dd0e51",
+      "after": "02f0182d2bb96ba9247b3ede184a95979a89921a210112cffbfb85c4f6dd0e51",
+      "unchanged": true
+    },
+    {
+      "slot": "body",
+      "parts": [
+        "arm-l",
+        "neck"
+      ],
+      "before": "7c42b3dc4407d870c01e6a3f009546168d21d3b9baf4146c403ba8bb58d5583a",
+      "after": "7c42b3dc4407d870c01e6a3f009546168d21d3b9baf4146c403ba8bb58d5583a",
+      "unchanged": true
+    },
+    {
+      "slot": "shoes",
+      "parts": [
+        "shoe-l",
+        "shoe-r"
+      ],
+      "before": "37a7b28c19830b6c8438bd1e38891d4f2fa002c777189a9bb1e1d411f84b11a3",
+      "after": "37a7b28c19830b6c8438bd1e38891d4f2fa002c777189a9bb1e1d411f84b11a3",
+      "unchanged": true
+    },
+    {
+      "slot": "shoes",
+      "parts": [
+        "sole-l",
+        "lace-l-0",
+        "lace-l-1",
+        "lace-l-2",
+        "lace-l-3",
+        "sole-r",
+        "lace-r-0",
+        "lace-r-1",
+        "lace-r-2",
+        "lace-r-3"
+      ],
+      "before": "3b4529af102ab6ba3cee9779588afb4016eeb35a4972c13bcfffd72581ae83f7",
+      "after": "3b4529af102ab6ba3cee9779588afb4016eeb35a4972c13bcfffd72581ae83f7",
+      "unchanged": true
+    },
+    {
+      "slot": "body",
+      "parts": [
+        "arm-r"
+      ],
+      "before": "8e1064497fc5db2be8b8e1b6c5c913927c53c97c0d98d1d7ed9c762324f87d7d",
+      "after": "8e1064497fc5db2be8b8e1b6c5c913927c53c97c0d98d1d7ed9c762324f87d7d",
+      "unchanged": true
+    },
+    {
+      "slot": "head",
+      "parts": [
+        "head",
+        "ear--1",
+        "ear-1"
+      ],
+      "before": "5c86bb521b4b7af1c05cc947bffdb5f2b023d1d7dea34814ca9648cb6667cf1c",
+      "after": "5c86bb521b4b7af1c05cc947bffdb5f2b023d1d7dea34814ca9648cb6667cf1c",
+      "unchanged": true
+    },
+    {
+      "slot": "head",
+      "parts": [
+        "eye--1",
+        "eye-1"
+      ],
+      "before": "d923b9c2b2a1a9dd4ff653d55e03c1870ec88c36015c34703c2bbd773b31d06d",
+      "after": "d923b9c2b2a1a9dd4ff653d55e03c1870ec88c36015c34703c2bbd773b31d06d",
+      "unchanged": true
+    },
+    {
+      "slot": "eyewear",
+      "parts": [
+        "glasses--1",
+        "temple--1",
+        "glasses-1",
+        "temple-1",
+        "glasses-bridge"
+      ],
+      "before": "fa03e29418b8deb4df1af9bd1ff0fc8dc37c5064640af25b027ba6996d93134c",
+      "after": "fa03e29418b8deb4df1af9bd1ff0fc8dc37c5064640af25b027ba6996d93134c",
+      "unchanged": true
+    },
+    {
+      "slot": "head",
+      "parts": [
+        "mouth"
+      ],
+      "before": "fd0f35933daa598495ad60de65ebf7ad12671c784ba1959961e517f4defec757",
+      "after": "fd0f35933daa598495ad60de65ebf7ad12671c784ba1959961e517f4defec757",
+      "unchanged": true
+    },
+    {
+      "slot": "headwear",
+      "parts": [
+        "cap",
+        "cap-brim"
+      ],
+      "before": "b0db3742c8f44a4b0dacc8d91c2f97cf88738e511be6ef30d8ef3343d4280edf",
+      "after": "b0db3742c8f44a4b0dacc8d91c2f97cf88738e511be6ef30d8ef3343d4280edf",
+      "unchanged": true
+    },
+    {
+      "slot": "hair",
+      "parts": [
+        "fringe-0",
+        "fringe-1",
+        "fringe-2",
+        "fringe-3",
+        "fringe-4",
+        "fringe-back"
+      ],
+      "before": "bd0d164f4516628981b9a986958acd50d04a7ec67ca46a7564f01e17f8e1e769",
+      "after": "bd0d164f4516628981b9a986958acd50d04a7ec67ca46a7564f01e17f8e1e769",
+      "unchanged": true
+    },
+    {
+      "slot": "accessories",
+      "parts": [
+        "necklace",
+        "pendant"
+      ],
+      "before": "1a00b18922113bf1aaa465a6d19667cb053ec56aff6d77f00b2b4d9f019ed836",
+      "after": "1a00b18922113bf1aaa465a6d19667cb053ec56aff6d77f00b2b4d9f019ed836",
+      "unchanged": true
+    }
+  ]
+}

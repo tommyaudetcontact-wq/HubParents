@@ -349,7 +349,8 @@
   "qualityContract": {
     "qualityBar": "complex",
     "definitionOfDone": [
-      "The rendered model matches the reference silhouette, primary proportions, visible component hierarchy, material response, and most recognizable local features for the selected fidelity tier."
+      "The rendered model matches the reference silhouette, primary proportions, visible component hierarchy, material response, and most recognizable local features for the selected fidelity tier.",
+      "User accepted the stylized approximate direction on 2026-10-28. Pixel IoU remains diagnostic, not an assertion of exact likeness. Ship only after shoe/face corrections and actual runtime pose and bind checks."
     ],
     "minimumSpecDepth": {
       "macroComponents": 3,
@@ -1207,274 +1208,277 @@
       "role": "body",
       "importance": 1.0,
       "confidence": 0.78,
-      "primitive": "ellipsoid",
-      "topologyClass": "implicit",
-      "topologyRationale": "Continuous trouser volume, smooth union of waist and overlapping thigh, calf contour volumes. All fields use supported primitives; no separate visible leg shells.",
+      "primitive": "tapered-sweep",
+      "topologyClass": "continuous-sculpt",
+      "topologyRationale": "Smooth branched contour loft for pelvis and two legs; no ellipsoid stack or repeated lobes.",
       "geometryDescriptor": {
-        "sdf": {
-          "primitives": [
+        "taperedSweep": {
+          "stations": [
             {
-              "id": "waist",
-              "type": "ellipsoid",
-              "center": [
+              "position": [
                 0,
-                0.973,
-                -0.008
+                0.835,
+                0
               ],
-              "radii": [
-                0.176,
-                0.085,
-                0.106
-              ]
+              "rx": 0.045,
+              "rz": 0.075
             },
             {
-              "id": "hip",
-              "type": "ellipsoid",
-              "center": [
+              "position": [
+                0,
+                0.865,
+                -0.006
+              ],
+              "rx": 0.08,
+              "rz": 0.15
+            },
+            {
+              "position": [
                 0,
                 0.93,
-                -0.005
+                -0.006
               ],
-              "radii": [
-                0.174,
-                0.092,
-                0.106
-              ]
+              "rx": 0.105,
+              "rz": 0.177
             },
             {
-              "id": "l-0",
-              "type": "ellipsoid",
-              "center": [
-                0.11261224489795918,
-                0.82,
-                0
+              "position": [
+                0,
+                0.98,
+                -0.006
               ],
-              "radii": [
-                0.097,
-                0.17,
-                0.095
-              ]
+              "rx": 0.108,
+              "rz": 0.18
             },
             {
-              "id": "l-1",
-              "type": "ellipsoid",
-              "center": [
-                0.12388775510204081,
-                0.65,
-                0
+              "position": [
+                0,
+                1.045,
+                -0.006
               ],
-              "radii": [
-                0.081,
-                0.16,
-                0.082
-              ]
-            },
-            {
-              "id": "l-2",
-              "type": "ellipsoid",
-              "center": [
-                0.14750000000000002,
-                0.49,
-                0
+              "rx": 0.101,
+              "rz": 0.17
+            }
+          ],
+          "radialSegments": 40,
+          "capEnds": true,
+          "fixedFrame": "horizontal"
+        },
+        "branchedLoft": {
+          "lofts": [
+            [
+              [
+                0.835,
+                0,
+                0,
+                0.075,
+                0.045
               ],
-              "radii": [
-                0.068,
-                0.1,
-                0.071
-              ]
-            },
-            {
-              "id": "l-3",
-              "type": "ellipsoid",
-              "center": [
-                0.15678571428571428,
-                0.35,
-                0
-              ],
-              "radii": [
-                0.073,
+              [
+                0.865,
+                0,
+                -0.006,
                 0.15,
-                0.076
+                0.08
+              ],
+              [
+                0.93,
+                0,
+                -0.006,
+                0.177,
+                0.105
+              ],
+              [
+                0.98,
+                0,
+                -0.006,
+                0.18,
+                0.108
+              ],
+              [
+                1.045,
+                0,
+                -0.006,
+                0.17,
+                0.101
               ]
-            },
-            {
-              "id": "l-4",
-              "type": "ellipsoid",
-              "center": [
+            ],
+            [
+              [
+                0.155,
+                0.16971938775510204,
+                -0.004,
+                0.055,
+                0.057
+              ],
+              [
+                0.2,
                 0.16673469387755102,
-                0.2,
-                0
-              ],
-              "radii": [
+                -0.004,
                 0.058,
-                0.11,
-                0.061
-              ]
-            },
-            {
-              "id": "r-0",
-              "type": "ellipsoid",
-              "center": [
-                -0.10526530612244897,
-                0.82,
-                0
+                0.06
               ],
-              "radii": [
-                0.097,
-                0.17,
-                0.095
-              ]
-            },
-            {
-              "id": "r-1",
-              "type": "ellipsoid",
-              "center": [
-                -0.10873469387755101,
-                0.65,
-                0
+              [
+                0.3,
+                0.16010204081632654,
+                -0.004,
+                0.066,
+                0.066
               ],
-              "radii": [
-                0.081,
-                0.16,
-                0.082
-              ]
-            },
-            {
-              "id": "r-2",
-              "type": "ellipsoid",
-              "center": [
-                -0.125,
-                0.49,
-                0
-              ],
-              "radii": [
-                0.068,
-                0.1,
+              [
+                0.4,
+                0.15346938775510205,
+                -0.004,
+                0.069,
                 0.071
-              ]
-            },
-            {
-              "id": "r-3",
-              "type": "ellipsoid",
-              "center": [
-                -0.12785714285714286,
-                0.35,
-                0
               ],
-              "radii": [
-                0.073,
-                0.15,
-                0.076
+              [
+                0.5,
+                0.14683673469387756,
+                -0.004,
+                0.067,
+                0.07
+              ],
+              [
+                0.6,
+                0.12720408163265307,
+                -0.004,
+                0.078,
+                0.08
+              ],
+              [
+                0.75,
+                0.11725510204081632,
+                -0.004,
+                0.09,
+                0.094
+              ],
+              [
+                0.88,
+                0.10863265306122448,
+                -0.004,
+                0.09,
+                0.094
+              ],
+              [
+                0.93,
+                0.10531632653061224,
+                -0.004,
+                0.078,
+                0.084
+              ],
+              [
+                0.97,
+                0.10266326530612244,
+                -0.004,
+                0.043,
+                0.054
+              ],
+              [
+                1.005,
+                0.102,
+                -0.004,
+                0.004,
+                0.006
               ]
-            },
-            {
-              "id": "r-4",
-              "type": "ellipsoid",
-              "center": [
-                -0.1309183673469388,
+            ],
+            [
+              [
+                0.155,
+                -0.13183673469387755,
+                -0.004,
+                0.055,
+                0.057
+              ],
+              [
                 0.2,
-                0
-              ],
-              "radii": [
+                -0.1309183673469388,
+                -0.004,
                 0.058,
-                0.11,
-                0.061
+                0.06
+              ],
+              [
+                0.3,
+                -0.12887755102040815,
+                -0.004,
+                0.066,
+                0.066
+              ],
+              [
+                0.4,
+                -0.12683673469387755,
+                -0.004,
+                0.069,
+                0.071
+              ],
+              [
+                0.5,
+                -0.12479591836734694,
+                -0.004,
+                0.067,
+                0.07
+              ],
+              [
+                0.6,
+                -0.10975510204081632,
+                -0.004,
+                0.078,
+                0.08
+              ],
+              [
+                0.75,
+                -0.1066938775510204,
+                -0.004,
+                0.09,
+                0.094
+              ],
+              [
+                0.88,
+                -0.1040408163265306,
+                -0.004,
+                0.09,
+                0.094
+              ],
+              [
+                0.93,
+                -0.1030204081632653,
+                -0.004,
+                0.078,
+                0.084
+              ],
+              [
+                0.97,
+                -0.10220408163265306,
+                -0.004,
+                0.043,
+                0.054
+              ],
+              [
+                1.005,
+                -0.102,
+                -0.004,
+                0.004,
+                0.006
               ]
-            }
+            ]
           ],
-          "operations": [
-            {
-              "id": "pants-join0",
-              "type": "smooth-union",
-              "left": "waist",
-              "right": "hip",
-              "radius": 0.022
-            },
-            {
-              "id": "pants-join1",
-              "type": "smooth-union",
-              "left": "pants-join0",
-              "right": "l-0",
-              "radius": 0.022
-            },
-            {
-              "id": "pants-join2",
-              "type": "smooth-union",
-              "left": "pants-join1",
-              "right": "l-1",
-              "radius": 0.022
-            },
-            {
-              "id": "pants-join3",
-              "type": "smooth-union",
-              "left": "pants-join2",
-              "right": "l-2",
-              "radius": 0.022
-            },
-            {
-              "id": "pants-join4",
-              "type": "smooth-union",
-              "left": "pants-join3",
-              "right": "l-3",
-              "radius": 0.022
-            },
-            {
-              "id": "pants-join5",
-              "type": "smooth-union",
-              "left": "pants-join4",
-              "right": "l-4",
-              "radius": 0.022
-            },
-            {
-              "id": "pants-join6",
-              "type": "smooth-union",
-              "left": "pants-join5",
-              "right": "r-0",
-              "radius": 0.022
-            },
-            {
-              "id": "pants-join7",
-              "type": "smooth-union",
-              "left": "pants-join6",
-              "right": "r-1",
-              "radius": 0.022
-            },
-            {
-              "id": "pants-join8",
-              "type": "smooth-union",
-              "left": "pants-join7",
-              "right": "r-2",
-              "radius": 0.022
-            },
-            {
-              "id": "pants-join9",
-              "type": "smooth-union",
-              "left": "pants-join8",
-              "right": "r-3",
-              "radius": 0.022
-            },
-            {
-              "id": "pants-join10",
-              "type": "smooth-union",
-              "left": "pants-join9",
-              "right": "r-4",
-              "radius": 0.022
-            }
-          ],
-          "resolution": 64,
+          "blendRadius": 0.014,
+          "resolution": 40,
           "bounds": {
             "min": [
               -0.29,
-              0.09,
-              -0.16
+              0.13,
+              -0.15
             ],
             "max": [
               0.29,
-              1.075,
-              0.16
+              1.07,
+              0.15
             ]
           }
-        }
+        },
+        "normalStrategy": "Continuous cubic contour field, welded surface-net topology",
+        "authoredRefinement": "refine-emitter.cjs: branchedProfileSample replaces only this surface before rigging; every contour is stored here."
       },
       "parent": "root",
       "attachment": null,
@@ -1674,7 +1678,170 @@
           "radialSegments": 24,
           "capEnds": true
         },
-        "normalStrategy": "smooth vertex normals"
+        "normalStrategy": "smooth vertex normals",
+        "connectedHand": {
+          "lofts": [
+            [
+              [
+                0.84,
+                0.324,
+                0.005,
+                0.034,
+                0.028
+              ],
+              [
+                0.88,
+                0.321,
+                0.003,
+                0.032,
+                0.029
+              ],
+              [
+                0.95,
+                0.321,
+                0,
+                0.038,
+                0.035
+              ],
+              [
+                1.045,
+                0.317,
+                0,
+                0.055,
+                0.048
+              ],
+              [
+                1.105,
+                0.31,
+                0,
+                0.048,
+                0.043
+              ],
+              [
+                1.17,
+                0.295,
+                0,
+                0.055,
+                0.05
+              ],
+              [
+                1.245,
+                0.276,
+                0,
+                0.064,
+                0.06
+              ],
+              [
+                1.31,
+                0.258,
+                0,
+                0.062,
+                0.062
+              ]
+            ]
+          ],
+          "volumes": [
+            {
+              "id": "palm",
+              "type": "ellipsoid",
+              "center": [
+                0.325,
+                0.842,
+                0.005
+              ],
+              "radii": [
+                0.044079999999999994,
+                0.061560000000000004,
+                0.028319999999999998
+              ]
+            },
+            {
+              "id": "finger0",
+              "type": "ellipsoid",
+              "center": [
+                0.29524,
+                0.7944800000000001,
+                0.01
+              ],
+              "radii": [
+                0.010439999999999998,
+                0.03672,
+                0.012979999999999998
+              ]
+            },
+            {
+              "id": "finger1",
+              "type": "ellipsoid",
+              "center": [
+                0.31508,
+                0.788,
+                0.01
+              ],
+              "radii": [
+                0.010439999999999998,
+                0.04104,
+                0.012979999999999998
+              ]
+            },
+            {
+              "id": "finger2",
+              "type": "ellipsoid",
+              "center": [
+                0.33491999999999994,
+                0.7944800000000001,
+                0.01
+              ],
+              "radii": [
+                0.010439999999999998,
+                0.03672,
+                0.012979999999999998
+              ]
+            },
+            {
+              "id": "finger3",
+              "type": "ellipsoid",
+              "center": [
+                0.35475999999999996,
+                0.80096,
+                0.01
+              ],
+              "radii": [
+                0.010439999999999998,
+                0.0324,
+                0.012979999999999998
+              ]
+            },
+            {
+              "id": "thumb",
+              "type": "ellipsoid",
+              "center": [
+                0.28159999999999996,
+                0.8398399999999999,
+                0.027
+              ],
+              "radii": [
+                0.01972,
+                0.03132,
+                0.01652
+              ]
+            }
+          ],
+          "blendRadius": 0.004,
+          "resolution": 60,
+          "bounds": {
+            "min": [
+              0.2,
+              0.72,
+              -0.085
+            ],
+            "max": [
+              0.43,
+              1.34,
+              0.085
+            ]
+          },
+          "purpose": "One continuous wrist surface; hand enlarged from reference-approved draft"
+        }
       },
       "parent": "root",
       "attachment": {
@@ -1803,333 +1970,106 @@
       }
     },
     {
-      "id": "hand-l",
-      "name": "hand-l",
-      "level": "meso",
-      "role": "body",
-      "importance": 1.0,
-      "confidence": 0.78,
-      "primitive": "ellipsoid",
-      "topologyClass": "implicit",
-      "topologyRationale": "Continuous sculpt volume made from smoothly blended fields, not independently rendered spheres.",
-      "geometryDescriptor": {
-        "sdf": {
-          "primitives": [
-            {
-              "id": "palm",
-              "type": "ellipsoid",
-              "center": [
-                0.325,
-                0.842,
-                0.005
-              ],
-              "radii": [
-                0.038,
-                0.057,
-                0.024
-              ]
-            },
-            {
-              "id": "finger0",
-              "type": "ellipsoid",
-              "center": [
-                0.301,
-                0.798,
-                0.01
-              ],
-              "radii": [
-                0.009,
-                0.034,
-                0.011
-              ]
-            },
-            {
-              "id": "finger1",
-              "type": "ellipsoid",
-              "center": [
-                0.317,
-                0.792,
-                0.01
-              ],
-              "radii": [
-                0.009,
-                0.038,
-                0.011
-              ]
-            },
-            {
-              "id": "finger2",
-              "type": "ellipsoid",
-              "center": [
-                0.33299999999999996,
-                0.798,
-                0.01
-              ],
-              "radii": [
-                0.009,
-                0.034,
-                0.011
-              ]
-            },
-            {
-              "id": "finger3",
-              "type": "ellipsoid",
-              "center": [
-                0.349,
-                0.804,
-                0.01
-              ],
-              "radii": [
-                0.009,
-                0.03,
-                0.011
-              ]
-            },
-            {
-              "id": "thumb",
-              "type": "ellipsoid",
-              "center": [
-                0.29,
-                0.84,
-                0.027
-              ],
-              "radii": [
-                0.017,
-                0.029,
-                0.014
-              ]
-            }
-          ],
-          "operations": [
-            {
-              "id": "blend0",
-              "type": "smooth-union",
-              "left": "palm",
-              "right": "finger0",
-              "radius": 0.003
-            },
-            {
-              "id": "blend1",
-              "type": "smooth-union",
-              "left": "blend0",
-              "right": "finger1",
-              "radius": 0.003
-            },
-            {
-              "id": "blend2",
-              "type": "smooth-union",
-              "left": "blend1",
-              "right": "finger2",
-              "radius": 0.003
-            },
-            {
-              "id": "blend3",
-              "type": "smooth-union",
-              "left": "blend2",
-              "right": "finger3",
-              "radius": 0.003
-            },
-            {
-              "id": "blend4",
-              "type": "smooth-union",
-              "left": "blend3",
-              "right": "thumb",
-              "radius": 0.003
-            }
-          ],
-          "bounds": {
-            "min": [
-              0.24799999999999997,
-              0.729,
-              -0.044
-            ],
-            "max": [
-              0.388,
-              0.924,
-              0.066
-            ]
-          },
-          "resolution": 40
-        },
-        "normalStrategy": "smooth vertex normals"
-      },
-      "parent": "root",
-      "attachment": null,
-      "dimensions": {
-        "width": 1,
-        "height": 1,
-        "depth": 1,
-        "units": "meters",
-        "confidence": 0.78
-      },
-      "transform": {
-        "position": [
-          0,
-          0,
-          0
-        ],
-        "rotation": [
-          0,
-          0,
-          0
-        ],
-        "scale": [
-          1,
-          1,
-          1
-        ]
-      },
-      "actionProfile": {
-        "animationRole": "static",
-        "pivot": {
-          "mode": "center",
-          "localPosition": [
-            0,
-            0,
-            0
-          ],
-          "axis": [
-            0,
-            1,
-            0
-          ],
-          "confidence": 0.7
-        },
-        "transformChannels": {
-          "translate": true,
-          "rotate": true,
-          "scale": true,
-          "bend": false,
-          "twist": false,
-          "detach": false,
-          "visibility": true,
-          "materialState": false
-        },
-        "sockets": [],
-        "collider": {
-          "type": "box",
-          "offset": [
-            0,
-            0,
-            0
-          ],
-          "scale": [
-            1,
-            1,
-            1
-          ],
-          "isTrigger": false,
-          "notes": "box proxy"
-        },
-        "constraints": [],
-        "destruction": {
-          "breakable": false,
-          "fractureGroup": "hand-l",
-          "seamRefs": [],
-          "detachableFragments": [],
-          "breakImpulse": 0.0,
-          "debrisMaterial": "hidden"
-        }
-      },
-      "material": "skin",
-      "materialLayers": [
-        "skin"
-      ],
-      "deformations": [],
-      "joints": [],
-      "seams": [],
-      "localFeatures": [],
-      "surfaceDetail": {
-        "macroRoughness": 0.0,
-        "microRoughness": 0.0,
-        "bumpAmplitude": 0.0,
-        "normalPattern": "",
-        "displacementPattern": "",
-        "occlusionPattern": "",
-        "edgeWearPattern": "",
-        "notes": ""
-      },
-      "evidenceRefs": [
-        "full-object"
-      ],
-      "details": [],
-      "fidelityTier": "blockout",
-      "colorMaterialRecipe": {
-        "dominantAlbedo": "rgba(213, 154, 115, 1)",
-        "secondaryAlbedo": "rgba(213, 154, 115, 1)",
-        "materialClass": "skin",
-        "materialClassConfidence": 0.8,
-        "evidenceRefs": [
-          "full-object"
-        ]
-      }
-    },
-    {
       "id": "shoe-l",
       "name": "shoe-l",
       "level": "meso",
       "role": "body",
       "importance": 1.0,
       "confidence": 0.78,
-      "primitive": "ellipsoid",
-      "topologyClass": "implicit",
-      "topologyRationale": "Continuous sculpt volume made from smoothly blended fields, not independently rendered spheres.",
+      "primitive": "tapered-sweep",
+      "topologyClass": "continuous-sculpt",
+      "topologyRationale": "Continuous high-top shoe contour: flat broad toe, shaped instep and ankle collar, replacing rounded overlapping blobs.",
       "geometryDescriptor": {
-        "sdf": {
-          "primitives": [
+        "taperedSweep": {
+          "stations": [
             {
-              "id": "ankle",
-              "type": "ellipsoid",
-              "center": [
+              "position": [
                 0.115,
-                0.105,
-                -0.003
+                0.012,
+                0.035
               ],
-              "radii": [
-                0.065,
-                0.08,
-                0.075
-              ]
+              "rx": 0.024,
+              "rz": 0.015
             },
             {
-              "id": "toe",
-              "type": "ellipsoid",
-              "center": [
+              "position": [
                 0.115,
-                0.053,
-                0.065
+                0.025,
+                0.035
               ],
-              "radii": [
-                0.068,
-                0.05,
-                0.115
-              ]
-            }
-          ],
-          "operations": [
+              "rx": 0.118,
+              "rz": 0.063
+            },
             {
-              "id": "blend0",
-              "type": "smooth-union",
-              "left": "ankle",
-              "right": "toe",
-              "radius": 0.022
+              "position": [
+                0.115,
+                0.045,
+                0.035
+              ],
+              "rx": 0.121,
+              "rz": 0.067
+            },
+            {
+              "position": [
+                0.115,
+                0.062,
+                0.03
+              ],
+              "rx": 0.115,
+              "rz": 0.064
+            },
+            {
+              "position": [
+                0.115,
+                0.08,
+                0.015
+              ],
+              "rx": 0.096,
+              "rz": 0.06
+            },
+            {
+              "position": [
+                0.115,
+                0.1,
+                -0.002
+              ],
+              "rx": 0.075,
+              "rz": 0.056
+            },
+            {
+              "position": [
+                0.115,
+                0.13,
+                -0.018
+              ],
+              "rx": 0.059,
+              "rz": 0.054
+            },
+            {
+              "position": [
+                0.115,
+                0.17,
+                -0.023
+              ],
+              "rx": 0.052,
+              "rz": 0.052
+            },
+            {
+              "position": [
+                0.115,
+                0.178,
+                -0.023
+              ],
+              "rx": 0.05,
+              "rz": 0.05
             }
           ],
-          "bounds": {
-            "min": [
-              0.022,
-              -0.022000000000000006,
-              -0.10300000000000001
-            ],
-            "max": [
-              0.208,
-              0.21,
-              0.205
-            ]
-          },
-          "resolution": 40
+          "radialSegments": 28,
+          "capEnds": true,
+          "fixedFrame": "horizontal"
         },
-        "normalStrategy": "smooth vertex normals"
+        "normalStrategy": "Smooth horizontal shoe contours; separate outsole",
+        "sourceNotes": "Broad reference toe and dark high-top sneakers, independent shoe module"
       },
       "parent": "root",
       "attachment": null,
@@ -2256,42 +2196,202 @@
         "profile2D": {
           "points": [
             [
-              -0.42,
-              -0.45
+              0.42769999999999997,
+              0.0
             ],
             [
-              0.42,
-              -0.45
+              0.41805772288557197,
+              0.10232070351484124
             ],
             [
-              0.5,
-              -0.1
+              0.405118990788356,
+              0.1732426103684521
             ],
             [
-              0.47,
-              0.45
+              0.38764313024846664,
+              0.23404723308381586
             ],
             [
-              0.28,
-              0.5
+              0.36561897893722106,
+              0.28749781270113345
             ],
             [
-              -0.28,
-              0.5
+              0.33914098771003437,
+              0.33449234126967875
             ],
             [
-              -0.47,
-              0.45
+              0.30830758094922195,
+              0.3753317575473136
             ],
             [
-              -0.5,
-              -0.1
+              0.2731685825266422,
+              0.41007447486767296
+            ],
+            [
+              0.2336630366055767,
+              0.4386748333756851
+            ],
+            [
+              0.1895037006540926,
+              0.46104821625249315
+            ],
+            [
+              0.13989014717124748,
+              0.4771054426630118
+            ],
+            [
+              0.08248650863723848,
+              0.4867721764671055
+            ],
+            [
+              1.3329809914788902e-13,
+              0.49
+            ],
+            [
+              -0.08248650863723843,
+              0.4867721764671055
+            ],
+            [
+              -0.13989014717124743,
+              0.4771054426630118
+            ],
+            [
+              -0.18950370065409247,
+              0.4610482162524932
+            ],
+            [
+              -0.23366303660557658,
+              0.43867483337568514
+            ],
+            [
+              -0.2731685825266422,
+              0.41007447486767296
+            ],
+            [
+              -0.3083075809492219,
+              0.3753317575473136
+            ],
+            [
+              -0.3391409877100343,
+              0.3344923412696788
+            ],
+            [
+              -0.36561897893722106,
+              0.28749781270113345
+            ],
+            [
+              -0.38764313024846664,
+              0.23404723308381592
+            ],
+            [
+              -0.40511899078835595,
+              0.17324261036845223
+            ],
+            [
+              -0.41805772288557197,
+              0.10232070351484147
+            ],
+            [
+              -0.42769999999998104,
+              2.819709889450938e-13
+            ],
+            [
+              -0.43170741946128943,
+              -0.10232070351484136
+            ],
+            [
+              -0.42777079626050174,
+              -0.17324261036845212
+            ],
+            [
+              -0.41721532726660004,
+              -0.2340472330838158
+            ],
+            [
+              -0.40018194447004646,
+              -0.28749781270113334
+            ],
+            [
+              -0.37673188127324614,
+              -0.33449234126967875
+            ],
+            [
+              -0.34691443008337425,
+              -0.3753317575473134
+            ],
+            [
+              -0.3107594760898541,
+              -0.41007447486767284
+            ],
+            [
+              -0.26822600213840225,
+              -0.4386748333756851
+            ],
+            [
+              -0.2190758976722258,
+              -0.4610482162524932
+            ],
+            [
+              -0.16254195264339313,
+              -0.4771054426630118
+            ],
+            [
+              -0.09613620521295588,
+              -0.4867721764671055
+            ],
+            [
+              -3.6206545950956876e-13,
+              -0.49
+            ],
+            [
+              0.09613620521295567,
+              -0.4867721764671056
+            ],
+            [
+              0.162541952643393,
+              -0.4771054426630118
+            ],
+            [
+              0.21907589767222568,
+              -0.46104821625249326
+            ],
+            [
+              0.2682260021384021,
+              -0.4386748333756851
+            ],
+            [
+              0.31075947608985377,
+              -0.4100744748676732
+            ],
+            [
+              0.3469144300833741,
+              -0.3753317575473136
+            ],
+            [
+              0.3767318812732461,
+              -0.33449234126967886
+            ],
+            [
+              0.40018194447004635,
+              -0.28749781270113367
+            ],
+            [
+              0.41721532726660004,
+              -0.23404723308381575
+            ],
+            [
+              0.42777079626050174,
+              -0.17324261036845254
+            ],
+            [
+              0.43170741946128943,
+              -0.10232070351484131
             ]
           ],
           "depth": 1,
           "bevelEnabled": true,
-          "bevelSize": 0.035,
-          "bevelThickness": 0.035,
+          "bevelSize": 0.018,
+          "bevelThickness": 0.06,
           "bevelSegments": 2
         }
       },
@@ -2307,7 +2407,7 @@
       "transform": {
         "position": [
           0.115,
-          0.025,
+          0.026,
           0.035
         ],
         "rotation": [
@@ -2317,8 +2417,8 @@
         ],
         "scale": [
           0.145,
-          0.25,
-          0.014
+          0.248,
+          0.013
         ]
       },
       "actionProfile": {
@@ -2429,17 +2529,17 @@
         "tubePath": {
           "points": [
             [
-              0.07500000000000001,
-              0.093,
-              0.11
+              0.07800000000000001,
+              0.082,
+              0.098
             ],
             [
-              0.155,
-              0.093,
+              0.152,
+              0.082,
               0.09
             ]
           ],
-          "radius": 0.003,
+          "radius": 0.0025,
           "closed": false
         },
         "attachmentGeometry": "authored-path"
@@ -2593,17 +2693,17 @@
         "tubePath": {
           "points": [
             [
-              0.07500000000000001,
-              0.102,
-              0.086
+              0.07800000000000001,
+              0.101,
+              0.077
             ],
             [
-              0.155,
-              0.102,
-              0.066
+              0.152,
+              0.101,
+              0.069
             ]
           ],
-          "radius": 0.003,
+          "radius": 0.0025,
           "closed": false
         },
         "attachmentGeometry": "authored-path"
@@ -2748,17 +2848,17 @@
         "tubePath": {
           "points": [
             [
-              0.07500000000000001,
-              0.111,
-              0.062
+              0.07800000000000001,
+              0.12,
+              0.056
             ],
             [
-              0.155,
-              0.111,
-              0.041999999999999996
+              0.152,
+              0.12,
+              0.048
             ]
           ],
-          "radius": 0.003,
+          "radius": 0.0025,
           "closed": false
         },
         "attachmentGeometry": "authored-path"
@@ -2903,17 +3003,17 @@
         "tubePath": {
           "points": [
             [
-              0.07500000000000001,
-              0.12,
-              0.03799999999999999
+              0.07800000000000001,
+              0.139,
+              0.035
             ],
             [
-              0.155,
-              0.12,
-              0.017999999999999988
+              0.152,
+              0.139,
+              0.027000000000000003
             ]
           ],
-          "radius": 0.003,
+          "radius": 0.0025,
           "closed": false
         },
         "attachmentGeometry": "authored-path"
@@ -3131,7 +3231,170 @@
           "radialSegments": 24,
           "capEnds": true
         },
-        "normalStrategy": "smooth vertex normals"
+        "normalStrategy": "smooth vertex normals",
+        "connectedHand": {
+          "lofts": [
+            [
+              [
+                0.84,
+                -0.324,
+                0.005,
+                0.034,
+                0.028
+              ],
+              [
+                0.88,
+                -0.321,
+                0.003,
+                0.032,
+                0.029
+              ],
+              [
+                0.95,
+                -0.321,
+                0,
+                0.038,
+                0.035
+              ],
+              [
+                1.045,
+                -0.317,
+                0,
+                0.055,
+                0.048
+              ],
+              [
+                1.105,
+                -0.31,
+                0,
+                0.048,
+                0.043
+              ],
+              [
+                1.17,
+                -0.295,
+                0,
+                0.055,
+                0.05
+              ],
+              [
+                1.245,
+                -0.276,
+                0,
+                0.064,
+                0.06
+              ],
+              [
+                1.31,
+                -0.258,
+                0,
+                0.062,
+                0.062
+              ]
+            ]
+          ],
+          "volumes": [
+            {
+              "id": "palm",
+              "type": "ellipsoid",
+              "center": [
+                -0.325,
+                0.842,
+                0.005
+              ],
+              "radii": [
+                0.044079999999999994,
+                0.061560000000000004,
+                0.028319999999999998
+              ]
+            },
+            {
+              "id": "finger0",
+              "type": "ellipsoid",
+              "center": [
+                -0.29524,
+                0.7944800000000001,
+                0.01
+              ],
+              "radii": [
+                0.010439999999999998,
+                0.03672,
+                0.012979999999999998
+              ]
+            },
+            {
+              "id": "finger1",
+              "type": "ellipsoid",
+              "center": [
+                -0.31508,
+                0.788,
+                0.01
+              ],
+              "radii": [
+                0.010439999999999998,
+                0.04104,
+                0.012979999999999998
+              ]
+            },
+            {
+              "id": "finger2",
+              "type": "ellipsoid",
+              "center": [
+                -0.33491999999999994,
+                0.7944800000000001,
+                0.01
+              ],
+              "radii": [
+                0.010439999999999998,
+                0.03672,
+                0.012979999999999998
+              ]
+            },
+            {
+              "id": "finger3",
+              "type": "ellipsoid",
+              "center": [
+                -0.35475999999999996,
+                0.80096,
+                0.01
+              ],
+              "radii": [
+                0.010439999999999998,
+                0.0324,
+                0.012979999999999998
+              ]
+            },
+            {
+              "id": "thumb",
+              "type": "ellipsoid",
+              "center": [
+                -0.28159999999999996,
+                0.8398399999999999,
+                0.027
+              ],
+              "radii": [
+                0.01972,
+                0.03132,
+                0.01652
+              ]
+            }
+          ],
+          "blendRadius": 0.004,
+          "resolution": 60,
+          "bounds": {
+            "min": [
+              -0.43,
+              0.72,
+              -0.085
+            ],
+            "max": [
+              -0.2,
+              1.34,
+              0.085
+            ]
+          },
+          "purpose": "One continuous wrist surface; hand enlarged from reference-approved draft"
+        }
       },
       "parent": "root",
       "attachment": {
@@ -3269,333 +3532,106 @@
       }
     },
     {
-      "id": "hand-r",
-      "name": "hand-r",
-      "level": "meso",
-      "role": "body",
-      "importance": 1.0,
-      "confidence": 0.78,
-      "primitive": "ellipsoid",
-      "topologyClass": "implicit",
-      "topologyRationale": "Continuous sculpt volume made from smoothly blended fields, not independently rendered spheres.",
-      "geometryDescriptor": {
-        "sdf": {
-          "primitives": [
-            {
-              "id": "palm",
-              "type": "ellipsoid",
-              "center": [
-                -0.325,
-                0.842,
-                0.005
-              ],
-              "radii": [
-                0.038,
-                0.057,
-                0.024
-              ]
-            },
-            {
-              "id": "finger0",
-              "type": "ellipsoid",
-              "center": [
-                -0.301,
-                0.798,
-                0.01
-              ],
-              "radii": [
-                0.009,
-                0.034,
-                0.011
-              ]
-            },
-            {
-              "id": "finger1",
-              "type": "ellipsoid",
-              "center": [
-                -0.317,
-                0.792,
-                0.01
-              ],
-              "radii": [
-                0.009,
-                0.038,
-                0.011
-              ]
-            },
-            {
-              "id": "finger2",
-              "type": "ellipsoid",
-              "center": [
-                -0.33299999999999996,
-                0.798,
-                0.01
-              ],
-              "radii": [
-                0.009,
-                0.034,
-                0.011
-              ]
-            },
-            {
-              "id": "finger3",
-              "type": "ellipsoid",
-              "center": [
-                -0.349,
-                0.804,
-                0.01
-              ],
-              "radii": [
-                0.009,
-                0.03,
-                0.011
-              ]
-            },
-            {
-              "id": "thumb",
-              "type": "ellipsoid",
-              "center": [
-                -0.29,
-                0.84,
-                0.027
-              ],
-              "radii": [
-                0.017,
-                0.029,
-                0.014
-              ]
-            }
-          ],
-          "operations": [
-            {
-              "id": "blend0",
-              "type": "smooth-union",
-              "left": "palm",
-              "right": "finger0",
-              "radius": 0.003
-            },
-            {
-              "id": "blend1",
-              "type": "smooth-union",
-              "left": "blend0",
-              "right": "finger1",
-              "radius": 0.003
-            },
-            {
-              "id": "blend2",
-              "type": "smooth-union",
-              "left": "blend1",
-              "right": "finger2",
-              "radius": 0.003
-            },
-            {
-              "id": "blend3",
-              "type": "smooth-union",
-              "left": "blend2",
-              "right": "finger3",
-              "radius": 0.003
-            },
-            {
-              "id": "blend4",
-              "type": "smooth-union",
-              "left": "blend3",
-              "right": "thumb",
-              "radius": 0.003
-            }
-          ],
-          "bounds": {
-            "min": [
-              -0.388,
-              0.729,
-              -0.044
-            ],
-            "max": [
-              -0.24799999999999997,
-              0.924,
-              0.066
-            ]
-          },
-          "resolution": 40
-        },
-        "normalStrategy": "smooth vertex normals"
-      },
-      "parent": "root",
-      "attachment": null,
-      "dimensions": {
-        "width": 1,
-        "height": 1,
-        "depth": 1,
-        "units": "meters",
-        "confidence": 0.78
-      },
-      "transform": {
-        "position": [
-          0,
-          0,
-          0
-        ],
-        "rotation": [
-          0,
-          0,
-          0
-        ],
-        "scale": [
-          1,
-          1,
-          1
-        ]
-      },
-      "actionProfile": {
-        "animationRole": "static",
-        "pivot": {
-          "mode": "center",
-          "localPosition": [
-            0,
-            0,
-            0
-          ],
-          "axis": [
-            0,
-            1,
-            0
-          ],
-          "confidence": 0.7
-        },
-        "transformChannels": {
-          "translate": true,
-          "rotate": true,
-          "scale": true,
-          "bend": false,
-          "twist": false,
-          "detach": false,
-          "visibility": true,
-          "materialState": false
-        },
-        "sockets": [],
-        "collider": {
-          "type": "box",
-          "offset": [
-            0,
-            0,
-            0
-          ],
-          "scale": [
-            1,
-            1,
-            1
-          ],
-          "isTrigger": false,
-          "notes": "box proxy"
-        },
-        "constraints": [],
-        "destruction": {
-          "breakable": false,
-          "fractureGroup": "hand-r",
-          "seamRefs": [],
-          "detachableFragments": [],
-          "breakImpulse": 0.0,
-          "debrisMaterial": "hidden"
-        }
-      },
-      "material": "skin",
-      "materialLayers": [
-        "skin"
-      ],
-      "deformations": [],
-      "joints": [],
-      "seams": [],
-      "localFeatures": [],
-      "surfaceDetail": {
-        "macroRoughness": 0.0,
-        "microRoughness": 0.0,
-        "bumpAmplitude": 0.0,
-        "normalPattern": "",
-        "displacementPattern": "",
-        "occlusionPattern": "",
-        "edgeWearPattern": "",
-        "notes": ""
-      },
-      "evidenceRefs": [
-        "full-object"
-      ],
-      "details": [],
-      "fidelityTier": "blockout",
-      "colorMaterialRecipe": {
-        "dominantAlbedo": "rgba(213, 154, 115, 1)",
-        "secondaryAlbedo": "rgba(213, 154, 115, 1)",
-        "materialClass": "skin",
-        "materialClassConfidence": 0.8,
-        "evidenceRefs": [
-          "full-object"
-        ]
-      }
-    },
-    {
       "id": "shoe-r",
       "name": "shoe-r",
       "level": "meso",
       "role": "body",
       "importance": 1.0,
       "confidence": 0.78,
-      "primitive": "ellipsoid",
-      "topologyClass": "implicit",
-      "topologyRationale": "Continuous sculpt volume made from smoothly blended fields, not independently rendered spheres.",
+      "primitive": "tapered-sweep",
+      "topologyClass": "continuous-sculpt",
+      "topologyRationale": "Continuous high-top shoe contour: flat broad toe, shaped instep and ankle collar, replacing rounded overlapping blobs.",
       "geometryDescriptor": {
-        "sdf": {
-          "primitives": [
+        "taperedSweep": {
+          "stations": [
             {
-              "id": "ankle",
-              "type": "ellipsoid",
-              "center": [
+              "position": [
                 -0.115,
-                0.105,
-                -0.003
+                0.012,
+                0.035
               ],
-              "radii": [
-                0.065,
-                0.08,
-                0.075
-              ]
+              "rx": 0.024,
+              "rz": 0.015
             },
             {
-              "id": "toe",
-              "type": "ellipsoid",
-              "center": [
+              "position": [
                 -0.115,
-                0.053,
-                0.065
+                0.025,
+                0.035
               ],
-              "radii": [
-                0.068,
-                0.05,
-                0.115
-              ]
-            }
-          ],
-          "operations": [
+              "rx": 0.118,
+              "rz": 0.063
+            },
             {
-              "id": "blend0",
-              "type": "smooth-union",
-              "left": "ankle",
-              "right": "toe",
-              "radius": 0.022
+              "position": [
+                -0.115,
+                0.045,
+                0.035
+              ],
+              "rx": 0.121,
+              "rz": 0.067
+            },
+            {
+              "position": [
+                -0.115,
+                0.062,
+                0.03
+              ],
+              "rx": 0.115,
+              "rz": 0.064
+            },
+            {
+              "position": [
+                -0.115,
+                0.08,
+                0.015
+              ],
+              "rx": 0.096,
+              "rz": 0.06
+            },
+            {
+              "position": [
+                -0.115,
+                0.1,
+                -0.002
+              ],
+              "rx": 0.075,
+              "rz": 0.056
+            },
+            {
+              "position": [
+                -0.115,
+                0.13,
+                -0.018
+              ],
+              "rx": 0.059,
+              "rz": 0.054
+            },
+            {
+              "position": [
+                -0.115,
+                0.17,
+                -0.023
+              ],
+              "rx": 0.052,
+              "rz": 0.052
+            },
+            {
+              "position": [
+                -0.115,
+                0.178,
+                -0.023
+              ],
+              "rx": 0.05,
+              "rz": 0.05
             }
           ],
-          "bounds": {
-            "min": [
-              -0.208,
-              -0.022000000000000006,
-              -0.10300000000000001
-            ],
-            "max": [
-              -0.022,
-              0.21,
-              0.205
-            ]
-          },
-          "resolution": 40
+          "radialSegments": 28,
+          "capEnds": true,
+          "fixedFrame": "horizontal"
         },
-        "normalStrategy": "smooth vertex normals"
+        "normalStrategy": "Smooth horizontal shoe contours; separate outsole",
+        "sourceNotes": "Broad reference toe and dark high-top sneakers, independent shoe module"
       },
       "parent": "root",
       "attachment": null,
@@ -3722,42 +3758,202 @@
         "profile2D": {
           "points": [
             [
-              -0.42,
-              -0.45
+              0.42769999999999997,
+              0.0
             ],
             [
-              0.42,
-              -0.45
+              0.41805772288557197,
+              0.10232070351484124
             ],
             [
-              0.5,
-              -0.1
+              0.405118990788356,
+              0.1732426103684521
             ],
             [
-              0.47,
-              0.45
+              0.38764313024846664,
+              0.23404723308381586
             ],
             [
-              0.28,
-              0.5
+              0.36561897893722106,
+              0.28749781270113345
             ],
             [
-              -0.28,
-              0.5
+              0.33914098771003437,
+              0.33449234126967875
             ],
             [
-              -0.47,
-              0.45
+              0.30830758094922195,
+              0.3753317575473136
             ],
             [
-              -0.5,
-              -0.1
+              0.2731685825266422,
+              0.41007447486767296
+            ],
+            [
+              0.2336630366055767,
+              0.4386748333756851
+            ],
+            [
+              0.1895037006540926,
+              0.46104821625249315
+            ],
+            [
+              0.13989014717124748,
+              0.4771054426630118
+            ],
+            [
+              0.08248650863723848,
+              0.4867721764671055
+            ],
+            [
+              1.3329809914788902e-13,
+              0.49
+            ],
+            [
+              -0.08248650863723843,
+              0.4867721764671055
+            ],
+            [
+              -0.13989014717124743,
+              0.4771054426630118
+            ],
+            [
+              -0.18950370065409247,
+              0.4610482162524932
+            ],
+            [
+              -0.23366303660557658,
+              0.43867483337568514
+            ],
+            [
+              -0.2731685825266422,
+              0.41007447486767296
+            ],
+            [
+              -0.3083075809492219,
+              0.3753317575473136
+            ],
+            [
+              -0.3391409877100343,
+              0.3344923412696788
+            ],
+            [
+              -0.36561897893722106,
+              0.28749781270113345
+            ],
+            [
+              -0.38764313024846664,
+              0.23404723308381592
+            ],
+            [
+              -0.40511899078835595,
+              0.17324261036845223
+            ],
+            [
+              -0.41805772288557197,
+              0.10232070351484147
+            ],
+            [
+              -0.42769999999998104,
+              2.819709889450938e-13
+            ],
+            [
+              -0.43170741946128943,
+              -0.10232070351484136
+            ],
+            [
+              -0.42777079626050174,
+              -0.17324261036845212
+            ],
+            [
+              -0.41721532726660004,
+              -0.2340472330838158
+            ],
+            [
+              -0.40018194447004646,
+              -0.28749781270113334
+            ],
+            [
+              -0.37673188127324614,
+              -0.33449234126967875
+            ],
+            [
+              -0.34691443008337425,
+              -0.3753317575473134
+            ],
+            [
+              -0.3107594760898541,
+              -0.41007447486767284
+            ],
+            [
+              -0.26822600213840225,
+              -0.4386748333756851
+            ],
+            [
+              -0.2190758976722258,
+              -0.4610482162524932
+            ],
+            [
+              -0.16254195264339313,
+              -0.4771054426630118
+            ],
+            [
+              -0.09613620521295588,
+              -0.4867721764671055
+            ],
+            [
+              -3.6206545950956876e-13,
+              -0.49
+            ],
+            [
+              0.09613620521295567,
+              -0.4867721764671056
+            ],
+            [
+              0.162541952643393,
+              -0.4771054426630118
+            ],
+            [
+              0.21907589767222568,
+              -0.46104821625249326
+            ],
+            [
+              0.2682260021384021,
+              -0.4386748333756851
+            ],
+            [
+              0.31075947608985377,
+              -0.4100744748676732
+            ],
+            [
+              0.3469144300833741,
+              -0.3753317575473136
+            ],
+            [
+              0.3767318812732461,
+              -0.33449234126967886
+            ],
+            [
+              0.40018194447004635,
+              -0.28749781270113367
+            ],
+            [
+              0.41721532726660004,
+              -0.23404723308381575
+            ],
+            [
+              0.42777079626050174,
+              -0.17324261036845254
+            ],
+            [
+              0.43170741946128943,
+              -0.10232070351484131
             ]
           ],
           "depth": 1,
           "bevelEnabled": true,
-          "bevelSize": 0.035,
-          "bevelThickness": 0.035,
+          "bevelSize": 0.018,
+          "bevelThickness": 0.06,
           "bevelSegments": 2
         }
       },
@@ -3773,7 +3969,7 @@
       "transform": {
         "position": [
           -0.115,
-          0.025,
+          0.026,
           0.035
         ],
         "rotation": [
@@ -3783,8 +3979,8 @@
         ],
         "scale": [
           0.145,
-          0.25,
-          0.014
+          0.248,
+          0.013
         ]
       },
       "actionProfile": {
@@ -3886,17 +4082,17 @@
         "tubePath": {
           "points": [
             [
-              -0.155,
-              0.093,
-              0.11
+              -0.152,
+              0.082,
+              0.098
             ],
             [
-              -0.07500000000000001,
-              0.093,
+              -0.07800000000000001,
+              0.082,
               0.09
             ]
           ],
-          "radius": 0.003,
+          "radius": 0.0025,
           "closed": false
         },
         "attachmentGeometry": "authored-path"
@@ -4041,17 +4237,17 @@
         "tubePath": {
           "points": [
             [
-              -0.155,
-              0.102,
-              0.086
+              -0.152,
+              0.101,
+              0.077
             ],
             [
-              -0.07500000000000001,
-              0.102,
-              0.066
+              -0.07800000000000001,
+              0.101,
+              0.069
             ]
           ],
-          "radius": 0.003,
+          "radius": 0.0025,
           "closed": false
         },
         "attachmentGeometry": "authored-path"
@@ -4196,17 +4392,17 @@
         "tubePath": {
           "points": [
             [
-              -0.155,
-              0.111,
-              0.062
+              -0.152,
+              0.12,
+              0.056
             ],
             [
-              -0.07500000000000001,
-              0.111,
-              0.041999999999999996
+              -0.07800000000000001,
+              0.12,
+              0.048
             ]
           ],
-          "radius": 0.003,
+          "radius": 0.0025,
           "closed": false
         },
         "attachmentGeometry": "authored-path"
@@ -4351,17 +4547,17 @@
         "tubePath": {
           "points": [
             [
-              -0.155,
-              0.12,
-              0.03799999999999999
+              -0.152,
+              0.139,
+              0.035
             ],
             [
-              -0.07500000000000001,
-              0.12,
-              0.017999999999999988
+              -0.07800000000000001,
+              0.139,
+              0.027000000000000003
             ]
           ],
-          "radius": 0.003,
+          "radius": 0.0025,
           "closed": false
         },
         "attachmentGeometry": "authored-path"
@@ -4762,16 +4958,16 @@
           "nose": [
             0,
             1.661,
-            0.026,
-            0.014,
-            0.022
+            0.021,
+            0.016,
+            0.019
           ],
           "bridge": [
             0,
             1.69,
             0.014,
             0.027,
-            0.011
+            0.009
           ],
           "cheeks": [
             [
@@ -4791,12 +4987,17 @@
           ],
           "lipRidge": [
             0,
-            1.632,
-            0.025,
-            0.007,
-            0.002
+            1.631,
+            0.023,
+            0.008,
+            0.003
           ],
-          "jawExponent": 2.25
+          "jawExponent": 2.25,
+          "backRoundness": {
+            "centreY": 1.715,
+            "heightRadius": 0.075,
+            "depth": 0.022
+          }
         },
         "displayHeadScale": 1.07,
         "displayHeadOffsetY": -0.018
@@ -8282,6 +8483,236 @@
           "full-object"
         ]
       }
+    },
+    {
+      "id": "fringe-back",
+      "name": "fringe-back",
+      "level": "meso",
+      "role": "body",
+      "importance": 1.0,
+      "confidence": 0.78,
+      "primitive": "tapered-sweep",
+      "topologyClass": "continuous-sculpt",
+      "topologyRationale": "Contour follows the reference silhouette; depth is inferred and tested in orbit.",
+      "geometryDescriptor": {
+        "taperedSweep": {
+          "stations": [
+            {
+              "position": [
+                0,
+                1.625,
+                -0.012
+              ],
+              "rx": 0.03,
+              "rz": 0.03
+            },
+            {
+              "position": [
+                0,
+                1.632,
+                -0.012
+              ],
+              "rx": 0.08,
+              "rz": 0.075
+            },
+            {
+              "position": [
+                0,
+                1.66,
+                -0.015
+              ],
+              "rx": 0.093,
+              "rz": 0.094
+            },
+            {
+              "position": [
+                0,
+                1.705,
+                -0.017
+              ],
+              "rx": 0.109,
+              "rz": 0.102
+            },
+            {
+              "position": [
+                0,
+                1.74,
+                -0.018
+              ],
+              "rx": 0.106,
+              "rz": 0.103
+            },
+            {
+              "position": [
+                0,
+                1.755,
+                -0.018
+              ],
+              "rx": 0.095,
+              "rz": 0.098
+            }
+          ],
+          "radialSegments": 24,
+          "capEnds": true,
+          "fixedFrame": "horizontal"
+        },
+        "rearHair": {
+          "rings": [
+            [
+              1.632,
+              0.075,
+              0.08,
+              -0.012
+            ],
+            [
+              1.66,
+              0.094,
+              0.093,
+              -0.015
+            ],
+            [
+              1.705,
+              0.102,
+              0.109,
+              -0.017
+            ],
+            [
+              1.74,
+              0.103,
+              0.106,
+              -0.018
+            ],
+            [
+              1.755,
+              0.098,
+              0.095,
+              -0.018
+            ]
+          ],
+          "radialSegments": 32,
+          "thickness": 0.014
+        },
+        "normalStrategy": "closed rear-half scalp shell, attached under cap"
+      },
+      "parent": "root",
+      "attachment": null,
+      "dimensions": {
+        "width": 1,
+        "height": 1,
+        "depth": 1,
+        "units": "meters",
+        "confidence": 0.78
+      },
+      "transform": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "actionProfile": {
+        "animationRole": "static",
+        "pivot": {
+          "mode": "center",
+          "localPosition": [
+            0,
+            0,
+            0
+          ],
+          "axis": [
+            0,
+            1,
+            0
+          ],
+          "confidence": 0.7
+        },
+        "transformChannels": {
+          "translate": true,
+          "rotate": true,
+          "scale": true,
+          "bend": false,
+          "twist": false,
+          "detach": false,
+          "visibility": true,
+          "materialState": false
+        },
+        "sockets": [],
+        "collider": {
+          "type": "box",
+          "offset": [
+            0,
+            0,
+            0
+          ],
+          "scale": [
+            1,
+            1,
+            1
+          ],
+          "isTrigger": false,
+          "notes": "box proxy"
+        },
+        "constraints": [],
+        "destruction": {
+          "breakable": false,
+          "fractureGroup": "fringe-0",
+          "seamRefs": [],
+          "detachableFragments": [],
+          "breakImpulse": 0.0,
+          "debrisMaterial": "hidden"
+        }
+      },
+      "material": "hair",
+      "materialLayers": [
+        "hair"
+      ],
+      "deformations": [],
+      "joints": [],
+      "seams": [],
+      "localFeatures": [
+        {
+          "id": "rear-hair",
+          "kind": "contour",
+          "description": "continuous rear hair and nape below the cap",
+          "evidenceRefs": [
+            "full-object"
+          ]
+        }
+      ],
+      "surfaceDetail": {
+        "macroRoughness": 0.0,
+        "microRoughness": 0.0,
+        "bumpAmplitude": 0.0,
+        "normalPattern": "",
+        "displacementPattern": "",
+        "occlusionPattern": "",
+        "edgeWearPattern": "",
+        "notes": ""
+      },
+      "evidenceRefs": [
+        "full-object"
+      ],
+      "details": [],
+      "fidelityTier": "blockout",
+      "colorMaterialRecipe": {
+        "dominantAlbedo": "rgba(52, 40, 43, 1)",
+        "secondaryAlbedo": "rgba(52, 40, 43, 1)",
+        "materialClass": "plastic",
+        "materialClassConfidence": 0.8,
+        "evidenceRefs": [
+          "full-object"
+        ]
+      }
     }
   ],
   "materials": [
@@ -8626,8 +9057,8 @@
       "name": "sole",
       "type": "standard",
       "shaderModel": "MeshStandardMaterial",
-      "baseColor": "#171a22",
-      "color": "#171a22",
+      "baseColor": "#30343d",
+      "color": "#30343d",
       "roughness": 0.75,
       "metalness": 0,
       "textureless": {
@@ -8637,9 +9068,9 @@
         ]
       },
       "albedo": {
-        "dominant": "#171a22",
+        "dominant": "#30343d",
         "secondary": [
-          "#171a22"
+          "#30343d"
         ]
       },
       "ambientOcclusion": {
@@ -8706,7 +9137,6 @@
         "shirt",
         "pants",
         "arm-l",
-        "hand-l",
         "shoe-l",
         "sole-l",
         "lace-l-0",
@@ -8714,7 +9144,6 @@
         "lace-l-2",
         "lace-l-3",
         "arm-r",
-        "hand-r",
         "shoe-r",
         "sole-r",
         "lace-r-0",
@@ -8743,7 +9172,8 @@
         "necklace",
         "pendant",
         "sleeve-l",
-        "sleeve-r"
+        "sleeve-r",
+        "fringe-back"
       ],
       "acceptance": [
         "Humanoid proportions and pose read correctly without materials."
@@ -8757,7 +9187,6 @@
         "shirt",
         "pants",
         "arm-l",
-        "hand-l",
         "shoe-l",
         "sole-l",
         "lace-l-0",
@@ -8765,7 +9194,6 @@
         "lace-l-2",
         "lace-l-3",
         "arm-r",
-        "hand-r",
         "shoe-r",
         "sole-r",
         "lace-r-0",
@@ -8794,7 +9222,8 @@
         "necklace",
         "pendant",
         "sleeve-l",
-        "sleeve-r"
+        "sleeve-r",
+        "fringe-back"
       ],
       "acceptance": [
         "Head-unit ratios match anatomy; silhouette matches reference."
@@ -8808,7 +9237,6 @@
         "shirt",
         "pants",
         "arm-l",
-        "hand-l",
         "shoe-l",
         "sole-l",
         "lace-l-0",
@@ -8816,7 +9244,6 @@
         "lace-l-2",
         "lace-l-3",
         "arm-r",
-        "hand-r",
         "shoe-r",
         "sole-r",
         "lace-r-0",
@@ -8845,7 +9272,8 @@
         "necklace",
         "pendant",
         "sleeve-l",
-        "sleeve-r"
+        "sleeve-r",
+        "fringe-back"
       ],
       "acceptance": [
         "No visible joint gaps or invented headphones."
@@ -8859,7 +9287,6 @@
         "shirt",
         "pants",
         "arm-l",
-        "hand-l",
         "shoe-l",
         "sole-l",
         "lace-l-0",
@@ -8867,7 +9294,6 @@
         "lace-l-2",
         "lace-l-3",
         "arm-r",
-        "hand-r",
         "shoe-r",
         "sole-r",
         "lace-r-0",
@@ -8896,7 +9322,8 @@
         "necklace",
         "pendant",
         "sleeve-l",
-        "sleeve-r"
+        "sleeve-r",
+        "fringe-back"
       ],
       "acceptance": [
         "Eyeline/nose/mouth on landmark lines; eyes read as recessed, not flat patches; enabled accessories placed as in reference."
@@ -8910,7 +9337,6 @@
         "shirt",
         "pants",
         "arm-l",
-        "hand-l",
         "shoe-l",
         "sole-l",
         "lace-l-0",
@@ -8918,7 +9344,6 @@
         "lace-l-2",
         "lace-l-3",
         "arm-r",
-        "hand-r",
         "shoe-r",
         "sole-r",
         "lace-r-0",
@@ -8947,7 +9372,8 @@
         "necklace",
         "pendant",
         "sleeve-l",
-        "sleeve-r"
+        "sleeve-r",
+        "fringe-back"
       ],
       "acceptance": [
         "Skin, hair, shirt, pants, shoe, and any enabled accessory materials match reference palette."
@@ -8961,7 +9387,6 @@
         "shirt",
         "pants",
         "arm-l",
-        "hand-l",
         "shoe-l",
         "sole-l",
         "lace-l-0",
@@ -8969,7 +9394,6 @@
         "lace-l-2",
         "lace-l-3",
         "arm-r",
-        "hand-r",
         "shoe-r",
         "sole-r",
         "lace-r-0",
@@ -8998,7 +9422,8 @@
         "necklace",
         "pendant",
         "sleeve-l",
-        "sleeve-r"
+        "sleeve-r",
+        "fringe-back"
       ],
       "acceptance": [
         "Readable under neutral light; reference-matched lighting added."
@@ -9012,7 +9437,6 @@
         "shirt",
         "pants",
         "arm-l",
-        "hand-l",
         "shoe-l",
         "sole-l",
         "lace-l-0",
@@ -9020,7 +9444,6 @@
         "lace-l-2",
         "lace-l-3",
         "arm-r",
-        "hand-r",
         "shoe-r",
         "sole-r",
         "lace-r-0",
@@ -9049,7 +9472,8 @@
         "necklace",
         "pendant",
         "sleeve-l",
-        "sleeve-r"
+        "sleeve-r",
+        "fringe-back"
       ],
       "acceptance": [
         "Head/neck/shoulder/elbow/hip/knee pivots and sockets exposed."
@@ -9063,7 +9487,6 @@
         "shirt",
         "pants",
         "arm-l",
-        "hand-l",
         "shoe-l",
         "sole-l",
         "lace-l-0",
@@ -9071,7 +9494,6 @@
         "lace-l-2",
         "lace-l-3",
         "arm-r",
-        "hand-r",
         "shoe-r",
         "sole-r",
         "lace-r-0",
@@ -9100,7 +9522,8 @@
         "necklace",
         "pendant",
         "sleeve-l",
-        "sleeve-r"
+        "sleeve-r",
+        "fringe-back"
       ],
       "acceptance": [
         "Triangle/draw-call budget documented."
@@ -9239,7 +9662,8 @@
       "fringe-1",
       "fringe-2",
       "fringe-3",
-      "fringe-4"
+      "fringe-4",
+      "fringe-back"
     ],
     "pivot": [
       0,
@@ -9466,5 +9890,10 @@
       "renderHash": "604282539c4808c7",
       "passId": "blockout"
     }
+  ],
+  "meshRepairNotes": [
+    "Connected arm/hand contour volumes before final skin bind; larger palms, continuous wrists",
+    "Round occiput and separate rear-hair shell",
+    "No changes to base surface during rigging; frozen buffer parity is regenerated only after these requested art edits"
   ]
 }

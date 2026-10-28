@@ -11,6 +11,26 @@ const marker='  const stations = sweep.stations;';if(!src.includes(marker))throw
     }
   }stations.push(input[input.length-1]);`);
 // final files written once below
+// Smooth variable-radius profile fields: the spec owns the contours, not hidden generated constants.
+const pantsSpec=spec.componentTree.find(c=>c.id==='pants').geometryDescriptor.branchedLoft;
+if(pantsSpec){
+ src=src.replace('readonly primitives: readonly SdfPrimitive[];', 'readonly primitives: readonly SdfPrimitive[]; readonly authoredLofts?: number[][][]; readonly blendRadius?: number; readonly authoredVolumes?: SdfPrimitive[];');
+ src=src.replace('  const sample = sdfSample(descriptor);', `  const sample: SdfFunction = descriptor.authoredLofts ? (point) => {
+    const values=descriptor.authoredLofts!.map((rings)=>{const y=point.y;let i=0;while(i<rings.length-2&&y>rings[i+1][0])i++;
+      const a=rings[Math.max(0,i-1)],b=rings[i],c=rings[i+1],d=rings[Math.min(rings.length-1,i+2)],t=Math.max(0,Math.min(1,(y-b[0])/(c[0]-b[0])));
+      const f=(k:number)=>{const q=.5*(2*b[k]+(-a[k]+c[k])*t+(2*a[k]-5*b[k]+4*c[k]-d[k])*t*t+(-a[k]+3*b[k]-3*c[k]+d[k])*t*t*t);return Math.max(Math.min(b[k],c[k]),Math.min(Math.max(b[k],c[k]),q));};
+      const rx=f(3),rz=f(4),radial=(Math.hypot((point.x-f(1))/rx,(point.z-f(2))/rz)-1)*Math.min(rx,rz);
+      return Math.max(radial,rings[0][0]-y,y-rings[rings.length-1][0]);
+    });for(const v of descriptor.authoredVolumes??[])values.push(sdfPrimitive(point,v));return values.reduce((a,b)=>smin(a,b,descriptor.blendRadius??.014));
+  } : sdfSample(descriptor);`);
+ const m=src.match(/const mesh_pants_\d+Geometry = endpoint_pants_\d+[\s\S]*?;/);
+ if(!m)throw Error('pants geometry missing');
+ const name=m[0].match(/const (\w+) =/)[1];src=src.replace(m[0],`const ${name} = polygonizeSdf(${JSON.stringify({primitives:[],authoredLofts:pantsSpec.lofts,blendRadius:pantsSpec.blendRadius,resolution:pantsSpec.resolution,bounds:pantsSpec.bounds})});`);
+}
+for(const comp of spec.componentTree){const field=comp.geometryDescriptor.connectedHand;if(!field)continue;const id=comp.id.replace(/[^a-zA-Z0-9_]/g,'_');const re=new RegExp('const (mesh_'+id+'_\\d+Geometry) = endpoint_'+id+'_\\d+[\\s\\S]*?;');const m=src.match(re);if(!m)throw Error('connected arm missing '+comp.id);src=src.replace(m[0],`const ${m[1]} = polygonizeSdf(${JSON.stringify({primitives:[],authoredLofts:field.lofts,authoredVolumes:field.volumes,blendRadius:field.blendRadius,resolution:field.resolution,bounds:field.bounds})});`);}
+// Footwear is not a sharp blade: allow a small authored outsole bevel.
+src=src.replace('ovalHoles?: { cx: number; cy: number; rx: number; ry: number }[] }','ovalHoles?: { cx: number; cy: number; rx: number; ry: number }[]; bevelEnabled?: boolean; bevelSize?: number; bevelThickness?: number; bevelSegments?: number }');
+src=src.replace('    bevelEnabled: false,','    bevelEnabled: profile.bevelEnabled??false, bevelSize:profile.bevelSize??0, bevelThickness:profile.bevelThickness??0, bevelSegments:profile.bevelSegments??1,');
 // Standalone image-driven sculpt constraints; appended before runtime publication.
 const insert=`
   // Head planes are deformed on ONE surface in model coordinates.
@@ -19,12 +39,22 @@ const insert=`
   const hp = headGeom.getAttribute('position');
   for(let i=0;i<hp.count;i++){
     let x=hp.getX(i),y=hp.getY(i),z=hp.getZ(i);
+    if(z<-.02){const round=faceSpec.backRoundness;z-=round.depth*Math.exp(-Math.pow((y-round.centreY)/round.heightRadius,2))*THREE.MathUtils.smoothstep(-z,.02,.075);hp.setXYZ(i,x,y,z);}
     if(z>-.005){const bump=(p:number[])=>p[4]*Math.exp(-Math.pow((x-p[0])/p[2],2)-Math.pow((y-p[1])/p[3],2));
       const gate=THREE.MathUtils.smoothstep(z,-.005,.035);
       z+=gate*(bump(faceSpec.nose)+bump(faceSpec.bridge)+bump(faceSpec.lipRidge)+faceSpec.cheeks.reduce((v:number,p:number[])=>v+bump(p),0));
       hp.setXYZ(i,x,y,z);
     }
   }headGeom.computeVertexNormals();
+  {
+    const spec=meshes['fringe-back'].userData.sculptComponent.geometryDescriptor.rearHair,rings=spec.rings,N=spec.radialSegments,positions:number[]=[],indices:number[]=[];
+    for(let layer=0;layer<2;layer++)for(let r=0;r<rings.length;r++){const [y,w,d,z]=rings[r];for(let j=0;j<=N;j++){const a=j/N*Math.PI,t=layer?spec.thickness:0;positions.push((w-t)*Math.cos(a),y+(r===0?-.003*Math.sin(a*8)**2:0),z-(d-t)*Math.sin(a));}}
+    const stride=N+1,offset=rings.length*stride;
+    for(let r=0;r<rings.length-1;r++)for(let j=0;j<N;j++){const a=r*stride+j,b=a+stride;indices.push(a,a+1,b,a+1,b+1,b);const c=a+offset,d=b+offset;indices.push(c,d,c+1,c+1,d,d+1);}
+    for(let r=0;r<rings.length-1;r++)for(const j of [0,N]){const a=r*stride+j,b=a+stride,c=a+offset,d=b+offset;indices.push(a,b,c,b,d,c);}
+    for(const r of [0,rings.length-1])for(let j=0;j<N;j++){const a=r*stride+j,b=a+offset;indices.push(a,b,a+1,a+1,b,b+1);}
+    const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(positions,3));g.setIndex(indices);g.computeVertexNormals();meshes['fringe-back'].geometry.dispose();meshes['fringe-back'].geometry=g;
+  }
   root.updateMatrixWorld(true);
   const imageHeadIds=IMAGE_HEAD_IDS;
   const hmat=new THREE.Matrix4().makeTranslation(0,1.7,0).multiply(new THREE.Matrix4().makeRotationY(.48)).multiply(new THREE.Matrix4().makeRotationZ(-.105)).multiply(new THREE.Matrix4().makeScale(1.18,1.07,1.1)).multiply(new THREE.Matrix4().makeTranslation(0,-1.718,0));

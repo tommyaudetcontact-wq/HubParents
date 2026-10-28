@@ -6,53 +6,53 @@ import { BokehPass } from 'three/examples/jsm/postprocessing/BokehPass.js';
 import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 
-                                      
-                      
-                       
-                          
-                       
-                             
-                                                      
-  
 
-                                      
-                                        
-                                     
-                                          
-                                     
-                                                      
-  
 
-                                              
 
-                                                   
-                                                                                                               
-                     
-                      
-                                                                     
-                              
-                                       
-                           
-                            
-                                  
-                             
-                                    
-  
-                     
-                       
-                           
-                                                           
-                        
-                         
-                           
-  
-                      
-                                               
-                                                
-                              
-                                                                         
-  
-                                                    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 function sdfSphere(point               , radius        )         {
   return point.length() - radius;
@@ -183,7 +183,14 @@ function polygonizeSdf(descriptor               )                       {
     (bounds.max[1] - bounds.min[1]) / resolution,
     (bounds.max[2] - bounds.min[2]) / resolution,
   );
-  const sample = sdfSample(descriptor);
+  const sample              = descriptor.authoredLofts ? (point) => {
+    const values=descriptor.authoredLofts .map((rings)=>{const y=point.y;let i=0;while(i<rings.length-2&&y>rings[i+1][0])i++;
+      const a=rings[Math.max(0,i-1)],b=rings[i],c=rings[i+1],d=rings[Math.min(rings.length-1,i+2)],t=Math.max(0,Math.min(1,(y-b[0])/(c[0]-b[0])));
+      const f=(k       )=>{const q=.5*(2*b[k]+(-a[k]+c[k])*t+(2*a[k]-5*b[k]+4*c[k]-d[k])*t*t+(-a[k]+3*b[k]-3*c[k]+d[k])*t*t*t);return Math.max(Math.min(b[k],c[k]),Math.min(Math.max(b[k],c[k]),q));};
+      const rx=f(3),rz=f(4),radial=(Math.hypot((point.x-f(1))/rx,(point.z-f(2))/rz)-1)*Math.min(rx,rz);
+      return Math.max(radial,rings[0][0]-y,y-rings[rings.length-1][0]);
+    });for(const v of descriptor.authoredVolumes??[])values.push(sdfPrimitive(point,v));return values.reduce((a,b)=>smin(a,b,descriptor.blendRadius??.014));
+  } : sdfSample(descriptor);
   const scratch = new THREE.Vector3();
 
   // Corner grid: one more corner than cells on each axis.
@@ -352,12 +359,12 @@ function ovalLoop(cx        , cy        , rx        , ry        , seg = 24)     
   return loop;
 }
 
-function buildExtrudeGeometry(profile                                                                                                                                               )                        {
+function buildExtrudeGeometry(profile                                                                                                                                                                                                                                            )                        {
   const holes = [...(profile.holes ?? []), ...((profile.ovalHoles ?? []).map((o) => ovalLoop(o.cx, o.cy, o.rx, o.ry)))];
   const shape = buildExtrudeShape(profile.points, holes);
   return new THREE.ExtrudeGeometry(shape, {
     depth: profile.depth,
-    bevelEnabled: false,
+    bevelEnabled: profile.bevelEnabled??false, bevelSize:profile.bevelSize??0, bevelThickness:profile.bevelThickness??0, bevelSegments:profile.bevelSegments??1,
     steps: 1,
   });
 }
@@ -371,7 +378,7 @@ function buildTubeGeometry(
   return new THREE.TubeGeometry(curve, tubularSegments, path.radius ?? 0.05, path.radialSegments ?? 8, path.closed ?? false);
 }
 
-                                                                                                     
+
 
 // Frames come from PARALLEL TRANSPORT, not from a Frenet frame. A Frenet frame is defined by
 // the curve's normal, which flips sign wherever the path has an inflection or straightens out,
@@ -593,13 +600,13 @@ function periodicValueNoise(u        , v        , seed        , periodX        ,
   return THREE.MathUtils.lerp(THREE.MathUtils.lerp(a, b, tx), THREE.MathUtils.lerp(c, d, tx), ty);
 }
 
-                    
-                    
-                    
-                   
-                   
-                 
-  
+
+
+
+
+
+
+
 
 function surfaceBands(spec                    )                {
   const source = Array.isArray(spec.surfaceFrequencyBands) ? spec.surfaceFrequencyBands : [];
@@ -655,12 +662,12 @@ function mixPalette(colors                            , value        )          
   ];
 }
 
-                                                           
-                          
-                            
-                         
-                             
-  
+
+
+
+
+
+
 
 function parseRgba(value        )                           {
   const match = /rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/.exec(value);
@@ -735,14 +742,14 @@ function createMapTexture(
   return texture;
 }
 
-                             
-                        
-                           
-                        
-                        
-                    
-                                                      
-  
+
+
+
+
+
+
+
+
 
 function referenceMapUrl(spec                    , channel        )                {
   const reference = spec.referencePbr;
@@ -998,14 +1005,14 @@ function createSculptMaterial(id        , spec                    , options     
   return material;
 }
 
-                           
-                       
-                          
-                               
-                 
-                     
-                    
-  
+
+
+
+
+
+
+
+
 
 function readVector3(value         , fallback                          )                {
   if (Array.isArray(value) && value.length === 3 && value.every((item) => typeof item === 'number')) {
@@ -1113,7 +1120,7 @@ export function createRiffNocturneSingleCharacterTestModel(options              
   );
   materialMap["sole"] = createSculptMaterial(
     "sole",
-    {"id": "sole", "name": "sole", "type": "standard", "shaderModel": "MeshStandardMaterial", "baseColor": "#171a22", "color": "#171a22", "roughness": 0.75, "metalness": 0, "textureless": {"declared": true, "evidence": ["reference-isolated.png: broad smooth color regions, no observable pore/grain pattern at target game distance; simplified art requested by user"]}, "albedo": {"dominant": "#171a22", "secondary": ["#171a22"]}, "ambientOcclusion": {"cavityStrength": 0.16, "contactShadowBias": 0.25}, "localOverrides": []},
+    {"id": "sole", "name": "sole", "type": "standard", "shaderModel": "MeshStandardMaterial", "baseColor": "#30343d", "color": "#30343d", "roughness": 0.75, "metalness": 0, "textureless": {"declared": true, "evidence": ["reference-isolated.png: broad smooth color regions, no observable pore/grain pattern at target game distance; simplified art requested by user"]}, "albedo": {"dominant": "#30343d", "secondary": ["#30343d"]}, "ambientOcclusion": {"cavityStrength": 0.16, "contactShadowBias": 0.25}, "localOverrides": []},
     options
   );
   materialMap["ink"] = createSculptMaterial(
@@ -1217,17 +1224,17 @@ export function createRiffNocturneSingleCharacterTestModel(options              
     node_pants_2.position.set(0.0, 0.0, 0.0);
     node_pants_2.rotation.set(0.0, 0.0, 0.0);
   }
-  node_pants_2.userData.sculptComponent = {"id": "pants", "name": "pants", "level": "macro", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "ellipsoid", "topologyClass": "implicit", "topologyRationale": "Continuous trouser volume, smooth union of waist and overlapping thigh, calf contour volumes. All fields use supported primitives; no separate visible leg shells.", "geometryDescriptor": {"sdf": {"primitives": [{"id": "waist", "type": "ellipsoid", "center": [0, 0.973, -0.008], "radii": [0.176, 0.085, 0.106]}, {"id": "hip", "type": "ellipsoid", "center": [0, 0.93, -0.005], "radii": [0.174, 0.092, 0.106]}, {"id": "l-0", "type": "ellipsoid", "center": [0.11261224489795918, 0.82, 0], "radii": [0.097, 0.17, 0.095]}, {"id": "l-1", "type": "ellipsoid", "center": [0.12388775510204081, 0.65, 0], "radii": [0.081, 0.16, 0.082]}, {"id": "l-2", "type": "ellipsoid", "center": [0.14750000000000002, 0.49, 0], "radii": [0.068, 0.1, 0.071]}, {"id": "l-3", "type": "ellipsoid", "center": [0.15678571428571428, 0.35, 0], "radii": [0.073, 0.15, 0.076]}, {"id": "l-4", "type": "ellipsoid", "center": [0.16673469387755102, 0.2, 0], "radii": [0.058, 0.11, 0.061]}, {"id": "r-0", "type": "ellipsoid", "center": [-0.10526530612244897, 0.82, 0], "radii": [0.097, 0.17, 0.095]}, {"id": "r-1", "type": "ellipsoid", "center": [-0.10873469387755101, 0.65, 0], "radii": [0.081, 0.16, 0.082]}, {"id": "r-2", "type": "ellipsoid", "center": [-0.125, 0.49, 0], "radii": [0.068, 0.1, 0.071]}, {"id": "r-3", "type": "ellipsoid", "center": [-0.12785714285714286, 0.35, 0], "radii": [0.073, 0.15, 0.076]}, {"id": "r-4", "type": "ellipsoid", "center": [-0.1309183673469388, 0.2, 0], "radii": [0.058, 0.11, 0.061]}], "operations": [{"id": "pants-join0", "type": "smooth-union", "left": "waist", "right": "hip", "radius": 0.022}, {"id": "pants-join1", "type": "smooth-union", "left": "pants-join0", "right": "l-0", "radius": 0.022}, {"id": "pants-join2", "type": "smooth-union", "left": "pants-join1", "right": "l-1", "radius": 0.022}, {"id": "pants-join3", "type": "smooth-union", "left": "pants-join2", "right": "l-2", "radius": 0.022}, {"id": "pants-join4", "type": "smooth-union", "left": "pants-join3", "right": "l-3", "radius": 0.022}, {"id": "pants-join5", "type": "smooth-union", "left": "pants-join4", "right": "l-4", "radius": 0.022}, {"id": "pants-join6", "type": "smooth-union", "left": "pants-join5", "right": "r-0", "radius": 0.022}, {"id": "pants-join7", "type": "smooth-union", "left": "pants-join6", "right": "r-1", "radius": 0.022}, {"id": "pants-join8", "type": "smooth-union", "left": "pants-join7", "right": "r-2", "radius": 0.022}, {"id": "pants-join9", "type": "smooth-union", "left": "pants-join8", "right": "r-3", "radius": 0.022}, {"id": "pants-join10", "type": "smooth-union", "left": "pants-join9", "right": "r-4", "radius": 0.022}], "resolution": 64, "bounds": {"min": [-0.29, 0.09, -0.16], "max": [0.29, 1.075, 0.16]}}}, "parent": "root", "attachment": null, "dimensions": {"width": 1, "height": 1, "depth": 1, "units": "meters", "confidence": 0.78}, "transform": {"position": [0, 0, 0], "rotation": [0, 0, 0], "scale": [1, 1, 1]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "pants-pelvis", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "pants", "materialLayers": ["pants"], "deformations": [], "joints": [], "seams": [], "localFeatures": [], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(36, 44, 67, 1)", "secondaryAlbedo": "rgba(36, 44, 67, 1)", "materialClass": "fabric", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
+  node_pants_2.userData.sculptComponent = {"id": "pants", "name": "pants", "level": "macro", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "tapered-sweep", "topologyClass": "continuous-sculpt", "topologyRationale": "Smooth branched contour loft for pelvis and two legs; no ellipsoid stack or repeated lobes.", "geometryDescriptor": {"taperedSweep": {"stations": [{"position": [0, 0.835, 0], "rx": 0.045, "rz": 0.075}, {"position": [0, 0.865, -0.006], "rx": 0.08, "rz": 0.15}, {"position": [0, 0.93, -0.006], "rx": 0.105, "rz": 0.177}, {"position": [0, 0.98, -0.006], "rx": 0.108, "rz": 0.18}, {"position": [0, 1.045, -0.006], "rx": 0.101, "rz": 0.17}], "radialSegments": 40, "capEnds": true, "fixedFrame": "horizontal"}, "branchedLoft": {"lofts": [[[0.835, 0, 0, 0.075, 0.045], [0.865, 0, -0.006, 0.15, 0.08], [0.93, 0, -0.006, 0.177, 0.105], [0.98, 0, -0.006, 0.18, 0.108], [1.045, 0, -0.006, 0.17, 0.101]], [[0.155, 0.16971938775510204, -0.004, 0.055, 0.057], [0.2, 0.16673469387755102, -0.004, 0.058, 0.06], [0.3, 0.16010204081632654, -0.004, 0.066, 0.066], [0.4, 0.15346938775510205, -0.004, 0.069, 0.071], [0.5, 0.14683673469387756, -0.004, 0.067, 0.07], [0.6, 0.12720408163265307, -0.004, 0.078, 0.08], [0.75, 0.11725510204081632, -0.004, 0.09, 0.094], [0.88, 0.10863265306122448, -0.004, 0.09, 0.094], [0.93, 0.10531632653061224, -0.004, 0.078, 0.084], [0.97, 0.10266326530612244, -0.004, 0.043, 0.054], [1.005, 0.102, -0.004, 0.004, 0.006]], [[0.155, -0.13183673469387755, -0.004, 0.055, 0.057], [0.2, -0.1309183673469388, -0.004, 0.058, 0.06], [0.3, -0.12887755102040815, -0.004, 0.066, 0.066], [0.4, -0.12683673469387755, -0.004, 0.069, 0.071], [0.5, -0.12479591836734694, -0.004, 0.067, 0.07], [0.6, -0.10975510204081632, -0.004, 0.078, 0.08], [0.75, -0.1066938775510204, -0.004, 0.09, 0.094], [0.88, -0.1040408163265306, -0.004, 0.09, 0.094], [0.93, -0.1030204081632653, -0.004, 0.078, 0.084], [0.97, -0.10220408163265306, -0.004, 0.043, 0.054], [1.005, -0.102, -0.004, 0.004, 0.006]]], "blendRadius": 0.014, "resolution": 40, "bounds": {"min": [-0.29, 0.13, -0.15], "max": [0.29, 1.07, 0.15]}}, "normalStrategy": "Continuous cubic contour field, welded surface-net topology", "authoredRefinement": "refine-emitter.cjs: branchedProfileSample replaces only this surface before rigging; every contour is stored here."}, "parent": "root", "attachment": null, "dimensions": {"width": 1, "height": 1, "depth": 1, "units": "meters", "confidence": 0.78}, "transform": {"position": [0, 0, 0], "rotation": [0, 0, 0], "scale": [1, 1, 1]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "pants-pelvis", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "pants", "materialLayers": ["pants"], "deformations": [], "joints": [], "seams": [], "localFeatures": [], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(36, 44, 67, 1)", "secondaryAlbedo": "rgba(36, 44, 67, 1)", "materialClass": "fabric", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
   node_pants_2.userData.actionProfile = {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "pants-pelvis", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}};
   (nodes["root"] ?? root).add(node_pants_2);
   nodes["pants"] = node_pants_2;
-  const mesh_pants_2Geometry = polygonizeSdf({"primitives": [{"id": "waist", "type": "ellipsoid", "center": [0, 0.973, -0.008], "radii": [0.176, 0.085, 0.106]}, {"id": "hip", "type": "ellipsoid", "center": [0, 0.93, -0.005], "radii": [0.174, 0.092, 0.106]}, {"id": "l-0", "type": "ellipsoid", "center": [0.11261224489795918, 0.82, 0], "radii": [0.097, 0.17, 0.095]}, {"id": "l-1", "type": "ellipsoid", "center": [0.12388775510204081, 0.65, 0], "radii": [0.081, 0.16, 0.082]}, {"id": "l-2", "type": "ellipsoid", "center": [0.14750000000000002, 0.49, 0], "radii": [0.068, 0.1, 0.071]}, {"id": "l-3", "type": "ellipsoid", "center": [0.15678571428571428, 0.35, 0], "radii": [0.073, 0.15, 0.076]}, {"id": "l-4", "type": "ellipsoid", "center": [0.16673469387755102, 0.2, 0], "radii": [0.058, 0.11, 0.061]}, {"id": "r-0", "type": "ellipsoid", "center": [-0.10526530612244897, 0.82, 0], "radii": [0.097, 0.17, 0.095]}, {"id": "r-1", "type": "ellipsoid", "center": [-0.10873469387755101, 0.65, 0], "radii": [0.081, 0.16, 0.082]}, {"id": "r-2", "type": "ellipsoid", "center": [-0.125, 0.49, 0], "radii": [0.068, 0.1, 0.071]}, {"id": "r-3", "type": "ellipsoid", "center": [-0.12785714285714286, 0.35, 0], "radii": [0.073, 0.15, 0.076]}, {"id": "r-4", "type": "ellipsoid", "center": [-0.1309183673469388, 0.2, 0], "radii": [0.058, 0.11, 0.061]}], "operations": [{"id": "pants-join0", "type": "smooth-union", "left": "waist", "right": "hip", "radius": 0.022}, {"id": "pants-join1", "type": "smooth-union", "left": "pants-join0", "right": "l-0", "radius": 0.022}, {"id": "pants-join2", "type": "smooth-union", "left": "pants-join1", "right": "l-1", "radius": 0.022}, {"id": "pants-join3", "type": "smooth-union", "left": "pants-join2", "right": "l-2", "radius": 0.022}, {"id": "pants-join4", "type": "smooth-union", "left": "pants-join3", "right": "l-3", "radius": 0.022}, {"id": "pants-join5", "type": "smooth-union", "left": "pants-join4", "right": "l-4", "radius": 0.022}, {"id": "pants-join6", "type": "smooth-union", "left": "pants-join5", "right": "r-0", "radius": 0.022}, {"id": "pants-join7", "type": "smooth-union", "left": "pants-join6", "right": "r-1", "radius": 0.022}, {"id": "pants-join8", "type": "smooth-union", "left": "pants-join7", "right": "r-2", "radius": 0.022}, {"id": "pants-join9", "type": "smooth-union", "left": "pants-join8", "right": "r-3", "radius": 0.022}, {"id": "pants-join10", "type": "smooth-union", "left": "pants-join9", "right": "r-4", "radius": 0.022}], "resolution": 40, "bounds": {"min": [-0.29, 0.09, -0.16], "max": [0.29, 1.075, 0.16]}});
+  const mesh_pants_2Geometry = polygonizeSdf({"primitives":[],"authoredLofts":[[[0.835,0,0,0.075,0.045],[0.865,0,-0.006,0.15,0.08],[0.93,0,-0.006,0.177,0.105],[0.98,0,-0.006,0.18,0.108],[1.045,0,-0.006,0.17,0.101]],[[0.155,0.16971938775510204,-0.004,0.055,0.057],[0.2,0.16673469387755102,-0.004,0.058,0.06],[0.3,0.16010204081632654,-0.004,0.066,0.066],[0.4,0.15346938775510205,-0.004,0.069,0.071],[0.5,0.14683673469387756,-0.004,0.067,0.07],[0.6,0.12720408163265307,-0.004,0.078,0.08],[0.75,0.11725510204081632,-0.004,0.09,0.094],[0.88,0.10863265306122448,-0.004,0.09,0.094],[0.93,0.10531632653061224,-0.004,0.078,0.084],[0.97,0.10266326530612244,-0.004,0.043,0.054],[1.005,0.102,-0.004,0.004,0.006]],[[0.155,-0.13183673469387755,-0.004,0.055,0.057],[0.2,-0.1309183673469388,-0.004,0.058,0.06],[0.3,-0.12887755102040815,-0.004,0.066,0.066],[0.4,-0.12683673469387755,-0.004,0.069,0.071],[0.5,-0.12479591836734694,-0.004,0.067,0.07],[0.6,-0.10975510204081632,-0.004,0.078,0.08],[0.75,-0.1066938775510204,-0.004,0.09,0.094],[0.88,-0.1040408163265306,-0.004,0.09,0.094],[0.93,-0.1030204081632653,-0.004,0.078,0.084],[0.97,-0.10220408163265306,-0.004,0.043,0.054],[1.005,-0.102,-0.004,0.004,0.006]]],"blendRadius":0.014,"resolution":40,"bounds":{"min":[-0.29,0.13,-0.15],"max":[0.29,1.07,0.15]}});
   if (!endpoint_pants_2) {
     mesh_pants_2Geometry.scale(1.0, 1.0, 1.0);
   }
   const mesh_pants_2 = new THREE.Mesh(
     mesh_pants_2Geometry,
-    createSculptMaterial("pants", {"id": "pants", "name": "pants", "type": "standard", "shaderModel": "MeshStandardMaterial", "baseColor": "#242c43", "color": "#242c43", "roughness": 0.78, "metalness": 0, "textureless": {"declared": true, "evidence": ["reference-isolated.png: broad smooth color regions, no observable pore/grain pattern at target game distance; simplified art requested by user"]}, "albedo": {"dominant": "#242c43", "secondary": ["#242c43"]}, "ambientOcclusion": {"cavityStrength": 0.16, "contactShadowBias": 0.25}, "localOverrides": [{"id": "cuff-shadow", "region": "hem seam", "color": "#1b2334", "roughness": 0.88, "evidenceRefs": ["full-object"]}]}, options, true)
+    materialMap["pants"] ?? new THREE.MeshStandardMaterial({ color: 0x888888 })
   );
   mesh_pants_2.name = "pants";
   if (endpoint_pants_2) {
@@ -1236,7 +1243,7 @@ export function createRiffNocturneSingleCharacterTestModel(options              
   }
   mesh_pants_2.castShadow = options.castShadow ?? true;
   mesh_pants_2.receiveShadow = options.receiveShadow ?? true;
-  mesh_pants_2.userData.sculptComponent = {"id": "pants", "name": "pants", "level": "macro", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "ellipsoid", "topologyClass": "implicit", "topologyRationale": "Continuous trouser volume, smooth union of waist and overlapping thigh, calf contour volumes. All fields use supported primitives; no separate visible leg shells.", "geometryDescriptor": {"sdf": {"primitives": [{"id": "waist", "type": "ellipsoid", "center": [0, 0.973, -0.008], "radii": [0.176, 0.085, 0.106]}, {"id": "hip", "type": "ellipsoid", "center": [0, 0.93, -0.005], "radii": [0.174, 0.092, 0.106]}, {"id": "l-0", "type": "ellipsoid", "center": [0.11261224489795918, 0.82, 0], "radii": [0.097, 0.17, 0.095]}, {"id": "l-1", "type": "ellipsoid", "center": [0.12388775510204081, 0.65, 0], "radii": [0.081, 0.16, 0.082]}, {"id": "l-2", "type": "ellipsoid", "center": [0.14750000000000002, 0.49, 0], "radii": [0.068, 0.1, 0.071]}, {"id": "l-3", "type": "ellipsoid", "center": [0.15678571428571428, 0.35, 0], "radii": [0.073, 0.15, 0.076]}, {"id": "l-4", "type": "ellipsoid", "center": [0.16673469387755102, 0.2, 0], "radii": [0.058, 0.11, 0.061]}, {"id": "r-0", "type": "ellipsoid", "center": [-0.10526530612244897, 0.82, 0], "radii": [0.097, 0.17, 0.095]}, {"id": "r-1", "type": "ellipsoid", "center": [-0.10873469387755101, 0.65, 0], "radii": [0.081, 0.16, 0.082]}, {"id": "r-2", "type": "ellipsoid", "center": [-0.125, 0.49, 0], "radii": [0.068, 0.1, 0.071]}, {"id": "r-3", "type": "ellipsoid", "center": [-0.12785714285714286, 0.35, 0], "radii": [0.073, 0.15, 0.076]}, {"id": "r-4", "type": "ellipsoid", "center": [-0.1309183673469388, 0.2, 0], "radii": [0.058, 0.11, 0.061]}], "operations": [{"id": "pants-join0", "type": "smooth-union", "left": "waist", "right": "hip", "radius": 0.022}, {"id": "pants-join1", "type": "smooth-union", "left": "pants-join0", "right": "l-0", "radius": 0.022}, {"id": "pants-join2", "type": "smooth-union", "left": "pants-join1", "right": "l-1", "radius": 0.022}, {"id": "pants-join3", "type": "smooth-union", "left": "pants-join2", "right": "l-2", "radius": 0.022}, {"id": "pants-join4", "type": "smooth-union", "left": "pants-join3", "right": "l-3", "radius": 0.022}, {"id": "pants-join5", "type": "smooth-union", "left": "pants-join4", "right": "l-4", "radius": 0.022}, {"id": "pants-join6", "type": "smooth-union", "left": "pants-join5", "right": "r-0", "radius": 0.022}, {"id": "pants-join7", "type": "smooth-union", "left": "pants-join6", "right": "r-1", "radius": 0.022}, {"id": "pants-join8", "type": "smooth-union", "left": "pants-join7", "right": "r-2", "radius": 0.022}, {"id": "pants-join9", "type": "smooth-union", "left": "pants-join8", "right": "r-3", "radius": 0.022}, {"id": "pants-join10", "type": "smooth-union", "left": "pants-join9", "right": "r-4", "radius": 0.022}], "resolution": 64, "bounds": {"min": [-0.29, 0.09, -0.16], "max": [0.29, 1.075, 0.16]}}}, "parent": "root", "attachment": null, "dimensions": {"width": 1, "height": 1, "depth": 1, "units": "meters", "confidence": 0.78}, "transform": {"position": [0, 0, 0], "rotation": [0, 0, 0], "scale": [1, 1, 1]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "pants-pelvis", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "pants", "materialLayers": ["pants"], "deformations": [], "joints": [], "seams": [], "localFeatures": [], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(36, 44, 67, 1)", "secondaryAlbedo": "rgba(36, 44, 67, 1)", "materialClass": "fabric", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
+  mesh_pants_2.userData.sculptComponent = {"id": "pants", "name": "pants", "level": "macro", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "tapered-sweep", "topologyClass": "continuous-sculpt", "topologyRationale": "Smooth branched contour loft for pelvis and two legs; no ellipsoid stack or repeated lobes.", "geometryDescriptor": {"taperedSweep": {"stations": [{"position": [0, 0.835, 0], "rx": 0.045, "rz": 0.075}, {"position": [0, 0.865, -0.006], "rx": 0.08, "rz": 0.15}, {"position": [0, 0.93, -0.006], "rx": 0.105, "rz": 0.177}, {"position": [0, 0.98, -0.006], "rx": 0.108, "rz": 0.18}, {"position": [0, 1.045, -0.006], "rx": 0.101, "rz": 0.17}], "radialSegments": 40, "capEnds": true, "fixedFrame": "horizontal"}, "branchedLoft": {"lofts": [[[0.835, 0, 0, 0.075, 0.045], [0.865, 0, -0.006, 0.15, 0.08], [0.93, 0, -0.006, 0.177, 0.105], [0.98, 0, -0.006, 0.18, 0.108], [1.045, 0, -0.006, 0.17, 0.101]], [[0.155, 0.16971938775510204, -0.004, 0.055, 0.057], [0.2, 0.16673469387755102, -0.004, 0.058, 0.06], [0.3, 0.16010204081632654, -0.004, 0.066, 0.066], [0.4, 0.15346938775510205, -0.004, 0.069, 0.071], [0.5, 0.14683673469387756, -0.004, 0.067, 0.07], [0.6, 0.12720408163265307, -0.004, 0.078, 0.08], [0.75, 0.11725510204081632, -0.004, 0.09, 0.094], [0.88, 0.10863265306122448, -0.004, 0.09, 0.094], [0.93, 0.10531632653061224, -0.004, 0.078, 0.084], [0.97, 0.10266326530612244, -0.004, 0.043, 0.054], [1.005, 0.102, -0.004, 0.004, 0.006]], [[0.155, -0.13183673469387755, -0.004, 0.055, 0.057], [0.2, -0.1309183673469388, -0.004, 0.058, 0.06], [0.3, -0.12887755102040815, -0.004, 0.066, 0.066], [0.4, -0.12683673469387755, -0.004, 0.069, 0.071], [0.5, -0.12479591836734694, -0.004, 0.067, 0.07], [0.6, -0.10975510204081632, -0.004, 0.078, 0.08], [0.75, -0.1066938775510204, -0.004, 0.09, 0.094], [0.88, -0.1040408163265306, -0.004, 0.09, 0.094], [0.93, -0.1030204081632653, -0.004, 0.078, 0.084], [0.97, -0.10220408163265306, -0.004, 0.043, 0.054], [1.005, -0.102, -0.004, 0.004, 0.006]]], "blendRadius": 0.014, "resolution": 40, "bounds": {"min": [-0.29, 0.13, -0.15], "max": [0.29, 1.07, 0.15]}}, "normalStrategy": "Continuous cubic contour field, welded surface-net topology", "authoredRefinement": "refine-emitter.cjs: branchedProfileSample replaces only this surface before rigging; every contour is stored here."}, "parent": "root", "attachment": null, "dimensions": {"width": 1, "height": 1, "depth": 1, "units": "meters", "confidence": 0.78}, "transform": {"position": [0, 0, 0], "rotation": [0, 0, 0], "scale": [1, 1, 1]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "pants-pelvis", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "pants", "materialLayers": ["pants"], "deformations": [], "joints": [], "seams": [], "localFeatures": [], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(36, 44, 67, 1)", "secondaryAlbedo": "rgba(36, 44, 67, 1)", "materialClass": "fabric", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
   node_pants_2.add(mesh_pants_2);
   meshes["pants"] = mesh_pants_2;
   colliders["pants"] = {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"};
@@ -1254,13 +1261,11 @@ export function createRiffNocturneSingleCharacterTestModel(options              
     node_arm_l_3.position.set(0.0, 0.0, 0.0);
     node_arm_l_3.rotation.set(0.0, 0.0, 0.0);
   }
-  node_arm_l_3.userData.sculptComponent = {"id": "arm-l", "name": "arm-l", "level": "macro", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "tapered-sweep", "topologyClass": "continuous-sculpt", "topologyRationale": "Contour follows the reference silhouette; depth is inferred and tested in orbit.", "geometryDescriptor": {"taperedSweep": {"stations": [{"position": [0.321, 0.88, 0.003], "rx": 0.029, "rz": 0.032, "twist": 0}, {"position": [0.321, 0.95, 0], "rx": 0.035, "rz": 0.038, "twist": 0}, {"position": [0.317, 1.045, 0], "rx": 0.048, "rz": 0.055, "twist": 0}, {"position": [0.31, 1.105, 0], "rx": 0.043, "rz": 0.048, "twist": 0}, {"position": [0.295, 1.17, 0], "rx": 0.05, "rz": 0.055, "twist": 0}, {"position": [0.276, 1.245, 0], "rx": 0.06, "rz": 0.064, "twist": 0}, {"position": [0.258, 1.31, 0], "rx": 0.062, "rz": 0.062, "twist": 0}], "radialSegments": 24, "capEnds": true}, "normalStrategy": "smooth vertex normals"}, "parent": "root", "attachment": {"parentSocket": "shirt-sleeve", "localStart": [0.258, 1.31, 0], "localEnd": [0.321, 0.88, 0.003], "contactType": "overlap", "embedDepth": 0.025, "gapTolerance": 0.003}, "dimensions": {"width": 1, "height": 1, "depth": 1, "units": "meters", "confidence": 0.78}, "transform": {"position": [0, 0, 0], "rotation": [0, 0, 0], "scale": [1, 1, 1]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "arm-l", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "skin", "materialLayers": ["skin"], "deformations": [], "joints": [], "seams": [], "localFeatures": [], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(213, 154, 115, 1)", "secondaryAlbedo": "rgba(213, 154, 115, 1)", "materialClass": "skin", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
+  node_arm_l_3.userData.sculptComponent = {"id": "arm-l", "name": "arm-l", "level": "macro", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "tapered-sweep", "topologyClass": "continuous-sculpt", "topologyRationale": "Contour follows the reference silhouette; depth is inferred and tested in orbit.", "geometryDescriptor": {"taperedSweep": {"stations": [{"position": [0.321, 0.88, 0.003], "rx": 0.029, "rz": 0.032, "twist": 0}, {"position": [0.321, 0.95, 0], "rx": 0.035, "rz": 0.038, "twist": 0}, {"position": [0.317, 1.045, 0], "rx": 0.048, "rz": 0.055, "twist": 0}, {"position": [0.31, 1.105, 0], "rx": 0.043, "rz": 0.048, "twist": 0}, {"position": [0.295, 1.17, 0], "rx": 0.05, "rz": 0.055, "twist": 0}, {"position": [0.276, 1.245, 0], "rx": 0.06, "rz": 0.064, "twist": 0}, {"position": [0.258, 1.31, 0], "rx": 0.062, "rz": 0.062, "twist": 0}], "radialSegments": 24, "capEnds": true}, "normalStrategy": "smooth vertex normals", "connectedHand": {"lofts": [[[0.84, 0.324, 0.005, 0.034, 0.028], [0.88, 0.321, 0.003, 0.032, 0.029], [0.95, 0.321, 0, 0.038, 0.035], [1.045, 0.317, 0, 0.055, 0.048], [1.105, 0.31, 0, 0.048, 0.043], [1.17, 0.295, 0, 0.055, 0.05], [1.245, 0.276, 0, 0.064, 0.06], [1.31, 0.258, 0, 0.062, 0.062]]], "volumes": [{"id": "palm", "type": "ellipsoid", "center": [0.325, 0.842, 0.005], "radii": [0.044079999999999994, 0.061560000000000004, 0.028319999999999998]}, {"id": "finger0", "type": "ellipsoid", "center": [0.29524, 0.7944800000000001, 0.01], "radii": [0.010439999999999998, 0.03672, 0.012979999999999998]}, {"id": "finger1", "type": "ellipsoid", "center": [0.31508, 0.788, 0.01], "radii": [0.010439999999999998, 0.04104, 0.012979999999999998]}, {"id": "finger2", "type": "ellipsoid", "center": [0.33491999999999994, 0.7944800000000001, 0.01], "radii": [0.010439999999999998, 0.03672, 0.012979999999999998]}, {"id": "finger3", "type": "ellipsoid", "center": [0.35475999999999996, 0.80096, 0.01], "radii": [0.010439999999999998, 0.0324, 0.012979999999999998]}, {"id": "thumb", "type": "ellipsoid", "center": [0.28159999999999996, 0.8398399999999999, 0.027], "radii": [0.01972, 0.03132, 0.01652]}], "blendRadius": 0.004, "resolution": 60, "bounds": {"min": [0.2, 0.72, -0.085], "max": [0.43, 1.34, 0.085]}, "purpose": "One continuous wrist surface; hand enlarged from reference-approved draft"}}, "parent": "root", "attachment": {"parentSocket": "shirt-sleeve", "localStart": [0.258, 1.31, 0], "localEnd": [0.321, 0.88, 0.003], "contactType": "overlap", "embedDepth": 0.025, "gapTolerance": 0.003}, "dimensions": {"width": 1, "height": 1, "depth": 1, "units": "meters", "confidence": 0.78}, "transform": {"position": [0, 0, 0], "rotation": [0, 0, 0], "scale": [1, 1, 1]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "arm-l", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "skin", "materialLayers": ["skin"], "deformations": [], "joints": [], "seams": [], "localFeatures": [], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(213, 154, 115, 1)", "secondaryAlbedo": "rgba(213, 154, 115, 1)", "materialClass": "skin", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
   node_arm_l_3.userData.actionProfile = {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "arm-l", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}};
   (nodes["root"] ?? root).add(node_arm_l_3);
   nodes["arm-l"] = node_arm_l_3;
-  const mesh_arm_l_3Geometry = endpoint_arm_l_3
-    ? new THREE.CylinderGeometry(endpoint_arm_l_3.endRadius, endpoint_arm_l_3.baseRadius, endpoint_arm_l_3.length, 16, 6)
-    : buildTaperedSweepGeometry({"stations": [{"position": [0.321, 0.88, 0.003], "rx": 0.029, "rz": 0.032, "twist": 0}, {"position": [0.321, 0.95, 0], "rx": 0.035, "rz": 0.038, "twist": 0}, {"position": [0.317, 1.045, 0], "rx": 0.048, "rz": 0.055, "twist": 0}, {"position": [0.31, 1.105, 0], "rx": 0.043, "rz": 0.048, "twist": 0}, {"position": [0.295, 1.17, 0], "rx": 0.05, "rz": 0.055, "twist": 0}, {"position": [0.276, 1.245, 0], "rx": 0.06, "rz": 0.064, "twist": 0}, {"position": [0.258, 1.31, 0], "rx": 0.062, "rz": 0.062, "twist": 0}], "radialSegments": 24, "capEnds": true});
+  const mesh_arm_l_3Geometry = polygonizeSdf({"primitives":[],"authoredLofts":[[[0.84,0.324,0.005,0.034,0.028],[0.88,0.321,0.003,0.032,0.029],[0.95,0.321,0,0.038,0.035],[1.045,0.317,0,0.055,0.048],[1.105,0.31,0,0.048,0.043],[1.17,0.295,0,0.055,0.05],[1.245,0.276,0,0.064,0.06],[1.31,0.258,0,0.062,0.062]]],"authoredVolumes":[{"id":"palm","type":"ellipsoid","center":[0.325,0.842,0.005],"radii":[0.044079999999999994,0.061560000000000004,0.028319999999999998]},{"id":"finger0","type":"ellipsoid","center":[0.29524,0.7944800000000001,0.01],"radii":[0.010439999999999998,0.03672,0.012979999999999998]},{"id":"finger1","type":"ellipsoid","center":[0.31508,0.788,0.01],"radii":[0.010439999999999998,0.04104,0.012979999999999998]},{"id":"finger2","type":"ellipsoid","center":[0.33491999999999994,0.7944800000000001,0.01],"radii":[0.010439999999999998,0.03672,0.012979999999999998]},{"id":"finger3","type":"ellipsoid","center":[0.35475999999999996,0.80096,0.01],"radii":[0.010439999999999998,0.0324,0.012979999999999998]},{"id":"thumb","type":"ellipsoid","center":[0.28159999999999996,0.8398399999999999,0.027],"radii":[0.01972,0.03132,0.01652]}],"blendRadius":0.004,"resolution":60,"bounds":{"min":[0.2,0.72,-0.085],"max":[0.43,1.34,0.085]}});
   if (!endpoint_arm_l_3) {
     mesh_arm_l_3Geometry.scale(1.0, 1.0, 1.0);
   }
@@ -1275,1497 +1280,1464 @@ export function createRiffNocturneSingleCharacterTestModel(options              
   }
   mesh_arm_l_3.castShadow = options.castShadow ?? true;
   mesh_arm_l_3.receiveShadow = options.receiveShadow ?? true;
-  mesh_arm_l_3.userData.sculptComponent = {"id": "arm-l", "name": "arm-l", "level": "macro", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "tapered-sweep", "topologyClass": "continuous-sculpt", "topologyRationale": "Contour follows the reference silhouette; depth is inferred and tested in orbit.", "geometryDescriptor": {"taperedSweep": {"stations": [{"position": [0.321, 0.88, 0.003], "rx": 0.029, "rz": 0.032, "twist": 0}, {"position": [0.321, 0.95, 0], "rx": 0.035, "rz": 0.038, "twist": 0}, {"position": [0.317, 1.045, 0], "rx": 0.048, "rz": 0.055, "twist": 0}, {"position": [0.31, 1.105, 0], "rx": 0.043, "rz": 0.048, "twist": 0}, {"position": [0.295, 1.17, 0], "rx": 0.05, "rz": 0.055, "twist": 0}, {"position": [0.276, 1.245, 0], "rx": 0.06, "rz": 0.064, "twist": 0}, {"position": [0.258, 1.31, 0], "rx": 0.062, "rz": 0.062, "twist": 0}], "radialSegments": 24, "capEnds": true}, "normalStrategy": "smooth vertex normals"}, "parent": "root", "attachment": {"parentSocket": "shirt-sleeve", "localStart": [0.258, 1.31, 0], "localEnd": [0.321, 0.88, 0.003], "contactType": "overlap", "embedDepth": 0.025, "gapTolerance": 0.003}, "dimensions": {"width": 1, "height": 1, "depth": 1, "units": "meters", "confidence": 0.78}, "transform": {"position": [0, 0, 0], "rotation": [0, 0, 0], "scale": [1, 1, 1]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "arm-l", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "skin", "materialLayers": ["skin"], "deformations": [], "joints": [], "seams": [], "localFeatures": [], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(213, 154, 115, 1)", "secondaryAlbedo": "rgba(213, 154, 115, 1)", "materialClass": "skin", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
+  mesh_arm_l_3.userData.sculptComponent = {"id": "arm-l", "name": "arm-l", "level": "macro", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "tapered-sweep", "topologyClass": "continuous-sculpt", "topologyRationale": "Contour follows the reference silhouette; depth is inferred and tested in orbit.", "geometryDescriptor": {"taperedSweep": {"stations": [{"position": [0.321, 0.88, 0.003], "rx": 0.029, "rz": 0.032, "twist": 0}, {"position": [0.321, 0.95, 0], "rx": 0.035, "rz": 0.038, "twist": 0}, {"position": [0.317, 1.045, 0], "rx": 0.048, "rz": 0.055, "twist": 0}, {"position": [0.31, 1.105, 0], "rx": 0.043, "rz": 0.048, "twist": 0}, {"position": [0.295, 1.17, 0], "rx": 0.05, "rz": 0.055, "twist": 0}, {"position": [0.276, 1.245, 0], "rx": 0.06, "rz": 0.064, "twist": 0}, {"position": [0.258, 1.31, 0], "rx": 0.062, "rz": 0.062, "twist": 0}], "radialSegments": 24, "capEnds": true}, "normalStrategy": "smooth vertex normals", "connectedHand": {"lofts": [[[0.84, 0.324, 0.005, 0.034, 0.028], [0.88, 0.321, 0.003, 0.032, 0.029], [0.95, 0.321, 0, 0.038, 0.035], [1.045, 0.317, 0, 0.055, 0.048], [1.105, 0.31, 0, 0.048, 0.043], [1.17, 0.295, 0, 0.055, 0.05], [1.245, 0.276, 0, 0.064, 0.06], [1.31, 0.258, 0, 0.062, 0.062]]], "volumes": [{"id": "palm", "type": "ellipsoid", "center": [0.325, 0.842, 0.005], "radii": [0.044079999999999994, 0.061560000000000004, 0.028319999999999998]}, {"id": "finger0", "type": "ellipsoid", "center": [0.29524, 0.7944800000000001, 0.01], "radii": [0.010439999999999998, 0.03672, 0.012979999999999998]}, {"id": "finger1", "type": "ellipsoid", "center": [0.31508, 0.788, 0.01], "radii": [0.010439999999999998, 0.04104, 0.012979999999999998]}, {"id": "finger2", "type": "ellipsoid", "center": [0.33491999999999994, 0.7944800000000001, 0.01], "radii": [0.010439999999999998, 0.03672, 0.012979999999999998]}, {"id": "finger3", "type": "ellipsoid", "center": [0.35475999999999996, 0.80096, 0.01], "radii": [0.010439999999999998, 0.0324, 0.012979999999999998]}, {"id": "thumb", "type": "ellipsoid", "center": [0.28159999999999996, 0.8398399999999999, 0.027], "radii": [0.01972, 0.03132, 0.01652]}], "blendRadius": 0.004, "resolution": 60, "bounds": {"min": [0.2, 0.72, -0.085], "max": [0.43, 1.34, 0.085]}, "purpose": "One continuous wrist surface; hand enlarged from reference-approved draft"}}, "parent": "root", "attachment": {"parentSocket": "shirt-sleeve", "localStart": [0.258, 1.31, 0], "localEnd": [0.321, 0.88, 0.003], "contactType": "overlap", "embedDepth": 0.025, "gapTolerance": 0.003}, "dimensions": {"width": 1, "height": 1, "depth": 1, "units": "meters", "confidence": 0.78}, "transform": {"position": [0, 0, 0], "rotation": [0, 0, 0], "scale": [1, 1, 1]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "arm-l", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "skin", "materialLayers": ["skin"], "deformations": [], "joints": [], "seams": [], "localFeatures": [], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(213, 154, 115, 1)", "secondaryAlbedo": "rgba(213, 154, 115, 1)", "materialClass": "skin", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
   node_arm_l_3.add(mesh_arm_l_3);
   meshes["arm-l"] = mesh_arm_l_3;
   colliders["arm-l"] = {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"};
   destructionGroups["arm-l"] ??= [];
   destructionGroups["arm-l"].push(node_arm_l_3);
 
-  const endpoint_hand_l_4 = makeAttachmentEndpoint(null);
-  const node_hand_l_4 = new THREE.Group();
-  node_hand_l_4.name = "hand-l__pivot";
-  node_hand_l_4.scale.set(1, 1, 1);
-  if (endpoint_hand_l_4) {
-    node_hand_l_4.position.copy(endpoint_hand_l_4.start);
-    node_hand_l_4.rotation.set(0.0, 0.0, 0.0);
+  const endpoint_shoe_l_4 = makeAttachmentEndpoint(null);
+  const node_shoe_l_4 = new THREE.Group();
+  node_shoe_l_4.name = "shoe-l__pivot";
+  node_shoe_l_4.scale.set(1, 1, 1);
+  if (endpoint_shoe_l_4) {
+    node_shoe_l_4.position.copy(endpoint_shoe_l_4.start);
+    node_shoe_l_4.rotation.set(0.0, 0.0, 0.0);
   } else {
-    node_hand_l_4.position.set(0.0, 0.0, 0.0);
-    node_hand_l_4.rotation.set(0.0, 0.0, 0.0);
+    node_shoe_l_4.position.set(0.0, 0.0, 0.0);
+    node_shoe_l_4.rotation.set(0.0, 0.0, 0.0);
   }
-  node_hand_l_4.userData.sculptComponent = {"id": "hand-l", "name": "hand-l", "level": "meso", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "ellipsoid", "topologyClass": "implicit", "topologyRationale": "Continuous sculpt volume made from smoothly blended fields, not independently rendered spheres.", "geometryDescriptor": {"sdf": {"primitives": [{"id": "palm", "type": "ellipsoid", "center": [0.325, 0.842, 0.005], "radii": [0.038, 0.057, 0.024]}, {"id": "finger0", "type": "ellipsoid", "center": [0.301, 0.798, 0.01], "radii": [0.009, 0.034, 0.011]}, {"id": "finger1", "type": "ellipsoid", "center": [0.317, 0.792, 0.01], "radii": [0.009, 0.038, 0.011]}, {"id": "finger2", "type": "ellipsoid", "center": [0.33299999999999996, 0.798, 0.01], "radii": [0.009, 0.034, 0.011]}, {"id": "finger3", "type": "ellipsoid", "center": [0.349, 0.804, 0.01], "radii": [0.009, 0.03, 0.011]}, {"id": "thumb", "type": "ellipsoid", "center": [0.29, 0.84, 0.027], "radii": [0.017, 0.029, 0.014]}], "operations": [{"id": "blend0", "type": "smooth-union", "left": "palm", "right": "finger0", "radius": 0.003}, {"id": "blend1", "type": "smooth-union", "left": "blend0", "right": "finger1", "radius": 0.003}, {"id": "blend2", "type": "smooth-union", "left": "blend1", "right": "finger2", "radius": 0.003}, {"id": "blend3", "type": "smooth-union", "left": "blend2", "right": "finger3", "radius": 0.003}, {"id": "blend4", "type": "smooth-union", "left": "blend3", "right": "thumb", "radius": 0.003}], "bounds": {"min": [0.24799999999999997, 0.729, -0.044], "max": [0.388, 0.924, 0.066]}, "resolution": 40}, "normalStrategy": "smooth vertex normals"}, "parent": "root", "attachment": null, "dimensions": {"width": 1, "height": 1, "depth": 1, "units": "meters", "confidence": 0.78}, "transform": {"position": [0, 0, 0], "rotation": [0, 0, 0], "scale": [1, 1, 1]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "hand-l", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "skin", "materialLayers": ["skin"], "deformations": [], "joints": [], "seams": [], "localFeatures": [], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(213, 154, 115, 1)", "secondaryAlbedo": "rgba(213, 154, 115, 1)", "materialClass": "skin", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
-  node_hand_l_4.userData.actionProfile = {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "hand-l", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}};
-  (nodes["root"] ?? root).add(node_hand_l_4);
-  nodes["hand-l"] = node_hand_l_4;
-  const mesh_hand_l_4Geometry = polygonizeSdf({"primitives": [{"id": "palm", "type": "ellipsoid", "center": [0.325, 0.842, 0.005], "radii": [0.038, 0.057, 0.024]}, {"id": "finger0", "type": "ellipsoid", "center": [0.301, 0.798, 0.01], "radii": [0.009, 0.034, 0.011]}, {"id": "finger1", "type": "ellipsoid", "center": [0.317, 0.792, 0.01], "radii": [0.009, 0.038, 0.011]}, {"id": "finger2", "type": "ellipsoid", "center": [0.33299999999999996, 0.798, 0.01], "radii": [0.009, 0.034, 0.011]}, {"id": "finger3", "type": "ellipsoid", "center": [0.349, 0.804, 0.01], "radii": [0.009, 0.03, 0.011]}, {"id": "thumb", "type": "ellipsoid", "center": [0.29, 0.84, 0.027], "radii": [0.017, 0.029, 0.014]}], "operations": [{"id": "blend0", "type": "smooth-union", "left": "palm", "right": "finger0", "radius": 0.003}, {"id": "blend1", "type": "smooth-union", "left": "blend0", "right": "finger1", "radius": 0.003}, {"id": "blend2", "type": "smooth-union", "left": "blend1", "right": "finger2", "radius": 0.003}, {"id": "blend3", "type": "smooth-union", "left": "blend2", "right": "finger3", "radius": 0.003}, {"id": "blend4", "type": "smooth-union", "left": "blend3", "right": "thumb", "radius": 0.003}], "bounds": {"min": [0.24799999999999997, 0.729, -0.044], "max": [0.388, 0.924, 0.066]}, "resolution": 40});
-  if (!endpoint_hand_l_4) {
-    mesh_hand_l_4Geometry.scale(1.0, 1.0, 1.0);
+  node_shoe_l_4.userData.sculptComponent = {"id": "shoe-l", "name": "shoe-l", "level": "meso", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "tapered-sweep", "topologyClass": "continuous-sculpt", "topologyRationale": "Continuous high-top shoe contour: flat broad toe, shaped instep and ankle collar, replacing rounded overlapping blobs.", "geometryDescriptor": {"taperedSweep": {"stations": [{"position": [0.115, 0.012, 0.035], "rx": 0.024, "rz": 0.015}, {"position": [0.115, 0.025, 0.035], "rx": 0.118, "rz": 0.063}, {"position": [0.115, 0.045, 0.035], "rx": 0.121, "rz": 0.067}, {"position": [0.115, 0.062, 0.03], "rx": 0.115, "rz": 0.064}, {"position": [0.115, 0.08, 0.015], "rx": 0.096, "rz": 0.06}, {"position": [0.115, 0.1, -0.002], "rx": 0.075, "rz": 0.056}, {"position": [0.115, 0.13, -0.018], "rx": 0.059, "rz": 0.054}, {"position": [0.115, 0.17, -0.023], "rx": 0.052, "rz": 0.052}, {"position": [0.115, 0.178, -0.023], "rx": 0.05, "rz": 0.05}], "radialSegments": 28, "capEnds": true, "fixedFrame": "horizontal"}, "normalStrategy": "Smooth horizontal shoe contours; separate outsole", "sourceNotes": "Broad reference toe and dark high-top sneakers, independent shoe module"}, "parent": "root", "attachment": null, "dimensions": {"width": 1, "height": 1, "depth": 1, "units": "meters", "confidence": 0.78}, "transform": {"position": [0, 0, 0], "rotation": [0, 0, 0], "scale": [1, 1, 1]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "shoe-l", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "shoes", "materialLayers": ["shoes"], "deformations": [], "joints": [], "seams": [], "localFeatures": [], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(39, 41, 50, 1)", "secondaryAlbedo": "rgba(39, 41, 50, 1)", "materialClass": "plastic", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
+  node_shoe_l_4.userData.actionProfile = {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "shoe-l", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}};
+  (nodes["root"] ?? root).add(node_shoe_l_4);
+  nodes["shoe-l"] = node_shoe_l_4;
+  const mesh_shoe_l_4Geometry = endpoint_shoe_l_4
+    ? new THREE.CylinderGeometry(endpoint_shoe_l_4.endRadius, endpoint_shoe_l_4.baseRadius, endpoint_shoe_l_4.length, 16, 6)
+    : buildTaperedSweepGeometry({"stations": [{"position": [0.115, 0.012, 0.035], "rx": 0.024, "rz": 0.015}, {"position": [0.115, 0.025, 0.035], "rx": 0.118, "rz": 0.063}, {"position": [0.115, 0.045, 0.035], "rx": 0.121, "rz": 0.067}, {"position": [0.115, 0.062, 0.03], "rx": 0.115, "rz": 0.064}, {"position": [0.115, 0.08, 0.015], "rx": 0.096, "rz": 0.06}, {"position": [0.115, 0.1, -0.002], "rx": 0.075, "rz": 0.056}, {"position": [0.115, 0.13, -0.018], "rx": 0.059, "rz": 0.054}, {"position": [0.115, 0.17, -0.023], "rx": 0.052, "rz": 0.052}, {"position": [0.115, 0.178, -0.023], "rx": 0.05, "rz": 0.05}], "radialSegments": 28, "capEnds": true, "fixedFrame": "horizontal"});
+  if (!endpoint_shoe_l_4) {
+    mesh_shoe_l_4Geometry.scale(1.0, 1.0, 1.0);
   }
-  const mesh_hand_l_4 = new THREE.Mesh(
-    mesh_hand_l_4Geometry,
-    createSculptMaterial("skin", {"id": "skin", "name": "skin", "type": "standard", "shaderModel": "MeshStandardMaterial", "baseColor": "#d59a73", "color": "#d59a73", "roughness": 0.78, "metalness": 0, "textureless": {"declared": true, "evidence": ["reference-isolated.png: broad smooth color regions, no observable pore/grain pattern at target game distance; simplified art requested by user"]}, "albedo": {"dominant": "#d59a73", "secondary": ["#d59a73"]}, "ambientOcclusion": {"cavityStrength": 0.16, "contactShadowBias": 0.25}, "localOverrides": []}, options, true)
+  const mesh_shoe_l_4 = new THREE.Mesh(
+    mesh_shoe_l_4Geometry,
+    materialMap["shoes"] ?? new THREE.MeshStandardMaterial({ color: 0x888888 })
   );
-  mesh_hand_l_4.name = "hand-l";
-  if (endpoint_hand_l_4) {
-    mesh_hand_l_4.position.copy(endpoint_hand_l_4.midpoint);
-    mesh_hand_l_4.quaternion.copy(endpoint_hand_l_4.quaternion);
+  mesh_shoe_l_4.name = "shoe-l";
+  if (endpoint_shoe_l_4) {
+    mesh_shoe_l_4.position.copy(endpoint_shoe_l_4.midpoint);
+    mesh_shoe_l_4.quaternion.copy(endpoint_shoe_l_4.quaternion);
   }
-  mesh_hand_l_4.castShadow = options.castShadow ?? true;
-  mesh_hand_l_4.receiveShadow = options.receiveShadow ?? true;
-  mesh_hand_l_4.userData.sculptComponent = {"id": "hand-l", "name": "hand-l", "level": "meso", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "ellipsoid", "topologyClass": "implicit", "topologyRationale": "Continuous sculpt volume made from smoothly blended fields, not independently rendered spheres.", "geometryDescriptor": {"sdf": {"primitives": [{"id": "palm", "type": "ellipsoid", "center": [0.325, 0.842, 0.005], "radii": [0.038, 0.057, 0.024]}, {"id": "finger0", "type": "ellipsoid", "center": [0.301, 0.798, 0.01], "radii": [0.009, 0.034, 0.011]}, {"id": "finger1", "type": "ellipsoid", "center": [0.317, 0.792, 0.01], "radii": [0.009, 0.038, 0.011]}, {"id": "finger2", "type": "ellipsoid", "center": [0.33299999999999996, 0.798, 0.01], "radii": [0.009, 0.034, 0.011]}, {"id": "finger3", "type": "ellipsoid", "center": [0.349, 0.804, 0.01], "radii": [0.009, 0.03, 0.011]}, {"id": "thumb", "type": "ellipsoid", "center": [0.29, 0.84, 0.027], "radii": [0.017, 0.029, 0.014]}], "operations": [{"id": "blend0", "type": "smooth-union", "left": "palm", "right": "finger0", "radius": 0.003}, {"id": "blend1", "type": "smooth-union", "left": "blend0", "right": "finger1", "radius": 0.003}, {"id": "blend2", "type": "smooth-union", "left": "blend1", "right": "finger2", "radius": 0.003}, {"id": "blend3", "type": "smooth-union", "left": "blend2", "right": "finger3", "radius": 0.003}, {"id": "blend4", "type": "smooth-union", "left": "blend3", "right": "thumb", "radius": 0.003}], "bounds": {"min": [0.24799999999999997, 0.729, -0.044], "max": [0.388, 0.924, 0.066]}, "resolution": 40}, "normalStrategy": "smooth vertex normals"}, "parent": "root", "attachment": null, "dimensions": {"width": 1, "height": 1, "depth": 1, "units": "meters", "confidence": 0.78}, "transform": {"position": [0, 0, 0], "rotation": [0, 0, 0], "scale": [1, 1, 1]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "hand-l", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "skin", "materialLayers": ["skin"], "deformations": [], "joints": [], "seams": [], "localFeatures": [], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(213, 154, 115, 1)", "secondaryAlbedo": "rgba(213, 154, 115, 1)", "materialClass": "skin", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
-  node_hand_l_4.add(mesh_hand_l_4);
-  meshes["hand-l"] = mesh_hand_l_4;
-  colliders["hand-l"] = {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"};
-  destructionGroups["hand-l"] ??= [];
-  destructionGroups["hand-l"].push(node_hand_l_4);
-
-  const endpoint_shoe_l_5 = makeAttachmentEndpoint(null);
-  const node_shoe_l_5 = new THREE.Group();
-  node_shoe_l_5.name = "shoe-l__pivot";
-  node_shoe_l_5.scale.set(1, 1, 1);
-  if (endpoint_shoe_l_5) {
-    node_shoe_l_5.position.copy(endpoint_shoe_l_5.start);
-    node_shoe_l_5.rotation.set(0.0, 0.0, 0.0);
-  } else {
-    node_shoe_l_5.position.set(0.0, 0.0, 0.0);
-    node_shoe_l_5.rotation.set(0.0, 0.0, 0.0);
-  }
-  node_shoe_l_5.userData.sculptComponent = {"id": "shoe-l", "name": "shoe-l", "level": "meso", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "ellipsoid", "topologyClass": "implicit", "topologyRationale": "Continuous sculpt volume made from smoothly blended fields, not independently rendered spheres.", "geometryDescriptor": {"sdf": {"primitives": [{"id": "ankle", "type": "ellipsoid", "center": [0.115, 0.105, -0.003], "radii": [0.065, 0.08, 0.075]}, {"id": "toe", "type": "ellipsoid", "center": [0.115, 0.053, 0.065], "radii": [0.068, 0.05, 0.115]}], "operations": [{"id": "blend0", "type": "smooth-union", "left": "ankle", "right": "toe", "radius": 0.022}], "bounds": {"min": [0.022, -0.022000000000000006, -0.10300000000000001], "max": [0.208, 0.21, 0.205]}, "resolution": 40}, "normalStrategy": "smooth vertex normals"}, "parent": "root", "attachment": null, "dimensions": {"width": 1, "height": 1, "depth": 1, "units": "meters", "confidence": 0.78}, "transform": {"position": [0, 0, 0], "rotation": [0, 0, 0], "scale": [1, 1, 1]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "shoe-l", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "shoes", "materialLayers": ["shoes"], "deformations": [], "joints": [], "seams": [], "localFeatures": [], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(39, 41, 50, 1)", "secondaryAlbedo": "rgba(39, 41, 50, 1)", "materialClass": "plastic", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
-  node_shoe_l_5.userData.actionProfile = {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "shoe-l", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}};
-  (nodes["root"] ?? root).add(node_shoe_l_5);
-  nodes["shoe-l"] = node_shoe_l_5;
-  const mesh_shoe_l_5Geometry = polygonizeSdf({"primitives": [{"id": "ankle", "type": "ellipsoid", "center": [0.115, 0.105, -0.003], "radii": [0.065, 0.08, 0.075]}, {"id": "toe", "type": "ellipsoid", "center": [0.115, 0.053, 0.065], "radii": [0.068, 0.05, 0.115]}], "operations": [{"id": "blend0", "type": "smooth-union", "left": "ankle", "right": "toe", "radius": 0.022}], "bounds": {"min": [0.022, -0.022000000000000006, -0.10300000000000001], "max": [0.208, 0.21, 0.205]}, "resolution": 40});
-  if (!endpoint_shoe_l_5) {
-    mesh_shoe_l_5Geometry.scale(1.0, 1.0, 1.0);
-  }
-  const mesh_shoe_l_5 = new THREE.Mesh(
-    mesh_shoe_l_5Geometry,
-    createSculptMaterial("shoes", {"id": "shoes", "name": "shoes", "type": "standard", "shaderModel": "MeshStandardMaterial", "baseColor": "#272932", "color": "#272932", "roughness": 0.78, "metalness": 0, "textureless": {"declared": true, "evidence": ["reference-isolated.png: broad smooth color regions, no observable pore/grain pattern at target game distance; simplified art requested by user"]}, "albedo": {"dominant": "#272932", "secondary": ["#272932"]}, "ambientOcclusion": {"cavityStrength": 0.16, "contactShadowBias": 0.25}, "localOverrides": []}, options, true)
-  );
-  mesh_shoe_l_5.name = "shoe-l";
-  if (endpoint_shoe_l_5) {
-    mesh_shoe_l_5.position.copy(endpoint_shoe_l_5.midpoint);
-    mesh_shoe_l_5.quaternion.copy(endpoint_shoe_l_5.quaternion);
-  }
-  mesh_shoe_l_5.castShadow = options.castShadow ?? true;
-  mesh_shoe_l_5.receiveShadow = options.receiveShadow ?? true;
-  mesh_shoe_l_5.userData.sculptComponent = {"id": "shoe-l", "name": "shoe-l", "level": "meso", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "ellipsoid", "topologyClass": "implicit", "topologyRationale": "Continuous sculpt volume made from smoothly blended fields, not independently rendered spheres.", "geometryDescriptor": {"sdf": {"primitives": [{"id": "ankle", "type": "ellipsoid", "center": [0.115, 0.105, -0.003], "radii": [0.065, 0.08, 0.075]}, {"id": "toe", "type": "ellipsoid", "center": [0.115, 0.053, 0.065], "radii": [0.068, 0.05, 0.115]}], "operations": [{"id": "blend0", "type": "smooth-union", "left": "ankle", "right": "toe", "radius": 0.022}], "bounds": {"min": [0.022, -0.022000000000000006, -0.10300000000000001], "max": [0.208, 0.21, 0.205]}, "resolution": 40}, "normalStrategy": "smooth vertex normals"}, "parent": "root", "attachment": null, "dimensions": {"width": 1, "height": 1, "depth": 1, "units": "meters", "confidence": 0.78}, "transform": {"position": [0, 0, 0], "rotation": [0, 0, 0], "scale": [1, 1, 1]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "shoe-l", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "shoes", "materialLayers": ["shoes"], "deformations": [], "joints": [], "seams": [], "localFeatures": [], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(39, 41, 50, 1)", "secondaryAlbedo": "rgba(39, 41, 50, 1)", "materialClass": "plastic", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
-  node_shoe_l_5.add(mesh_shoe_l_5);
-  meshes["shoe-l"] = mesh_shoe_l_5;
+  mesh_shoe_l_4.castShadow = options.castShadow ?? true;
+  mesh_shoe_l_4.receiveShadow = options.receiveShadow ?? true;
+  mesh_shoe_l_4.userData.sculptComponent = {"id": "shoe-l", "name": "shoe-l", "level": "meso", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "tapered-sweep", "topologyClass": "continuous-sculpt", "topologyRationale": "Continuous high-top shoe contour: flat broad toe, shaped instep and ankle collar, replacing rounded overlapping blobs.", "geometryDescriptor": {"taperedSweep": {"stations": [{"position": [0.115, 0.012, 0.035], "rx": 0.024, "rz": 0.015}, {"position": [0.115, 0.025, 0.035], "rx": 0.118, "rz": 0.063}, {"position": [0.115, 0.045, 0.035], "rx": 0.121, "rz": 0.067}, {"position": [0.115, 0.062, 0.03], "rx": 0.115, "rz": 0.064}, {"position": [0.115, 0.08, 0.015], "rx": 0.096, "rz": 0.06}, {"position": [0.115, 0.1, -0.002], "rx": 0.075, "rz": 0.056}, {"position": [0.115, 0.13, -0.018], "rx": 0.059, "rz": 0.054}, {"position": [0.115, 0.17, -0.023], "rx": 0.052, "rz": 0.052}, {"position": [0.115, 0.178, -0.023], "rx": 0.05, "rz": 0.05}], "radialSegments": 28, "capEnds": true, "fixedFrame": "horizontal"}, "normalStrategy": "Smooth horizontal shoe contours; separate outsole", "sourceNotes": "Broad reference toe and dark high-top sneakers, independent shoe module"}, "parent": "root", "attachment": null, "dimensions": {"width": 1, "height": 1, "depth": 1, "units": "meters", "confidence": 0.78}, "transform": {"position": [0, 0, 0], "rotation": [0, 0, 0], "scale": [1, 1, 1]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "shoe-l", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "shoes", "materialLayers": ["shoes"], "deformations": [], "joints": [], "seams": [], "localFeatures": [], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(39, 41, 50, 1)", "secondaryAlbedo": "rgba(39, 41, 50, 1)", "materialClass": "plastic", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
+  node_shoe_l_4.add(mesh_shoe_l_4);
+  meshes["shoe-l"] = mesh_shoe_l_4;
   colliders["shoe-l"] = {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"};
   destructionGroups["shoe-l"] ??= [];
-  destructionGroups["shoe-l"].push(node_shoe_l_5);
+  destructionGroups["shoe-l"].push(node_shoe_l_4);
 
-  const endpoint_sole_l_6 = makeAttachmentEndpoint(null);
-  const node_sole_l_6 = new THREE.Group();
-  node_sole_l_6.name = "sole-l__pivot";
-  node_sole_l_6.scale.set(1, 1, 1);
-  if (endpoint_sole_l_6) {
-    node_sole_l_6.position.copy(endpoint_sole_l_6.start);
-    node_sole_l_6.rotation.set(1.5707963267948966, 0.0, 0.0);
+  const endpoint_sole_l_5 = makeAttachmentEndpoint(null);
+  const node_sole_l_5 = new THREE.Group();
+  node_sole_l_5.name = "sole-l__pivot";
+  node_sole_l_5.scale.set(1, 1, 1);
+  if (endpoint_sole_l_5) {
+    node_sole_l_5.position.copy(endpoint_sole_l_5.start);
+    node_sole_l_5.rotation.set(1.5707963267948966, 0.0, 0.0);
   } else {
-    node_sole_l_6.position.set(0.115, 0.025, 0.035);
-    node_sole_l_6.rotation.set(1.5707963267948966, 0.0, 0.0);
+    node_sole_l_5.position.set(0.115, 0.026, 0.035);
+    node_sole_l_5.rotation.set(1.5707963267948966, 0.0, 0.0);
   }
-  node_sole_l_6.userData.sculptComponent = {"id": "sole-l", "name": "sole-l", "level": "micro", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "extrude", "topologyClass": "assembled-solid", "topologyRationale": "Contour follows the reference silhouette; depth is inferred and tested in orbit.", "geometryDescriptor": {"profile2D": {"points": [[-0.42, -0.45], [0.42, -0.45], [0.5, -0.1], [0.47, 0.45], [0.28, 0.5], [-0.28, 0.5], [-0.47, 0.45], [-0.5, -0.1]], "depth": 1, "bevelEnabled": true, "bevelSize": 0.035, "bevelThickness": 0.035, "bevelSegments": 2}}, "parent": "root", "attachment": null, "dimensions": {"width": 0.145, "height": 0.25, "depth": 0.014, "units": "meters", "confidence": 0.78}, "transform": {"position": [0.115, 0.025, 0.035], "rotation": [1.5707963267948966, 0, 0], "scale": [0.145, 0.25, 0.014]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "sole-l", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "sole", "materialLayers": ["sole"], "deformations": [], "joints": [], "seams": [], "localFeatures": [{"id": "shoe-sole", "kind": "contour", "description": "shoe-sole", "evidenceRefs": ["full-object"]}], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(23, 26, 34, 1)", "secondaryAlbedo": "rgba(23, 26, 34, 1)", "materialClass": "plastic", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
-  node_sole_l_6.userData.actionProfile = {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "sole-l", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}};
-  (nodes["root"] ?? root).add(node_sole_l_6);
-  nodes["sole-l"] = node_sole_l_6;
-  const mesh_sole_l_6Geometry = endpoint_sole_l_6
-    ? new THREE.CylinderGeometry(endpoint_sole_l_6.endRadius, endpoint_sole_l_6.baseRadius, endpoint_sole_l_6.length, 16, 6)
-    : buildExtrudeGeometry({"points": [[-0.42, -0.45], [0.42, -0.45], [0.5, -0.1], [0.47, 0.45], [0.28, 0.5], [-0.28, 0.5], [-0.47, 0.45], [-0.5, -0.1]], "depth": 1, "bevelEnabled": true, "bevelSize": 0.035, "bevelThickness": 0.035, "bevelSegments": 2});
-  if (!endpoint_sole_l_6) {
-    mesh_sole_l_6Geometry.scale(0.145, 0.25, 0.014);
+  node_sole_l_5.userData.sculptComponent = {"id": "sole-l", "name": "sole-l", "level": "micro", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "extrude", "topologyClass": "assembled-solid", "topologyRationale": "Contour follows the reference silhouette; depth is inferred and tested in orbit.", "geometryDescriptor": {"profile2D": {"points": [[0.42769999999999997, 0.0], [0.41805772288557197, 0.10232070351484124], [0.405118990788356, 0.1732426103684521], [0.38764313024846664, 0.23404723308381586], [0.36561897893722106, 0.28749781270113345], [0.33914098771003437, 0.33449234126967875], [0.30830758094922195, 0.3753317575473136], [0.2731685825266422, 0.41007447486767296], [0.2336630366055767, 0.4386748333756851], [0.1895037006540926, 0.46104821625249315], [0.13989014717124748, 0.4771054426630118], [0.08248650863723848, 0.4867721764671055], [1.3329809914788902e-13, 0.49], [-0.08248650863723843, 0.4867721764671055], [-0.13989014717124743, 0.4771054426630118], [-0.18950370065409247, 0.4610482162524932], [-0.23366303660557658, 0.43867483337568514], [-0.2731685825266422, 0.41007447486767296], [-0.3083075809492219, 0.3753317575473136], [-0.3391409877100343, 0.3344923412696788], [-0.36561897893722106, 0.28749781270113345], [-0.38764313024846664, 0.23404723308381592], [-0.40511899078835595, 0.17324261036845223], [-0.41805772288557197, 0.10232070351484147], [-0.42769999999998104, 2.819709889450938e-13], [-0.43170741946128943, -0.10232070351484136], [-0.42777079626050174, -0.17324261036845212], [-0.41721532726660004, -0.2340472330838158], [-0.40018194447004646, -0.28749781270113334], [-0.37673188127324614, -0.33449234126967875], [-0.34691443008337425, -0.3753317575473134], [-0.3107594760898541, -0.41007447486767284], [-0.26822600213840225, -0.4386748333756851], [-0.2190758976722258, -0.4610482162524932], [-0.16254195264339313, -0.4771054426630118], [-0.09613620521295588, -0.4867721764671055], [-3.6206545950956876e-13, -0.49], [0.09613620521295567, -0.4867721764671056], [0.162541952643393, -0.4771054426630118], [0.21907589767222568, -0.46104821625249326], [0.2682260021384021, -0.4386748333756851], [0.31075947608985377, -0.4100744748676732], [0.3469144300833741, -0.3753317575473136], [0.3767318812732461, -0.33449234126967886], [0.40018194447004635, -0.28749781270113367], [0.41721532726660004, -0.23404723308381575], [0.42777079626050174, -0.17324261036845254], [0.43170741946128943, -0.10232070351484131]], "depth": 1, "bevelEnabled": true, "bevelSize": 0.018, "bevelThickness": 0.06, "bevelSegments": 2}}, "parent": "root", "attachment": null, "dimensions": {"width": 0.145, "height": 0.25, "depth": 0.014, "units": "meters", "confidence": 0.78}, "transform": {"position": [0.115, 0.026, 0.035], "rotation": [1.5707963267948966, 0, 0], "scale": [0.145, 0.248, 0.013]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "sole-l", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "sole", "materialLayers": ["sole"], "deformations": [], "joints": [], "seams": [], "localFeatures": [{"id": "shoe-sole", "kind": "contour", "description": "shoe-sole", "evidenceRefs": ["full-object"]}], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(23, 26, 34, 1)", "secondaryAlbedo": "rgba(23, 26, 34, 1)", "materialClass": "plastic", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
+  node_sole_l_5.userData.actionProfile = {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "sole-l", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}};
+  (nodes["root"] ?? root).add(node_sole_l_5);
+  nodes["sole-l"] = node_sole_l_5;
+  const mesh_sole_l_5Geometry = endpoint_sole_l_5
+    ? new THREE.CylinderGeometry(endpoint_sole_l_5.endRadius, endpoint_sole_l_5.baseRadius, endpoint_sole_l_5.length, 16, 6)
+    : buildExtrudeGeometry({"points": [[0.42769999999999997, 0.0], [0.41805772288557197, 0.10232070351484124], [0.405118990788356, 0.1732426103684521], [0.38764313024846664, 0.23404723308381586], [0.36561897893722106, 0.28749781270113345], [0.33914098771003437, 0.33449234126967875], [0.30830758094922195, 0.3753317575473136], [0.2731685825266422, 0.41007447486767296], [0.2336630366055767, 0.4386748333756851], [0.1895037006540926, 0.46104821625249315], [0.13989014717124748, 0.4771054426630118], [0.08248650863723848, 0.4867721764671055], [1.3329809914788902e-13, 0.49], [-0.08248650863723843, 0.4867721764671055], [-0.13989014717124743, 0.4771054426630118], [-0.18950370065409247, 0.4610482162524932], [-0.23366303660557658, 0.43867483337568514], [-0.2731685825266422, 0.41007447486767296], [-0.3083075809492219, 0.3753317575473136], [-0.3391409877100343, 0.3344923412696788], [-0.36561897893722106, 0.28749781270113345], [-0.38764313024846664, 0.23404723308381592], [-0.40511899078835595, 0.17324261036845223], [-0.41805772288557197, 0.10232070351484147], [-0.42769999999998104, 2.819709889450938e-13], [-0.43170741946128943, -0.10232070351484136], [-0.42777079626050174, -0.17324261036845212], [-0.41721532726660004, -0.2340472330838158], [-0.40018194447004646, -0.28749781270113334], [-0.37673188127324614, -0.33449234126967875], [-0.34691443008337425, -0.3753317575473134], [-0.3107594760898541, -0.41007447486767284], [-0.26822600213840225, -0.4386748333756851], [-0.2190758976722258, -0.4610482162524932], [-0.16254195264339313, -0.4771054426630118], [-0.09613620521295588, -0.4867721764671055], [-3.6206545950956876e-13, -0.49], [0.09613620521295567, -0.4867721764671056], [0.162541952643393, -0.4771054426630118], [0.21907589767222568, -0.46104821625249326], [0.2682260021384021, -0.4386748333756851], [0.31075947608985377, -0.4100744748676732], [0.3469144300833741, -0.3753317575473136], [0.3767318812732461, -0.33449234126967886], [0.40018194447004635, -0.28749781270113367], [0.41721532726660004, -0.23404723308381575], [0.42777079626050174, -0.17324261036845254], [0.43170741946128943, -0.10232070351484131]], "depth": 1, "bevelEnabled": true, "bevelSize": 0.018, "bevelThickness": 0.06, "bevelSegments": 2});
+  if (!endpoint_sole_l_5) {
+    mesh_sole_l_5Geometry.scale(0.145, 0.248, 0.013);
   }
-  const mesh_sole_l_6 = new THREE.Mesh(
-    mesh_sole_l_6Geometry,
+  const mesh_sole_l_5 = new THREE.Mesh(
+    mesh_sole_l_5Geometry,
     materialMap["sole"] ?? new THREE.MeshStandardMaterial({ color: 0x888888 })
   );
-  mesh_sole_l_6.name = "sole-l";
-  if (endpoint_sole_l_6) {
-    mesh_sole_l_6.position.copy(endpoint_sole_l_6.midpoint);
-    mesh_sole_l_6.quaternion.copy(endpoint_sole_l_6.quaternion);
+  mesh_sole_l_5.name = "sole-l";
+  if (endpoint_sole_l_5) {
+    mesh_sole_l_5.position.copy(endpoint_sole_l_5.midpoint);
+    mesh_sole_l_5.quaternion.copy(endpoint_sole_l_5.quaternion);
   }
-  mesh_sole_l_6.castShadow = options.castShadow ?? true;
-  mesh_sole_l_6.receiveShadow = options.receiveShadow ?? true;
-  mesh_sole_l_6.userData.sculptComponent = {"id": "sole-l", "name": "sole-l", "level": "micro", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "extrude", "topologyClass": "assembled-solid", "topologyRationale": "Contour follows the reference silhouette; depth is inferred and tested in orbit.", "geometryDescriptor": {"profile2D": {"points": [[-0.42, -0.45], [0.42, -0.45], [0.5, -0.1], [0.47, 0.45], [0.28, 0.5], [-0.28, 0.5], [-0.47, 0.45], [-0.5, -0.1]], "depth": 1, "bevelEnabled": true, "bevelSize": 0.035, "bevelThickness": 0.035, "bevelSegments": 2}}, "parent": "root", "attachment": null, "dimensions": {"width": 0.145, "height": 0.25, "depth": 0.014, "units": "meters", "confidence": 0.78}, "transform": {"position": [0.115, 0.025, 0.035], "rotation": [1.5707963267948966, 0, 0], "scale": [0.145, 0.25, 0.014]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "sole-l", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "sole", "materialLayers": ["sole"], "deformations": [], "joints": [], "seams": [], "localFeatures": [{"id": "shoe-sole", "kind": "contour", "description": "shoe-sole", "evidenceRefs": ["full-object"]}], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(23, 26, 34, 1)", "secondaryAlbedo": "rgba(23, 26, 34, 1)", "materialClass": "plastic", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
-  node_sole_l_6.add(mesh_sole_l_6);
-  meshes["sole-l"] = mesh_sole_l_6;
+  mesh_sole_l_5.castShadow = options.castShadow ?? true;
+  mesh_sole_l_5.receiveShadow = options.receiveShadow ?? true;
+  mesh_sole_l_5.userData.sculptComponent = {"id": "sole-l", "name": "sole-l", "level": "micro", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "extrude", "topologyClass": "assembled-solid", "topologyRationale": "Contour follows the reference silhouette; depth is inferred and tested in orbit.", "geometryDescriptor": {"profile2D": {"points": [[0.42769999999999997, 0.0], [0.41805772288557197, 0.10232070351484124], [0.405118990788356, 0.1732426103684521], [0.38764313024846664, 0.23404723308381586], [0.36561897893722106, 0.28749781270113345], [0.33914098771003437, 0.33449234126967875], [0.30830758094922195, 0.3753317575473136], [0.2731685825266422, 0.41007447486767296], [0.2336630366055767, 0.4386748333756851], [0.1895037006540926, 0.46104821625249315], [0.13989014717124748, 0.4771054426630118], [0.08248650863723848, 0.4867721764671055], [1.3329809914788902e-13, 0.49], [-0.08248650863723843, 0.4867721764671055], [-0.13989014717124743, 0.4771054426630118], [-0.18950370065409247, 0.4610482162524932], [-0.23366303660557658, 0.43867483337568514], [-0.2731685825266422, 0.41007447486767296], [-0.3083075809492219, 0.3753317575473136], [-0.3391409877100343, 0.3344923412696788], [-0.36561897893722106, 0.28749781270113345], [-0.38764313024846664, 0.23404723308381592], [-0.40511899078835595, 0.17324261036845223], [-0.41805772288557197, 0.10232070351484147], [-0.42769999999998104, 2.819709889450938e-13], [-0.43170741946128943, -0.10232070351484136], [-0.42777079626050174, -0.17324261036845212], [-0.41721532726660004, -0.2340472330838158], [-0.40018194447004646, -0.28749781270113334], [-0.37673188127324614, -0.33449234126967875], [-0.34691443008337425, -0.3753317575473134], [-0.3107594760898541, -0.41007447486767284], [-0.26822600213840225, -0.4386748333756851], [-0.2190758976722258, -0.4610482162524932], [-0.16254195264339313, -0.4771054426630118], [-0.09613620521295588, -0.4867721764671055], [-3.6206545950956876e-13, -0.49], [0.09613620521295567, -0.4867721764671056], [0.162541952643393, -0.4771054426630118], [0.21907589767222568, -0.46104821625249326], [0.2682260021384021, -0.4386748333756851], [0.31075947608985377, -0.4100744748676732], [0.3469144300833741, -0.3753317575473136], [0.3767318812732461, -0.33449234126967886], [0.40018194447004635, -0.28749781270113367], [0.41721532726660004, -0.23404723308381575], [0.42777079626050174, -0.17324261036845254], [0.43170741946128943, -0.10232070351484131]], "depth": 1, "bevelEnabled": true, "bevelSize": 0.018, "bevelThickness": 0.06, "bevelSegments": 2}}, "parent": "root", "attachment": null, "dimensions": {"width": 0.145, "height": 0.25, "depth": 0.014, "units": "meters", "confidence": 0.78}, "transform": {"position": [0.115, 0.026, 0.035], "rotation": [1.5707963267948966, 0, 0], "scale": [0.145, 0.248, 0.013]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "sole-l", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "sole", "materialLayers": ["sole"], "deformations": [], "joints": [], "seams": [], "localFeatures": [{"id": "shoe-sole", "kind": "contour", "description": "shoe-sole", "evidenceRefs": ["full-object"]}], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(23, 26, 34, 1)", "secondaryAlbedo": "rgba(23, 26, 34, 1)", "materialClass": "plastic", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
+  node_sole_l_5.add(mesh_sole_l_5);
+  meshes["sole-l"] = mesh_sole_l_5;
   colliders["sole-l"] = {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"};
   destructionGroups["sole-l"] ??= [];
-  destructionGroups["sole-l"].push(node_sole_l_6);
+  destructionGroups["sole-l"].push(node_sole_l_5);
 
-  const attachment_lace_l_0_7 = {"parentSocket": "shoe-l", "localStart": [0.07500000000000001, 0.093, 0.11], "localEnd": [0.155, 0.093, 0.09], "contactType": "surface-embed", "embedDepth": 0.002, "gapTolerance": 0.003};
-  const endpoint_lace_l_0_7 = null; // authored tubePath already in model coordinates
-  const node_lace_l_0_7 = new THREE.Group();
-  node_lace_l_0_7.name = "lace-l-0__pivot";
-  node_lace_l_0_7.scale.set(1, 1, 1);
-  if (endpoint_lace_l_0_7) {
-    node_lace_l_0_7.position.copy(endpoint_lace_l_0_7.start);
-    node_lace_l_0_7.rotation.set(0.0, 0.0, 0.0);
+  const attachment_lace_l_0_6 = {"parentSocket": "shoe-l", "localStart": [0.07500000000000001, 0.093, 0.11], "localEnd": [0.155, 0.093, 0.09], "contactType": "surface-embed", "embedDepth": 0.002, "gapTolerance": 0.003};
+  const endpoint_lace_l_0_6 = null; // authored tubePath already in model coordinates
+  const node_lace_l_0_6 = new THREE.Group();
+  node_lace_l_0_6.name = "lace-l-0__pivot";
+  node_lace_l_0_6.scale.set(1, 1, 1);
+  if (endpoint_lace_l_0_6) {
+    node_lace_l_0_6.position.copy(endpoint_lace_l_0_6.start);
+    node_lace_l_0_6.rotation.set(0.0, 0.0, 0.0);
   } else {
-    node_lace_l_0_7.position.set(0.0, 0.0, 0.0);
-    node_lace_l_0_7.rotation.set(0.0, 0.0, 0.0);
+    node_lace_l_0_6.position.set(0.0, 0.0, 0.0);
+    node_lace_l_0_6.rotation.set(0.0, 0.0, 0.0);
   }
-  node_lace_l_0_7.userData.sculptComponent = {"id": "lace-l-0", "name": "lace-l-0", "level": "micro", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "tube", "topologyClass": "assembled-solid", "topologyRationale": "Contour follows the reference silhouette; depth is inferred and tested in orbit.", "geometryDescriptor": {"tubePath": {"points": [[0.07500000000000001, 0.093, 0.11], [0.155, 0.093, 0.09]], "radius": 0.003, "closed": false}, "attachmentGeometry": "authored-path"}, "parent": "root", "attachment": {"parentSocket": "shoe-l", "localStart": [0.07500000000000001, 0.093, 0.11], "localEnd": [0.155, 0.093, 0.09], "contactType": "surface-embed", "embedDepth": 0.002, "gapTolerance": 0.003}, "dimensions": {"width": 1, "height": 1, "depth": 1, "units": "meters", "confidence": 0.78}, "transform": {"position": [0, 0, 0], "rotation": [0, 0, 0], "scale": [1, 1, 1]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "lace-l-0", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "sole", "materialLayers": ["sole"], "deformations": [], "joints": [], "seams": [], "localFeatures": [{"id": "lace-row", "kind": "linework", "description": "lace-row", "evidenceRefs": ["full-object"]}], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(23, 26, 34, 1)", "secondaryAlbedo": "rgba(23, 26, 34, 1)", "materialClass": "plastic", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
-  node_lace_l_0_7.userData.actionProfile = {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "lace-l-0", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}};
-  (nodes["root"] ?? root).add(node_lace_l_0_7);
-  nodes["lace-l-0"] = node_lace_l_0_7;
-  const mesh_lace_l_0_7Geometry = endpoint_lace_l_0_7
-    ? new THREE.CylinderGeometry(endpoint_lace_l_0_7.endRadius, endpoint_lace_l_0_7.baseRadius, endpoint_lace_l_0_7.length, 16, 6)
-    : buildTubeGeometry({"points": [[0.07500000000000001, 0.093, 0.11], [0.155, 0.093, 0.09]], "radius": 0.003, "closed": false});
-  if (!endpoint_lace_l_0_7) {
-    mesh_lace_l_0_7Geometry.scale(1.0, 1.0, 1.0);
+  node_lace_l_0_6.userData.sculptComponent = {"id": "lace-l-0", "name": "lace-l-0", "level": "micro", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "tube", "topologyClass": "assembled-solid", "topologyRationale": "Contour follows the reference silhouette; depth is inferred and tested in orbit.", "geometryDescriptor": {"tubePath": {"points": [[0.07800000000000001, 0.082, 0.098], [0.152, 0.082, 0.09]], "radius": 0.0025, "closed": false}, "attachmentGeometry": "authored-path"}, "parent": "root", "attachment": {"parentSocket": "shoe-l", "localStart": [0.07500000000000001, 0.093, 0.11], "localEnd": [0.155, 0.093, 0.09], "contactType": "surface-embed", "embedDepth": 0.002, "gapTolerance": 0.003}, "dimensions": {"width": 1, "height": 1, "depth": 1, "units": "meters", "confidence": 0.78}, "transform": {"position": [0, 0, 0], "rotation": [0, 0, 0], "scale": [1, 1, 1]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "lace-l-0", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "sole", "materialLayers": ["sole"], "deformations": [], "joints": [], "seams": [], "localFeatures": [{"id": "lace-row", "kind": "linework", "description": "lace-row", "evidenceRefs": ["full-object"]}], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(23, 26, 34, 1)", "secondaryAlbedo": "rgba(23, 26, 34, 1)", "materialClass": "plastic", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
+  node_lace_l_0_6.userData.actionProfile = {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "lace-l-0", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}};
+  (nodes["root"] ?? root).add(node_lace_l_0_6);
+  nodes["lace-l-0"] = node_lace_l_0_6;
+  const mesh_lace_l_0_6Geometry = endpoint_lace_l_0_6
+    ? new THREE.CylinderGeometry(endpoint_lace_l_0_6.endRadius, endpoint_lace_l_0_6.baseRadius, endpoint_lace_l_0_6.length, 16, 6)
+    : buildTubeGeometry({"points": [[0.07800000000000001, 0.082, 0.098], [0.152, 0.082, 0.09]], "radius": 0.0025, "closed": false});
+  if (!endpoint_lace_l_0_6) {
+    mesh_lace_l_0_6Geometry.scale(1.0, 1.0, 1.0);
   }
-  const mesh_lace_l_0_7 = new THREE.Mesh(
-    mesh_lace_l_0_7Geometry,
+  const mesh_lace_l_0_6 = new THREE.Mesh(
+    mesh_lace_l_0_6Geometry,
     materialMap["sole"] ?? new THREE.MeshStandardMaterial({ color: 0x888888 })
   );
-  mesh_lace_l_0_7.name = "lace-l-0";
-  if (endpoint_lace_l_0_7) {
-    mesh_lace_l_0_7.position.copy(endpoint_lace_l_0_7.midpoint);
-    mesh_lace_l_0_7.quaternion.copy(endpoint_lace_l_0_7.quaternion);
+  mesh_lace_l_0_6.name = "lace-l-0";
+  if (endpoint_lace_l_0_6) {
+    mesh_lace_l_0_6.position.copy(endpoint_lace_l_0_6.midpoint);
+    mesh_lace_l_0_6.quaternion.copy(endpoint_lace_l_0_6.quaternion);
   }
-  mesh_lace_l_0_7.castShadow = options.castShadow ?? true;
-  mesh_lace_l_0_7.receiveShadow = options.receiveShadow ?? true;
-  mesh_lace_l_0_7.userData.sculptComponent = {"id": "lace-l-0", "name": "lace-l-0", "level": "micro", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "tube", "topologyClass": "assembled-solid", "topologyRationale": "Contour follows the reference silhouette; depth is inferred and tested in orbit.", "geometryDescriptor": {"tubePath": {"points": [[0.07500000000000001, 0.093, 0.11], [0.155, 0.093, 0.09]], "radius": 0.003, "closed": false}, "attachmentGeometry": "authored-path"}, "parent": "root", "attachment": {"parentSocket": "shoe-l", "localStart": [0.07500000000000001, 0.093, 0.11], "localEnd": [0.155, 0.093, 0.09], "contactType": "surface-embed", "embedDepth": 0.002, "gapTolerance": 0.003}, "dimensions": {"width": 1, "height": 1, "depth": 1, "units": "meters", "confidence": 0.78}, "transform": {"position": [0, 0, 0], "rotation": [0, 0, 0], "scale": [1, 1, 1]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "lace-l-0", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "sole", "materialLayers": ["sole"], "deformations": [], "joints": [], "seams": [], "localFeatures": [{"id": "lace-row", "kind": "linework", "description": "lace-row", "evidenceRefs": ["full-object"]}], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(23, 26, 34, 1)", "secondaryAlbedo": "rgba(23, 26, 34, 1)", "materialClass": "plastic", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
-  node_lace_l_0_7.add(mesh_lace_l_0_7);
-  meshes["lace-l-0"] = mesh_lace_l_0_7;
+  mesh_lace_l_0_6.castShadow = options.castShadow ?? true;
+  mesh_lace_l_0_6.receiveShadow = options.receiveShadow ?? true;
+  mesh_lace_l_0_6.userData.sculptComponent = {"id": "lace-l-0", "name": "lace-l-0", "level": "micro", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "tube", "topologyClass": "assembled-solid", "topologyRationale": "Contour follows the reference silhouette; depth is inferred and tested in orbit.", "geometryDescriptor": {"tubePath": {"points": [[0.07800000000000001, 0.082, 0.098], [0.152, 0.082, 0.09]], "radius": 0.0025, "closed": false}, "attachmentGeometry": "authored-path"}, "parent": "root", "attachment": {"parentSocket": "shoe-l", "localStart": [0.07500000000000001, 0.093, 0.11], "localEnd": [0.155, 0.093, 0.09], "contactType": "surface-embed", "embedDepth": 0.002, "gapTolerance": 0.003}, "dimensions": {"width": 1, "height": 1, "depth": 1, "units": "meters", "confidence": 0.78}, "transform": {"position": [0, 0, 0], "rotation": [0, 0, 0], "scale": [1, 1, 1]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "lace-l-0", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "sole", "materialLayers": ["sole"], "deformations": [], "joints": [], "seams": [], "localFeatures": [{"id": "lace-row", "kind": "linework", "description": "lace-row", "evidenceRefs": ["full-object"]}], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(23, 26, 34, 1)", "secondaryAlbedo": "rgba(23, 26, 34, 1)", "materialClass": "plastic", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
+  node_lace_l_0_6.add(mesh_lace_l_0_6);
+  meshes["lace-l-0"] = mesh_lace_l_0_6;
   colliders["lace-l-0"] = {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"};
   destructionGroups["lace-l-0"] ??= [];
-  destructionGroups["lace-l-0"].push(node_lace_l_0_7);
+  destructionGroups["lace-l-0"].push(node_lace_l_0_6);
 
-  const attachment_lace_l_1_8 = {"parentSocket": "shoe-l", "localStart": [0.07500000000000001, 0.102, 0.086], "localEnd": [0.155, 0.102, 0.066], "contactType": "surface-embed", "embedDepth": 0.002, "gapTolerance": 0.003};
-  const endpoint_lace_l_1_8 = null; // authored tubePath already in model coordinates
-  const node_lace_l_1_8 = new THREE.Group();
-  node_lace_l_1_8.name = "lace-l-1__pivot";
-  node_lace_l_1_8.scale.set(1, 1, 1);
-  if (endpoint_lace_l_1_8) {
-    node_lace_l_1_8.position.copy(endpoint_lace_l_1_8.start);
-    node_lace_l_1_8.rotation.set(0.0, 0.0, 0.0);
+  const attachment_lace_l_1_7 = {"parentSocket": "shoe-l", "localStart": [0.07500000000000001, 0.102, 0.086], "localEnd": [0.155, 0.102, 0.066], "contactType": "surface-embed", "embedDepth": 0.002, "gapTolerance": 0.003};
+  const endpoint_lace_l_1_7 = null; // authored tubePath already in model coordinates
+  const node_lace_l_1_7 = new THREE.Group();
+  node_lace_l_1_7.name = "lace-l-1__pivot";
+  node_lace_l_1_7.scale.set(1, 1, 1);
+  if (endpoint_lace_l_1_7) {
+    node_lace_l_1_7.position.copy(endpoint_lace_l_1_7.start);
+    node_lace_l_1_7.rotation.set(0.0, 0.0, 0.0);
   } else {
-    node_lace_l_1_8.position.set(0.0, 0.0, 0.0);
-    node_lace_l_1_8.rotation.set(0.0, 0.0, 0.0);
+    node_lace_l_1_7.position.set(0.0, 0.0, 0.0);
+    node_lace_l_1_7.rotation.set(0.0, 0.0, 0.0);
   }
-  node_lace_l_1_8.userData.sculptComponent = {"id": "lace-l-1", "name": "lace-l-1", "level": "micro", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "tube", "topologyClass": "assembled-solid", "topologyRationale": "Contour follows the reference silhouette; depth is inferred and tested in orbit.", "geometryDescriptor": {"tubePath": {"points": [[0.07500000000000001, 0.102, 0.086], [0.155, 0.102, 0.066]], "radius": 0.003, "closed": false}, "attachmentGeometry": "authored-path"}, "parent": "root", "attachment": {"parentSocket": "shoe-l", "localStart": [0.07500000000000001, 0.102, 0.086], "localEnd": [0.155, 0.102, 0.066], "contactType": "surface-embed", "embedDepth": 0.002, "gapTolerance": 0.003}, "dimensions": {"width": 1, "height": 1, "depth": 1, "units": "meters", "confidence": 0.78}, "transform": {"position": [0, 0, 0], "rotation": [0, 0, 0], "scale": [1, 1, 1]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "lace-l-1", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "sole", "materialLayers": ["sole"], "deformations": [], "joints": [], "seams": [], "localFeatures": [], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(23, 26, 34, 1)", "secondaryAlbedo": "rgba(23, 26, 34, 1)", "materialClass": "plastic", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
-  node_lace_l_1_8.userData.actionProfile = {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "lace-l-1", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}};
-  (nodes["root"] ?? root).add(node_lace_l_1_8);
-  nodes["lace-l-1"] = node_lace_l_1_8;
-  const mesh_lace_l_1_8Geometry = endpoint_lace_l_1_8
-    ? new THREE.CylinderGeometry(endpoint_lace_l_1_8.endRadius, endpoint_lace_l_1_8.baseRadius, endpoint_lace_l_1_8.length, 16, 6)
-    : buildTubeGeometry({"points": [[0.07500000000000001, 0.102, 0.086], [0.155, 0.102, 0.066]], "radius": 0.003, "closed": false});
-  if (!endpoint_lace_l_1_8) {
-    mesh_lace_l_1_8Geometry.scale(1.0, 1.0, 1.0);
+  node_lace_l_1_7.userData.sculptComponent = {"id": "lace-l-1", "name": "lace-l-1", "level": "micro", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "tube", "topologyClass": "assembled-solid", "topologyRationale": "Contour follows the reference silhouette; depth is inferred and tested in orbit.", "geometryDescriptor": {"tubePath": {"points": [[0.07800000000000001, 0.101, 0.077], [0.152, 0.101, 0.069]], "radius": 0.0025, "closed": false}, "attachmentGeometry": "authored-path"}, "parent": "root", "attachment": {"parentSocket": "shoe-l", "localStart": [0.07500000000000001, 0.102, 0.086], "localEnd": [0.155, 0.102, 0.066], "contactType": "surface-embed", "embedDepth": 0.002, "gapTolerance": 0.003}, "dimensions": {"width": 1, "height": 1, "depth": 1, "units": "meters", "confidence": 0.78}, "transform": {"position": [0, 0, 0], "rotation": [0, 0, 0], "scale": [1, 1, 1]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "lace-l-1", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "sole", "materialLayers": ["sole"], "deformations": [], "joints": [], "seams": [], "localFeatures": [], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(23, 26, 34, 1)", "secondaryAlbedo": "rgba(23, 26, 34, 1)", "materialClass": "plastic", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
+  node_lace_l_1_7.userData.actionProfile = {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "lace-l-1", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}};
+  (nodes["root"] ?? root).add(node_lace_l_1_7);
+  nodes["lace-l-1"] = node_lace_l_1_7;
+  const mesh_lace_l_1_7Geometry = endpoint_lace_l_1_7
+    ? new THREE.CylinderGeometry(endpoint_lace_l_1_7.endRadius, endpoint_lace_l_1_7.baseRadius, endpoint_lace_l_1_7.length, 16, 6)
+    : buildTubeGeometry({"points": [[0.07800000000000001, 0.101, 0.077], [0.152, 0.101, 0.069]], "radius": 0.0025, "closed": false});
+  if (!endpoint_lace_l_1_7) {
+    mesh_lace_l_1_7Geometry.scale(1.0, 1.0, 1.0);
   }
-  const mesh_lace_l_1_8 = new THREE.Mesh(
-    mesh_lace_l_1_8Geometry,
+  const mesh_lace_l_1_7 = new THREE.Mesh(
+    mesh_lace_l_1_7Geometry,
     materialMap["sole"] ?? new THREE.MeshStandardMaterial({ color: 0x888888 })
   );
-  mesh_lace_l_1_8.name = "lace-l-1";
-  if (endpoint_lace_l_1_8) {
-    mesh_lace_l_1_8.position.copy(endpoint_lace_l_1_8.midpoint);
-    mesh_lace_l_1_8.quaternion.copy(endpoint_lace_l_1_8.quaternion);
+  mesh_lace_l_1_7.name = "lace-l-1";
+  if (endpoint_lace_l_1_7) {
+    mesh_lace_l_1_7.position.copy(endpoint_lace_l_1_7.midpoint);
+    mesh_lace_l_1_7.quaternion.copy(endpoint_lace_l_1_7.quaternion);
   }
-  mesh_lace_l_1_8.castShadow = options.castShadow ?? true;
-  mesh_lace_l_1_8.receiveShadow = options.receiveShadow ?? true;
-  mesh_lace_l_1_8.userData.sculptComponent = {"id": "lace-l-1", "name": "lace-l-1", "level": "micro", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "tube", "topologyClass": "assembled-solid", "topologyRationale": "Contour follows the reference silhouette; depth is inferred and tested in orbit.", "geometryDescriptor": {"tubePath": {"points": [[0.07500000000000001, 0.102, 0.086], [0.155, 0.102, 0.066]], "radius": 0.003, "closed": false}, "attachmentGeometry": "authored-path"}, "parent": "root", "attachment": {"parentSocket": "shoe-l", "localStart": [0.07500000000000001, 0.102, 0.086], "localEnd": [0.155, 0.102, 0.066], "contactType": "surface-embed", "embedDepth": 0.002, "gapTolerance": 0.003}, "dimensions": {"width": 1, "height": 1, "depth": 1, "units": "meters", "confidence": 0.78}, "transform": {"position": [0, 0, 0], "rotation": [0, 0, 0], "scale": [1, 1, 1]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "lace-l-1", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "sole", "materialLayers": ["sole"], "deformations": [], "joints": [], "seams": [], "localFeatures": [], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(23, 26, 34, 1)", "secondaryAlbedo": "rgba(23, 26, 34, 1)", "materialClass": "plastic", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
-  node_lace_l_1_8.add(mesh_lace_l_1_8);
-  meshes["lace-l-1"] = mesh_lace_l_1_8;
+  mesh_lace_l_1_7.castShadow = options.castShadow ?? true;
+  mesh_lace_l_1_7.receiveShadow = options.receiveShadow ?? true;
+  mesh_lace_l_1_7.userData.sculptComponent = {"id": "lace-l-1", "name": "lace-l-1", "level": "micro", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "tube", "topologyClass": "assembled-solid", "topologyRationale": "Contour follows the reference silhouette; depth is inferred and tested in orbit.", "geometryDescriptor": {"tubePath": {"points": [[0.07800000000000001, 0.101, 0.077], [0.152, 0.101, 0.069]], "radius": 0.0025, "closed": false}, "attachmentGeometry": "authored-path"}, "parent": "root", "attachment": {"parentSocket": "shoe-l", "localStart": [0.07500000000000001, 0.102, 0.086], "localEnd": [0.155, 0.102, 0.066], "contactType": "surface-embed", "embedDepth": 0.002, "gapTolerance": 0.003}, "dimensions": {"width": 1, "height": 1, "depth": 1, "units": "meters", "confidence": 0.78}, "transform": {"position": [0, 0, 0], "rotation": [0, 0, 0], "scale": [1, 1, 1]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "lace-l-1", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "sole", "materialLayers": ["sole"], "deformations": [], "joints": [], "seams": [], "localFeatures": [], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(23, 26, 34, 1)", "secondaryAlbedo": "rgba(23, 26, 34, 1)", "materialClass": "plastic", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
+  node_lace_l_1_7.add(mesh_lace_l_1_7);
+  meshes["lace-l-1"] = mesh_lace_l_1_7;
   colliders["lace-l-1"] = {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"};
   destructionGroups["lace-l-1"] ??= [];
-  destructionGroups["lace-l-1"].push(node_lace_l_1_8);
+  destructionGroups["lace-l-1"].push(node_lace_l_1_7);
 
-  const attachment_lace_l_2_9 = {"parentSocket": "shoe-l", "localStart": [0.07500000000000001, 0.111, 0.062], "localEnd": [0.155, 0.111, 0.041999999999999996], "contactType": "surface-embed", "embedDepth": 0.002, "gapTolerance": 0.003};
-  const endpoint_lace_l_2_9 = null; // authored tubePath already in model coordinates
-  const node_lace_l_2_9 = new THREE.Group();
-  node_lace_l_2_9.name = "lace-l-2__pivot";
-  node_lace_l_2_9.scale.set(1, 1, 1);
-  if (endpoint_lace_l_2_9) {
-    node_lace_l_2_9.position.copy(endpoint_lace_l_2_9.start);
-    node_lace_l_2_9.rotation.set(0.0, 0.0, 0.0);
+  const attachment_lace_l_2_8 = {"parentSocket": "shoe-l", "localStart": [0.07500000000000001, 0.111, 0.062], "localEnd": [0.155, 0.111, 0.041999999999999996], "contactType": "surface-embed", "embedDepth": 0.002, "gapTolerance": 0.003};
+  const endpoint_lace_l_2_8 = null; // authored tubePath already in model coordinates
+  const node_lace_l_2_8 = new THREE.Group();
+  node_lace_l_2_8.name = "lace-l-2__pivot";
+  node_lace_l_2_8.scale.set(1, 1, 1);
+  if (endpoint_lace_l_2_8) {
+    node_lace_l_2_8.position.copy(endpoint_lace_l_2_8.start);
+    node_lace_l_2_8.rotation.set(0.0, 0.0, 0.0);
   } else {
-    node_lace_l_2_9.position.set(0.0, 0.0, 0.0);
-    node_lace_l_2_9.rotation.set(0.0, 0.0, 0.0);
+    node_lace_l_2_8.position.set(0.0, 0.0, 0.0);
+    node_lace_l_2_8.rotation.set(0.0, 0.0, 0.0);
   }
-  node_lace_l_2_9.userData.sculptComponent = {"id": "lace-l-2", "name": "lace-l-2", "level": "micro", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "tube", "topologyClass": "assembled-solid", "topologyRationale": "Contour follows the reference silhouette; depth is inferred and tested in orbit.", "geometryDescriptor": {"tubePath": {"points": [[0.07500000000000001, 0.111, 0.062], [0.155, 0.111, 0.041999999999999996]], "radius": 0.003, "closed": false}, "attachmentGeometry": "authored-path"}, "parent": "root", "attachment": {"parentSocket": "shoe-l", "localStart": [0.07500000000000001, 0.111, 0.062], "localEnd": [0.155, 0.111, 0.041999999999999996], "contactType": "surface-embed", "embedDepth": 0.002, "gapTolerance": 0.003}, "dimensions": {"width": 1, "height": 1, "depth": 1, "units": "meters", "confidence": 0.78}, "transform": {"position": [0, 0, 0], "rotation": [0, 0, 0], "scale": [1, 1, 1]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "lace-l-2", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "sole", "materialLayers": ["sole"], "deformations": [], "joints": [], "seams": [], "localFeatures": [], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(23, 26, 34, 1)", "secondaryAlbedo": "rgba(23, 26, 34, 1)", "materialClass": "plastic", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
-  node_lace_l_2_9.userData.actionProfile = {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "lace-l-2", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}};
-  (nodes["root"] ?? root).add(node_lace_l_2_9);
-  nodes["lace-l-2"] = node_lace_l_2_9;
-  const mesh_lace_l_2_9Geometry = endpoint_lace_l_2_9
-    ? new THREE.CylinderGeometry(endpoint_lace_l_2_9.endRadius, endpoint_lace_l_2_9.baseRadius, endpoint_lace_l_2_9.length, 16, 6)
-    : buildTubeGeometry({"points": [[0.07500000000000001, 0.111, 0.062], [0.155, 0.111, 0.041999999999999996]], "radius": 0.003, "closed": false});
-  if (!endpoint_lace_l_2_9) {
-    mesh_lace_l_2_9Geometry.scale(1.0, 1.0, 1.0);
+  node_lace_l_2_8.userData.sculptComponent = {"id": "lace-l-2", "name": "lace-l-2", "level": "micro", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "tube", "topologyClass": "assembled-solid", "topologyRationale": "Contour follows the reference silhouette; depth is inferred and tested in orbit.", "geometryDescriptor": {"tubePath": {"points": [[0.07800000000000001, 0.12, 0.056], [0.152, 0.12, 0.048]], "radius": 0.0025, "closed": false}, "attachmentGeometry": "authored-path"}, "parent": "root", "attachment": {"parentSocket": "shoe-l", "localStart": [0.07500000000000001, 0.111, 0.062], "localEnd": [0.155, 0.111, 0.041999999999999996], "contactType": "surface-embed", "embedDepth": 0.002, "gapTolerance": 0.003}, "dimensions": {"width": 1, "height": 1, "depth": 1, "units": "meters", "confidence": 0.78}, "transform": {"position": [0, 0, 0], "rotation": [0, 0, 0], "scale": [1, 1, 1]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "lace-l-2", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "sole", "materialLayers": ["sole"], "deformations": [], "joints": [], "seams": [], "localFeatures": [], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(23, 26, 34, 1)", "secondaryAlbedo": "rgba(23, 26, 34, 1)", "materialClass": "plastic", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
+  node_lace_l_2_8.userData.actionProfile = {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "lace-l-2", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}};
+  (nodes["root"] ?? root).add(node_lace_l_2_8);
+  nodes["lace-l-2"] = node_lace_l_2_8;
+  const mesh_lace_l_2_8Geometry = endpoint_lace_l_2_8
+    ? new THREE.CylinderGeometry(endpoint_lace_l_2_8.endRadius, endpoint_lace_l_2_8.baseRadius, endpoint_lace_l_2_8.length, 16, 6)
+    : buildTubeGeometry({"points": [[0.07800000000000001, 0.12, 0.056], [0.152, 0.12, 0.048]], "radius": 0.0025, "closed": false});
+  if (!endpoint_lace_l_2_8) {
+    mesh_lace_l_2_8Geometry.scale(1.0, 1.0, 1.0);
   }
-  const mesh_lace_l_2_9 = new THREE.Mesh(
-    mesh_lace_l_2_9Geometry,
+  const mesh_lace_l_2_8 = new THREE.Mesh(
+    mesh_lace_l_2_8Geometry,
     materialMap["sole"] ?? new THREE.MeshStandardMaterial({ color: 0x888888 })
   );
-  mesh_lace_l_2_9.name = "lace-l-2";
-  if (endpoint_lace_l_2_9) {
-    mesh_lace_l_2_9.position.copy(endpoint_lace_l_2_9.midpoint);
-    mesh_lace_l_2_9.quaternion.copy(endpoint_lace_l_2_9.quaternion);
+  mesh_lace_l_2_8.name = "lace-l-2";
+  if (endpoint_lace_l_2_8) {
+    mesh_lace_l_2_8.position.copy(endpoint_lace_l_2_8.midpoint);
+    mesh_lace_l_2_8.quaternion.copy(endpoint_lace_l_2_8.quaternion);
   }
-  mesh_lace_l_2_9.castShadow = options.castShadow ?? true;
-  mesh_lace_l_2_9.receiveShadow = options.receiveShadow ?? true;
-  mesh_lace_l_2_9.userData.sculptComponent = {"id": "lace-l-2", "name": "lace-l-2", "level": "micro", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "tube", "topologyClass": "assembled-solid", "topologyRationale": "Contour follows the reference silhouette; depth is inferred and tested in orbit.", "geometryDescriptor": {"tubePath": {"points": [[0.07500000000000001, 0.111, 0.062], [0.155, 0.111, 0.041999999999999996]], "radius": 0.003, "closed": false}, "attachmentGeometry": "authored-path"}, "parent": "root", "attachment": {"parentSocket": "shoe-l", "localStart": [0.07500000000000001, 0.111, 0.062], "localEnd": [0.155, 0.111, 0.041999999999999996], "contactType": "surface-embed", "embedDepth": 0.002, "gapTolerance": 0.003}, "dimensions": {"width": 1, "height": 1, "depth": 1, "units": "meters", "confidence": 0.78}, "transform": {"position": [0, 0, 0], "rotation": [0, 0, 0], "scale": [1, 1, 1]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "lace-l-2", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "sole", "materialLayers": ["sole"], "deformations": [], "joints": [], "seams": [], "localFeatures": [], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(23, 26, 34, 1)", "secondaryAlbedo": "rgba(23, 26, 34, 1)", "materialClass": "plastic", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
-  node_lace_l_2_9.add(mesh_lace_l_2_9);
-  meshes["lace-l-2"] = mesh_lace_l_2_9;
+  mesh_lace_l_2_8.castShadow = options.castShadow ?? true;
+  mesh_lace_l_2_8.receiveShadow = options.receiveShadow ?? true;
+  mesh_lace_l_2_8.userData.sculptComponent = {"id": "lace-l-2", "name": "lace-l-2", "level": "micro", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "tube", "topologyClass": "assembled-solid", "topologyRationale": "Contour follows the reference silhouette; depth is inferred and tested in orbit.", "geometryDescriptor": {"tubePath": {"points": [[0.07800000000000001, 0.12, 0.056], [0.152, 0.12, 0.048]], "radius": 0.0025, "closed": false}, "attachmentGeometry": "authored-path"}, "parent": "root", "attachment": {"parentSocket": "shoe-l", "localStart": [0.07500000000000001, 0.111, 0.062], "localEnd": [0.155, 0.111, 0.041999999999999996], "contactType": "surface-embed", "embedDepth": 0.002, "gapTolerance": 0.003}, "dimensions": {"width": 1, "height": 1, "depth": 1, "units": "meters", "confidence": 0.78}, "transform": {"position": [0, 0, 0], "rotation": [0, 0, 0], "scale": [1, 1, 1]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "lace-l-2", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "sole", "materialLayers": ["sole"], "deformations": [], "joints": [], "seams": [], "localFeatures": [], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(23, 26, 34, 1)", "secondaryAlbedo": "rgba(23, 26, 34, 1)", "materialClass": "plastic", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
+  node_lace_l_2_8.add(mesh_lace_l_2_8);
+  meshes["lace-l-2"] = mesh_lace_l_2_8;
   colliders["lace-l-2"] = {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"};
   destructionGroups["lace-l-2"] ??= [];
-  destructionGroups["lace-l-2"].push(node_lace_l_2_9);
+  destructionGroups["lace-l-2"].push(node_lace_l_2_8);
 
-  const attachment_lace_l_3_10 = {"parentSocket": "shoe-l", "localStart": [0.07500000000000001, 0.12, 0.03799999999999999], "localEnd": [0.155, 0.12, 0.017999999999999988], "contactType": "surface-embed", "embedDepth": 0.002, "gapTolerance": 0.003};
-  const endpoint_lace_l_3_10 = null; // authored tubePath already in model coordinates
-  const node_lace_l_3_10 = new THREE.Group();
-  node_lace_l_3_10.name = "lace-l-3__pivot";
-  node_lace_l_3_10.scale.set(1, 1, 1);
-  if (endpoint_lace_l_3_10) {
-    node_lace_l_3_10.position.copy(endpoint_lace_l_3_10.start);
-    node_lace_l_3_10.rotation.set(0.0, 0.0, 0.0);
+  const attachment_lace_l_3_9 = {"parentSocket": "shoe-l", "localStart": [0.07500000000000001, 0.12, 0.03799999999999999], "localEnd": [0.155, 0.12, 0.017999999999999988], "contactType": "surface-embed", "embedDepth": 0.002, "gapTolerance": 0.003};
+  const endpoint_lace_l_3_9 = null; // authored tubePath already in model coordinates
+  const node_lace_l_3_9 = new THREE.Group();
+  node_lace_l_3_9.name = "lace-l-3__pivot";
+  node_lace_l_3_9.scale.set(1, 1, 1);
+  if (endpoint_lace_l_3_9) {
+    node_lace_l_3_9.position.copy(endpoint_lace_l_3_9.start);
+    node_lace_l_3_9.rotation.set(0.0, 0.0, 0.0);
   } else {
-    node_lace_l_3_10.position.set(0.0, 0.0, 0.0);
-    node_lace_l_3_10.rotation.set(0.0, 0.0, 0.0);
+    node_lace_l_3_9.position.set(0.0, 0.0, 0.0);
+    node_lace_l_3_9.rotation.set(0.0, 0.0, 0.0);
   }
-  node_lace_l_3_10.userData.sculptComponent = {"id": "lace-l-3", "name": "lace-l-3", "level": "micro", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "tube", "topologyClass": "assembled-solid", "topologyRationale": "Contour follows the reference silhouette; depth is inferred and tested in orbit.", "geometryDescriptor": {"tubePath": {"points": [[0.07500000000000001, 0.12, 0.03799999999999999], [0.155, 0.12, 0.017999999999999988]], "radius": 0.003, "closed": false}, "attachmentGeometry": "authored-path"}, "parent": "root", "attachment": {"parentSocket": "shoe-l", "localStart": [0.07500000000000001, 0.12, 0.03799999999999999], "localEnd": [0.155, 0.12, 0.017999999999999988], "contactType": "surface-embed", "embedDepth": 0.002, "gapTolerance": 0.003}, "dimensions": {"width": 1, "height": 1, "depth": 1, "units": "meters", "confidence": 0.78}, "transform": {"position": [0, 0, 0], "rotation": [0, 0, 0], "scale": [1, 1, 1]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "lace-l-3", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "sole", "materialLayers": ["sole"], "deformations": [], "joints": [], "seams": [], "localFeatures": [], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(23, 26, 34, 1)", "secondaryAlbedo": "rgba(23, 26, 34, 1)", "materialClass": "plastic", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
-  node_lace_l_3_10.userData.actionProfile = {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "lace-l-3", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}};
-  (nodes["root"] ?? root).add(node_lace_l_3_10);
-  nodes["lace-l-3"] = node_lace_l_3_10;
-  const mesh_lace_l_3_10Geometry = endpoint_lace_l_3_10
-    ? new THREE.CylinderGeometry(endpoint_lace_l_3_10.endRadius, endpoint_lace_l_3_10.baseRadius, endpoint_lace_l_3_10.length, 16, 6)
-    : buildTubeGeometry({"points": [[0.07500000000000001, 0.12, 0.03799999999999999], [0.155, 0.12, 0.017999999999999988]], "radius": 0.003, "closed": false});
-  if (!endpoint_lace_l_3_10) {
-    mesh_lace_l_3_10Geometry.scale(1.0, 1.0, 1.0);
+  node_lace_l_3_9.userData.sculptComponent = {"id": "lace-l-3", "name": "lace-l-3", "level": "micro", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "tube", "topologyClass": "assembled-solid", "topologyRationale": "Contour follows the reference silhouette; depth is inferred and tested in orbit.", "geometryDescriptor": {"tubePath": {"points": [[0.07800000000000001, 0.139, 0.035], [0.152, 0.139, 0.027000000000000003]], "radius": 0.0025, "closed": false}, "attachmentGeometry": "authored-path"}, "parent": "root", "attachment": {"parentSocket": "shoe-l", "localStart": [0.07500000000000001, 0.12, 0.03799999999999999], "localEnd": [0.155, 0.12, 0.017999999999999988], "contactType": "surface-embed", "embedDepth": 0.002, "gapTolerance": 0.003}, "dimensions": {"width": 1, "height": 1, "depth": 1, "units": "meters", "confidence": 0.78}, "transform": {"position": [0, 0, 0], "rotation": [0, 0, 0], "scale": [1, 1, 1]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "lace-l-3", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "sole", "materialLayers": ["sole"], "deformations": [], "joints": [], "seams": [], "localFeatures": [], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(23, 26, 34, 1)", "secondaryAlbedo": "rgba(23, 26, 34, 1)", "materialClass": "plastic", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
+  node_lace_l_3_9.userData.actionProfile = {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "lace-l-3", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}};
+  (nodes["root"] ?? root).add(node_lace_l_3_9);
+  nodes["lace-l-3"] = node_lace_l_3_9;
+  const mesh_lace_l_3_9Geometry = endpoint_lace_l_3_9
+    ? new THREE.CylinderGeometry(endpoint_lace_l_3_9.endRadius, endpoint_lace_l_3_9.baseRadius, endpoint_lace_l_3_9.length, 16, 6)
+    : buildTubeGeometry({"points": [[0.07800000000000001, 0.139, 0.035], [0.152, 0.139, 0.027000000000000003]], "radius": 0.0025, "closed": false});
+  if (!endpoint_lace_l_3_9) {
+    mesh_lace_l_3_9Geometry.scale(1.0, 1.0, 1.0);
   }
-  const mesh_lace_l_3_10 = new THREE.Mesh(
-    mesh_lace_l_3_10Geometry,
+  const mesh_lace_l_3_9 = new THREE.Mesh(
+    mesh_lace_l_3_9Geometry,
     materialMap["sole"] ?? new THREE.MeshStandardMaterial({ color: 0x888888 })
   );
-  mesh_lace_l_3_10.name = "lace-l-3";
-  if (endpoint_lace_l_3_10) {
-    mesh_lace_l_3_10.position.copy(endpoint_lace_l_3_10.midpoint);
-    mesh_lace_l_3_10.quaternion.copy(endpoint_lace_l_3_10.quaternion);
+  mesh_lace_l_3_9.name = "lace-l-3";
+  if (endpoint_lace_l_3_9) {
+    mesh_lace_l_3_9.position.copy(endpoint_lace_l_3_9.midpoint);
+    mesh_lace_l_3_9.quaternion.copy(endpoint_lace_l_3_9.quaternion);
   }
-  mesh_lace_l_3_10.castShadow = options.castShadow ?? true;
-  mesh_lace_l_3_10.receiveShadow = options.receiveShadow ?? true;
-  mesh_lace_l_3_10.userData.sculptComponent = {"id": "lace-l-3", "name": "lace-l-3", "level": "micro", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "tube", "topologyClass": "assembled-solid", "topologyRationale": "Contour follows the reference silhouette; depth is inferred and tested in orbit.", "geometryDescriptor": {"tubePath": {"points": [[0.07500000000000001, 0.12, 0.03799999999999999], [0.155, 0.12, 0.017999999999999988]], "radius": 0.003, "closed": false}, "attachmentGeometry": "authored-path"}, "parent": "root", "attachment": {"parentSocket": "shoe-l", "localStart": [0.07500000000000001, 0.12, 0.03799999999999999], "localEnd": [0.155, 0.12, 0.017999999999999988], "contactType": "surface-embed", "embedDepth": 0.002, "gapTolerance": 0.003}, "dimensions": {"width": 1, "height": 1, "depth": 1, "units": "meters", "confidence": 0.78}, "transform": {"position": [0, 0, 0], "rotation": [0, 0, 0], "scale": [1, 1, 1]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "lace-l-3", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "sole", "materialLayers": ["sole"], "deformations": [], "joints": [], "seams": [], "localFeatures": [], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(23, 26, 34, 1)", "secondaryAlbedo": "rgba(23, 26, 34, 1)", "materialClass": "plastic", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
-  node_lace_l_3_10.add(mesh_lace_l_3_10);
-  meshes["lace-l-3"] = mesh_lace_l_3_10;
+  mesh_lace_l_3_9.castShadow = options.castShadow ?? true;
+  mesh_lace_l_3_9.receiveShadow = options.receiveShadow ?? true;
+  mesh_lace_l_3_9.userData.sculptComponent = {"id": "lace-l-3", "name": "lace-l-3", "level": "micro", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "tube", "topologyClass": "assembled-solid", "topologyRationale": "Contour follows the reference silhouette; depth is inferred and tested in orbit.", "geometryDescriptor": {"tubePath": {"points": [[0.07800000000000001, 0.139, 0.035], [0.152, 0.139, 0.027000000000000003]], "radius": 0.0025, "closed": false}, "attachmentGeometry": "authored-path"}, "parent": "root", "attachment": {"parentSocket": "shoe-l", "localStart": [0.07500000000000001, 0.12, 0.03799999999999999], "localEnd": [0.155, 0.12, 0.017999999999999988], "contactType": "surface-embed", "embedDepth": 0.002, "gapTolerance": 0.003}, "dimensions": {"width": 1, "height": 1, "depth": 1, "units": "meters", "confidence": 0.78}, "transform": {"position": [0, 0, 0], "rotation": [0, 0, 0], "scale": [1, 1, 1]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "lace-l-3", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "sole", "materialLayers": ["sole"], "deformations": [], "joints": [], "seams": [], "localFeatures": [], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(23, 26, 34, 1)", "secondaryAlbedo": "rgba(23, 26, 34, 1)", "materialClass": "plastic", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
+  node_lace_l_3_9.add(mesh_lace_l_3_9);
+  meshes["lace-l-3"] = mesh_lace_l_3_9;
   colliders["lace-l-3"] = {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"};
   destructionGroups["lace-l-3"] ??= [];
-  destructionGroups["lace-l-3"].push(node_lace_l_3_10);
+  destructionGroups["lace-l-3"].push(node_lace_l_3_9);
 
-  const endpoint_arm_r_11 = makeAttachmentEndpoint(null);
-  const node_arm_r_11 = new THREE.Group();
-  node_arm_r_11.name = "arm-r__pivot";
-  node_arm_r_11.scale.set(1, 1, 1);
-  if (endpoint_arm_r_11) {
-    node_arm_r_11.position.copy(endpoint_arm_r_11.start);
-    node_arm_r_11.rotation.set(0.0, 0.0, 0.0);
+  const endpoint_arm_r_10 = makeAttachmentEndpoint(null);
+  const node_arm_r_10 = new THREE.Group();
+  node_arm_r_10.name = "arm-r__pivot";
+  node_arm_r_10.scale.set(1, 1, 1);
+  if (endpoint_arm_r_10) {
+    node_arm_r_10.position.copy(endpoint_arm_r_10.start);
+    node_arm_r_10.rotation.set(0.0, 0.0, 0.0);
   } else {
-    node_arm_r_11.position.set(0.0, 0.0, 0.0);
-    node_arm_r_11.rotation.set(0.0, 0.0, 0.0);
+    node_arm_r_10.position.set(0.0, 0.0, 0.0);
+    node_arm_r_10.rotation.set(0.0, 0.0, 0.0);
   }
-  node_arm_r_11.userData.sculptComponent = {"id": "arm-r", "name": "arm-r", "level": "macro", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "tapered-sweep", "topologyClass": "continuous-sculpt", "topologyRationale": "Contour follows the reference silhouette; depth is inferred and tested in orbit.", "geometryDescriptor": {"taperedSweep": {"stations": [{"position": [-0.321, 0.88, 0.003], "rx": 0.029, "rz": 0.032, "twist": 0}, {"position": [-0.321, 0.95, 0], "rx": 0.035, "rz": 0.038, "twist": 0}, {"position": [-0.317, 1.045, 0], "rx": 0.048, "rz": 0.055, "twist": 0}, {"position": [-0.31, 1.105, 0], "rx": 0.043, "rz": 0.048, "twist": 0}, {"position": [-0.295, 1.17, 0], "rx": 0.05, "rz": 0.055, "twist": 0}, {"position": [-0.276, 1.245, 0], "rx": 0.06, "rz": 0.064, "twist": 0}, {"position": [-0.258, 1.31, 0], "rx": 0.062, "rz": 0.062, "twist": 0}], "radialSegments": 24, "capEnds": true}, "normalStrategy": "smooth vertex normals"}, "parent": "root", "attachment": {"parentSocket": "shirt-sleeve", "localStart": [-0.258, 1.31, 0], "localEnd": [-0.321, 0.88, 0.003], "contactType": "overlap", "embedDepth": 0.025, "gapTolerance": 0.003}, "dimensions": {"width": 1, "height": 1, "depth": 1, "units": "meters", "confidence": 0.78}, "transform": {"position": [0, 0, 0], "rotation": [0, 0, 0], "scale": [1, 1, 1]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "arm-r", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "skin", "materialLayers": ["skin"], "deformations": [], "joints": [], "seams": [], "localFeatures": [{"id": "angular-tattoo", "kind": "linework", "description": "matte dark tribal chevron and curved bands over forearm", "evidenceRefs": ["full-object"]}], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(213, 154, 115, 1)", "secondaryAlbedo": "rgba(213, 154, 115, 1)", "materialClass": "skin", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
-  node_arm_r_11.userData.actionProfile = {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "arm-r", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}};
-  (nodes["root"] ?? root).add(node_arm_r_11);
-  nodes["arm-r"] = node_arm_r_11;
-  const mesh_arm_r_11Geometry = endpoint_arm_r_11
-    ? new THREE.CylinderGeometry(endpoint_arm_r_11.endRadius, endpoint_arm_r_11.baseRadius, endpoint_arm_r_11.length, 16, 6)
-    : buildTaperedSweepGeometry({"stations": [{"position": [-0.321, 0.88, 0.003], "rx": 0.029, "rz": 0.032, "twist": 0}, {"position": [-0.321, 0.95, 0], "rx": 0.035, "rz": 0.038, "twist": 0}, {"position": [-0.317, 1.045, 0], "rx": 0.048, "rz": 0.055, "twist": 0}, {"position": [-0.31, 1.105, 0], "rx": 0.043, "rz": 0.048, "twist": 0}, {"position": [-0.295, 1.17, 0], "rx": 0.05, "rz": 0.055, "twist": 0}, {"position": [-0.276, 1.245, 0], "rx": 0.06, "rz": 0.064, "twist": 0}, {"position": [-0.258, 1.31, 0], "rx": 0.062, "rz": 0.062, "twist": 0}], "radialSegments": 24, "capEnds": true});
-  if (!endpoint_arm_r_11) {
-    mesh_arm_r_11Geometry.scale(1.0, 1.0, 1.0);
+  node_arm_r_10.userData.sculptComponent = {"id": "arm-r", "name": "arm-r", "level": "macro", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "tapered-sweep", "topologyClass": "continuous-sculpt", "topologyRationale": "Contour follows the reference silhouette; depth is inferred and tested in orbit.", "geometryDescriptor": {"taperedSweep": {"stations": [{"position": [-0.321, 0.88, 0.003], "rx": 0.029, "rz": 0.032, "twist": 0}, {"position": [-0.321, 0.95, 0], "rx": 0.035, "rz": 0.038, "twist": 0}, {"position": [-0.317, 1.045, 0], "rx": 0.048, "rz": 0.055, "twist": 0}, {"position": [-0.31, 1.105, 0], "rx": 0.043, "rz": 0.048, "twist": 0}, {"position": [-0.295, 1.17, 0], "rx": 0.05, "rz": 0.055, "twist": 0}, {"position": [-0.276, 1.245, 0], "rx": 0.06, "rz": 0.064, "twist": 0}, {"position": [-0.258, 1.31, 0], "rx": 0.062, "rz": 0.062, "twist": 0}], "radialSegments": 24, "capEnds": true}, "normalStrategy": "smooth vertex normals", "connectedHand": {"lofts": [[[0.84, -0.324, 0.005, 0.034, 0.028], [0.88, -0.321, 0.003, 0.032, 0.029], [0.95, -0.321, 0, 0.038, 0.035], [1.045, -0.317, 0, 0.055, 0.048], [1.105, -0.31, 0, 0.048, 0.043], [1.17, -0.295, 0, 0.055, 0.05], [1.245, -0.276, 0, 0.064, 0.06], [1.31, -0.258, 0, 0.062, 0.062]]], "volumes": [{"id": "palm", "type": "ellipsoid", "center": [-0.325, 0.842, 0.005], "radii": [0.044079999999999994, 0.061560000000000004, 0.028319999999999998]}, {"id": "finger0", "type": "ellipsoid", "center": [-0.29524, 0.7944800000000001, 0.01], "radii": [0.010439999999999998, 0.03672, 0.012979999999999998]}, {"id": "finger1", "type": "ellipsoid", "center": [-0.31508, 0.788, 0.01], "radii": [0.010439999999999998, 0.04104, 0.012979999999999998]}, {"id": "finger2", "type": "ellipsoid", "center": [-0.33491999999999994, 0.7944800000000001, 0.01], "radii": [0.010439999999999998, 0.03672, 0.012979999999999998]}, {"id": "finger3", "type": "ellipsoid", "center": [-0.35475999999999996, 0.80096, 0.01], "radii": [0.010439999999999998, 0.0324, 0.012979999999999998]}, {"id": "thumb", "type": "ellipsoid", "center": [-0.28159999999999996, 0.8398399999999999, 0.027], "radii": [0.01972, 0.03132, 0.01652]}], "blendRadius": 0.004, "resolution": 60, "bounds": {"min": [-0.43, 0.72, -0.085], "max": [-0.2, 1.34, 0.085]}, "purpose": "One continuous wrist surface; hand enlarged from reference-approved draft"}}, "parent": "root", "attachment": {"parentSocket": "shirt-sleeve", "localStart": [-0.258, 1.31, 0], "localEnd": [-0.321, 0.88, 0.003], "contactType": "overlap", "embedDepth": 0.025, "gapTolerance": 0.003}, "dimensions": {"width": 1, "height": 1, "depth": 1, "units": "meters", "confidence": 0.78}, "transform": {"position": [0, 0, 0], "rotation": [0, 0, 0], "scale": [1, 1, 1]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "arm-r", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "skin", "materialLayers": ["skin"], "deformations": [], "joints": [], "seams": [], "localFeatures": [{"id": "angular-tattoo", "kind": "linework", "description": "matte dark tribal chevron and curved bands over forearm", "evidenceRefs": ["full-object"]}], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(213, 154, 115, 1)", "secondaryAlbedo": "rgba(213, 154, 115, 1)", "materialClass": "skin", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
+  node_arm_r_10.userData.actionProfile = {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "arm-r", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}};
+  (nodes["root"] ?? root).add(node_arm_r_10);
+  nodes["arm-r"] = node_arm_r_10;
+  const mesh_arm_r_10Geometry = polygonizeSdf({"primitives":[],"authoredLofts":[[[0.84,-0.324,0.005,0.034,0.028],[0.88,-0.321,0.003,0.032,0.029],[0.95,-0.321,0,0.038,0.035],[1.045,-0.317,0,0.055,0.048],[1.105,-0.31,0,0.048,0.043],[1.17,-0.295,0,0.055,0.05],[1.245,-0.276,0,0.064,0.06],[1.31,-0.258,0,0.062,0.062]]],"authoredVolumes":[{"id":"palm","type":"ellipsoid","center":[-0.325,0.842,0.005],"radii":[0.044079999999999994,0.061560000000000004,0.028319999999999998]},{"id":"finger0","type":"ellipsoid","center":[-0.29524,0.7944800000000001,0.01],"radii":[0.010439999999999998,0.03672,0.012979999999999998]},{"id":"finger1","type":"ellipsoid","center":[-0.31508,0.788,0.01],"radii":[0.010439999999999998,0.04104,0.012979999999999998]},{"id":"finger2","type":"ellipsoid","center":[-0.33491999999999994,0.7944800000000001,0.01],"radii":[0.010439999999999998,0.03672,0.012979999999999998]},{"id":"finger3","type":"ellipsoid","center":[-0.35475999999999996,0.80096,0.01],"radii":[0.010439999999999998,0.0324,0.012979999999999998]},{"id":"thumb","type":"ellipsoid","center":[-0.28159999999999996,0.8398399999999999,0.027],"radii":[0.01972,0.03132,0.01652]}],"blendRadius":0.004,"resolution":60,"bounds":{"min":[-0.43,0.72,-0.085],"max":[-0.2,1.34,0.085]}});
+  if (!endpoint_arm_r_10) {
+    mesh_arm_r_10Geometry.scale(1.0, 1.0, 1.0);
   }
-  const mesh_arm_r_11 = new THREE.Mesh(
-    mesh_arm_r_11Geometry,
+  const mesh_arm_r_10 = new THREE.Mesh(
+    mesh_arm_r_10Geometry,
     materialMap["skin"] ?? new THREE.MeshStandardMaterial({ color: 0x888888 })
   );
-  mesh_arm_r_11.name = "arm-r";
-  if (endpoint_arm_r_11) {
-    mesh_arm_r_11.position.copy(endpoint_arm_r_11.midpoint);
-    mesh_arm_r_11.quaternion.copy(endpoint_arm_r_11.quaternion);
+  mesh_arm_r_10.name = "arm-r";
+  if (endpoint_arm_r_10) {
+    mesh_arm_r_10.position.copy(endpoint_arm_r_10.midpoint);
+    mesh_arm_r_10.quaternion.copy(endpoint_arm_r_10.quaternion);
   }
-  mesh_arm_r_11.castShadow = options.castShadow ?? true;
-  mesh_arm_r_11.receiveShadow = options.receiveShadow ?? true;
-  mesh_arm_r_11.userData.sculptComponent = {"id": "arm-r", "name": "arm-r", "level": "macro", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "tapered-sweep", "topologyClass": "continuous-sculpt", "topologyRationale": "Contour follows the reference silhouette; depth is inferred and tested in orbit.", "geometryDescriptor": {"taperedSweep": {"stations": [{"position": [-0.321, 0.88, 0.003], "rx": 0.029, "rz": 0.032, "twist": 0}, {"position": [-0.321, 0.95, 0], "rx": 0.035, "rz": 0.038, "twist": 0}, {"position": [-0.317, 1.045, 0], "rx": 0.048, "rz": 0.055, "twist": 0}, {"position": [-0.31, 1.105, 0], "rx": 0.043, "rz": 0.048, "twist": 0}, {"position": [-0.295, 1.17, 0], "rx": 0.05, "rz": 0.055, "twist": 0}, {"position": [-0.276, 1.245, 0], "rx": 0.06, "rz": 0.064, "twist": 0}, {"position": [-0.258, 1.31, 0], "rx": 0.062, "rz": 0.062, "twist": 0}], "radialSegments": 24, "capEnds": true}, "normalStrategy": "smooth vertex normals"}, "parent": "root", "attachment": {"parentSocket": "shirt-sleeve", "localStart": [-0.258, 1.31, 0], "localEnd": [-0.321, 0.88, 0.003], "contactType": "overlap", "embedDepth": 0.025, "gapTolerance": 0.003}, "dimensions": {"width": 1, "height": 1, "depth": 1, "units": "meters", "confidence": 0.78}, "transform": {"position": [0, 0, 0], "rotation": [0, 0, 0], "scale": [1, 1, 1]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "arm-r", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "skin", "materialLayers": ["skin"], "deformations": [], "joints": [], "seams": [], "localFeatures": [{"id": "angular-tattoo", "kind": "linework", "description": "matte dark tribal chevron and curved bands over forearm", "evidenceRefs": ["full-object"]}], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(213, 154, 115, 1)", "secondaryAlbedo": "rgba(213, 154, 115, 1)", "materialClass": "skin", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
-  node_arm_r_11.add(mesh_arm_r_11);
-  meshes["arm-r"] = mesh_arm_r_11;
+  mesh_arm_r_10.castShadow = options.castShadow ?? true;
+  mesh_arm_r_10.receiveShadow = options.receiveShadow ?? true;
+  mesh_arm_r_10.userData.sculptComponent = {"id": "arm-r", "name": "arm-r", "level": "macro", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "tapered-sweep", "topologyClass": "continuous-sculpt", "topologyRationale": "Contour follows the reference silhouette; depth is inferred and tested in orbit.", "geometryDescriptor": {"taperedSweep": {"stations": [{"position": [-0.321, 0.88, 0.003], "rx": 0.029, "rz": 0.032, "twist": 0}, {"position": [-0.321, 0.95, 0], "rx": 0.035, "rz": 0.038, "twist": 0}, {"position": [-0.317, 1.045, 0], "rx": 0.048, "rz": 0.055, "twist": 0}, {"position": [-0.31, 1.105, 0], "rx": 0.043, "rz": 0.048, "twist": 0}, {"position": [-0.295, 1.17, 0], "rx": 0.05, "rz": 0.055, "twist": 0}, {"position": [-0.276, 1.245, 0], "rx": 0.06, "rz": 0.064, "twist": 0}, {"position": [-0.258, 1.31, 0], "rx": 0.062, "rz": 0.062, "twist": 0}], "radialSegments": 24, "capEnds": true}, "normalStrategy": "smooth vertex normals", "connectedHand": {"lofts": [[[0.84, -0.324, 0.005, 0.034, 0.028], [0.88, -0.321, 0.003, 0.032, 0.029], [0.95, -0.321, 0, 0.038, 0.035], [1.045, -0.317, 0, 0.055, 0.048], [1.105, -0.31, 0, 0.048, 0.043], [1.17, -0.295, 0, 0.055, 0.05], [1.245, -0.276, 0, 0.064, 0.06], [1.31, -0.258, 0, 0.062, 0.062]]], "volumes": [{"id": "palm", "type": "ellipsoid", "center": [-0.325, 0.842, 0.005], "radii": [0.044079999999999994, 0.061560000000000004, 0.028319999999999998]}, {"id": "finger0", "type": "ellipsoid", "center": [-0.29524, 0.7944800000000001, 0.01], "radii": [0.010439999999999998, 0.03672, 0.012979999999999998]}, {"id": "finger1", "type": "ellipsoid", "center": [-0.31508, 0.788, 0.01], "radii": [0.010439999999999998, 0.04104, 0.012979999999999998]}, {"id": "finger2", "type": "ellipsoid", "center": [-0.33491999999999994, 0.7944800000000001, 0.01], "radii": [0.010439999999999998, 0.03672, 0.012979999999999998]}, {"id": "finger3", "type": "ellipsoid", "center": [-0.35475999999999996, 0.80096, 0.01], "radii": [0.010439999999999998, 0.0324, 0.012979999999999998]}, {"id": "thumb", "type": "ellipsoid", "center": [-0.28159999999999996, 0.8398399999999999, 0.027], "radii": [0.01972, 0.03132, 0.01652]}], "blendRadius": 0.004, "resolution": 60, "bounds": {"min": [-0.43, 0.72, -0.085], "max": [-0.2, 1.34, 0.085]}, "purpose": "One continuous wrist surface; hand enlarged from reference-approved draft"}}, "parent": "root", "attachment": {"parentSocket": "shirt-sleeve", "localStart": [-0.258, 1.31, 0], "localEnd": [-0.321, 0.88, 0.003], "contactType": "overlap", "embedDepth": 0.025, "gapTolerance": 0.003}, "dimensions": {"width": 1, "height": 1, "depth": 1, "units": "meters", "confidence": 0.78}, "transform": {"position": [0, 0, 0], "rotation": [0, 0, 0], "scale": [1, 1, 1]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "arm-r", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "skin", "materialLayers": ["skin"], "deformations": [], "joints": [], "seams": [], "localFeatures": [{"id": "angular-tattoo", "kind": "linework", "description": "matte dark tribal chevron and curved bands over forearm", "evidenceRefs": ["full-object"]}], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(213, 154, 115, 1)", "secondaryAlbedo": "rgba(213, 154, 115, 1)", "materialClass": "skin", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
+  node_arm_r_10.add(mesh_arm_r_10);
+  meshes["arm-r"] = mesh_arm_r_10;
   colliders["arm-r"] = {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"};
   destructionGroups["arm-r"] ??= [];
-  destructionGroups["arm-r"].push(node_arm_r_11);
+  destructionGroups["arm-r"].push(node_arm_r_10);
 
-  const endpoint_hand_r_12 = makeAttachmentEndpoint(null);
-  const node_hand_r_12 = new THREE.Group();
-  node_hand_r_12.name = "hand-r__pivot";
-  node_hand_r_12.scale.set(1, 1, 1);
-  if (endpoint_hand_r_12) {
-    node_hand_r_12.position.copy(endpoint_hand_r_12.start);
-    node_hand_r_12.rotation.set(0.0, 0.0, 0.0);
+  const endpoint_shoe_r_11 = makeAttachmentEndpoint(null);
+  const node_shoe_r_11 = new THREE.Group();
+  node_shoe_r_11.name = "shoe-r__pivot";
+  node_shoe_r_11.scale.set(1, 1, 1);
+  if (endpoint_shoe_r_11) {
+    node_shoe_r_11.position.copy(endpoint_shoe_r_11.start);
+    node_shoe_r_11.rotation.set(0.0, 0.0, 0.0);
   } else {
-    node_hand_r_12.position.set(0.0, 0.0, 0.0);
-    node_hand_r_12.rotation.set(0.0, 0.0, 0.0);
+    node_shoe_r_11.position.set(0.0, 0.0, 0.0);
+    node_shoe_r_11.rotation.set(0.0, 0.0, 0.0);
   }
-  node_hand_r_12.userData.sculptComponent = {"id": "hand-r", "name": "hand-r", "level": "meso", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "ellipsoid", "topologyClass": "implicit", "topologyRationale": "Continuous sculpt volume made from smoothly blended fields, not independently rendered spheres.", "geometryDescriptor": {"sdf": {"primitives": [{"id": "palm", "type": "ellipsoid", "center": [-0.325, 0.842, 0.005], "radii": [0.038, 0.057, 0.024]}, {"id": "finger0", "type": "ellipsoid", "center": [-0.301, 0.798, 0.01], "radii": [0.009, 0.034, 0.011]}, {"id": "finger1", "type": "ellipsoid", "center": [-0.317, 0.792, 0.01], "radii": [0.009, 0.038, 0.011]}, {"id": "finger2", "type": "ellipsoid", "center": [-0.33299999999999996, 0.798, 0.01], "radii": [0.009, 0.034, 0.011]}, {"id": "finger3", "type": "ellipsoid", "center": [-0.349, 0.804, 0.01], "radii": [0.009, 0.03, 0.011]}, {"id": "thumb", "type": "ellipsoid", "center": [-0.29, 0.84, 0.027], "radii": [0.017, 0.029, 0.014]}], "operations": [{"id": "blend0", "type": "smooth-union", "left": "palm", "right": "finger0", "radius": 0.003}, {"id": "blend1", "type": "smooth-union", "left": "blend0", "right": "finger1", "radius": 0.003}, {"id": "blend2", "type": "smooth-union", "left": "blend1", "right": "finger2", "radius": 0.003}, {"id": "blend3", "type": "smooth-union", "left": "blend2", "right": "finger3", "radius": 0.003}, {"id": "blend4", "type": "smooth-union", "left": "blend3", "right": "thumb", "radius": 0.003}], "bounds": {"min": [-0.388, 0.729, -0.044], "max": [-0.24799999999999997, 0.924, 0.066]}, "resolution": 40}, "normalStrategy": "smooth vertex normals"}, "parent": "root", "attachment": null, "dimensions": {"width": 1, "height": 1, "depth": 1, "units": "meters", "confidence": 0.78}, "transform": {"position": [0, 0, 0], "rotation": [0, 0, 0], "scale": [1, 1, 1]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "hand-r", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "skin", "materialLayers": ["skin"], "deformations": [], "joints": [], "seams": [], "localFeatures": [], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(213, 154, 115, 1)", "secondaryAlbedo": "rgba(213, 154, 115, 1)", "materialClass": "skin", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
-  node_hand_r_12.userData.actionProfile = {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "hand-r", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}};
-  (nodes["root"] ?? root).add(node_hand_r_12);
-  nodes["hand-r"] = node_hand_r_12;
-  const mesh_hand_r_12Geometry = polygonizeSdf({"primitives": [{"id": "palm", "type": "ellipsoid", "center": [-0.325, 0.842, 0.005], "radii": [0.038, 0.057, 0.024]}, {"id": "finger0", "type": "ellipsoid", "center": [-0.301, 0.798, 0.01], "radii": [0.009, 0.034, 0.011]}, {"id": "finger1", "type": "ellipsoid", "center": [-0.317, 0.792, 0.01], "radii": [0.009, 0.038, 0.011]}, {"id": "finger2", "type": "ellipsoid", "center": [-0.33299999999999996, 0.798, 0.01], "radii": [0.009, 0.034, 0.011]}, {"id": "finger3", "type": "ellipsoid", "center": [-0.349, 0.804, 0.01], "radii": [0.009, 0.03, 0.011]}, {"id": "thumb", "type": "ellipsoid", "center": [-0.29, 0.84, 0.027], "radii": [0.017, 0.029, 0.014]}], "operations": [{"id": "blend0", "type": "smooth-union", "left": "palm", "right": "finger0", "radius": 0.003}, {"id": "blend1", "type": "smooth-union", "left": "blend0", "right": "finger1", "radius": 0.003}, {"id": "blend2", "type": "smooth-union", "left": "blend1", "right": "finger2", "radius": 0.003}, {"id": "blend3", "type": "smooth-union", "left": "blend2", "right": "finger3", "radius": 0.003}, {"id": "blend4", "type": "smooth-union", "left": "blend3", "right": "thumb", "radius": 0.003}], "bounds": {"min": [-0.388, 0.729, -0.044], "max": [-0.24799999999999997, 0.924, 0.066]}, "resolution": 40});
-  if (!endpoint_hand_r_12) {
-    mesh_hand_r_12Geometry.scale(1.0, 1.0, 1.0);
+  node_shoe_r_11.userData.sculptComponent = {"id": "shoe-r", "name": "shoe-r", "level": "meso", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "tapered-sweep", "topologyClass": "continuous-sculpt", "topologyRationale": "Continuous high-top shoe contour: flat broad toe, shaped instep and ankle collar, replacing rounded overlapping blobs.", "geometryDescriptor": {"taperedSweep": {"stations": [{"position": [-0.115, 0.012, 0.035], "rx": 0.024, "rz": 0.015}, {"position": [-0.115, 0.025, 0.035], "rx": 0.118, "rz": 0.063}, {"position": [-0.115, 0.045, 0.035], "rx": 0.121, "rz": 0.067}, {"position": [-0.115, 0.062, 0.03], "rx": 0.115, "rz": 0.064}, {"position": [-0.115, 0.08, 0.015], "rx": 0.096, "rz": 0.06}, {"position": [-0.115, 0.1, -0.002], "rx": 0.075, "rz": 0.056}, {"position": [-0.115, 0.13, -0.018], "rx": 0.059, "rz": 0.054}, {"position": [-0.115, 0.17, -0.023], "rx": 0.052, "rz": 0.052}, {"position": [-0.115, 0.178, -0.023], "rx": 0.05, "rz": 0.05}], "radialSegments": 28, "capEnds": true, "fixedFrame": "horizontal"}, "normalStrategy": "Smooth horizontal shoe contours; separate outsole", "sourceNotes": "Broad reference toe and dark high-top sneakers, independent shoe module"}, "parent": "root", "attachment": null, "dimensions": {"width": 1, "height": 1, "depth": 1, "units": "meters", "confidence": 0.78}, "transform": {"position": [0, 0, 0], "rotation": [0, 0, 0], "scale": [1, 1, 1]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "shoe-r", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "shoes", "materialLayers": ["shoes"], "deformations": [], "joints": [], "seams": [], "localFeatures": [], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(39, 41, 50, 1)", "secondaryAlbedo": "rgba(39, 41, 50, 1)", "materialClass": "plastic", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
+  node_shoe_r_11.userData.actionProfile = {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "shoe-r", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}};
+  (nodes["root"] ?? root).add(node_shoe_r_11);
+  nodes["shoe-r"] = node_shoe_r_11;
+  const mesh_shoe_r_11Geometry = endpoint_shoe_r_11
+    ? new THREE.CylinderGeometry(endpoint_shoe_r_11.endRadius, endpoint_shoe_r_11.baseRadius, endpoint_shoe_r_11.length, 16, 6)
+    : buildTaperedSweepGeometry({"stations": [{"position": [-0.115, 0.012, 0.035], "rx": 0.024, "rz": 0.015}, {"position": [-0.115, 0.025, 0.035], "rx": 0.118, "rz": 0.063}, {"position": [-0.115, 0.045, 0.035], "rx": 0.121, "rz": 0.067}, {"position": [-0.115, 0.062, 0.03], "rx": 0.115, "rz": 0.064}, {"position": [-0.115, 0.08, 0.015], "rx": 0.096, "rz": 0.06}, {"position": [-0.115, 0.1, -0.002], "rx": 0.075, "rz": 0.056}, {"position": [-0.115, 0.13, -0.018], "rx": 0.059, "rz": 0.054}, {"position": [-0.115, 0.17, -0.023], "rx": 0.052, "rz": 0.052}, {"position": [-0.115, 0.178, -0.023], "rx": 0.05, "rz": 0.05}], "radialSegments": 28, "capEnds": true, "fixedFrame": "horizontal"});
+  if (!endpoint_shoe_r_11) {
+    mesh_shoe_r_11Geometry.scale(1.0, 1.0, 1.0);
   }
-  const mesh_hand_r_12 = new THREE.Mesh(
-    mesh_hand_r_12Geometry,
-    createSculptMaterial("skin", {"id": "skin", "name": "skin", "type": "standard", "shaderModel": "MeshStandardMaterial", "baseColor": "#d59a73", "color": "#d59a73", "roughness": 0.78, "metalness": 0, "textureless": {"declared": true, "evidence": ["reference-isolated.png: broad smooth color regions, no observable pore/grain pattern at target game distance; simplified art requested by user"]}, "albedo": {"dominant": "#d59a73", "secondary": ["#d59a73"]}, "ambientOcclusion": {"cavityStrength": 0.16, "contactShadowBias": 0.25}, "localOverrides": []}, options, true)
+  const mesh_shoe_r_11 = new THREE.Mesh(
+    mesh_shoe_r_11Geometry,
+    materialMap["shoes"] ?? new THREE.MeshStandardMaterial({ color: 0x888888 })
   );
-  mesh_hand_r_12.name = "hand-r";
-  if (endpoint_hand_r_12) {
-    mesh_hand_r_12.position.copy(endpoint_hand_r_12.midpoint);
-    mesh_hand_r_12.quaternion.copy(endpoint_hand_r_12.quaternion);
+  mesh_shoe_r_11.name = "shoe-r";
+  if (endpoint_shoe_r_11) {
+    mesh_shoe_r_11.position.copy(endpoint_shoe_r_11.midpoint);
+    mesh_shoe_r_11.quaternion.copy(endpoint_shoe_r_11.quaternion);
   }
-  mesh_hand_r_12.castShadow = options.castShadow ?? true;
-  mesh_hand_r_12.receiveShadow = options.receiveShadow ?? true;
-  mesh_hand_r_12.userData.sculptComponent = {"id": "hand-r", "name": "hand-r", "level": "meso", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "ellipsoid", "topologyClass": "implicit", "topologyRationale": "Continuous sculpt volume made from smoothly blended fields, not independently rendered spheres.", "geometryDescriptor": {"sdf": {"primitives": [{"id": "palm", "type": "ellipsoid", "center": [-0.325, 0.842, 0.005], "radii": [0.038, 0.057, 0.024]}, {"id": "finger0", "type": "ellipsoid", "center": [-0.301, 0.798, 0.01], "radii": [0.009, 0.034, 0.011]}, {"id": "finger1", "type": "ellipsoid", "center": [-0.317, 0.792, 0.01], "radii": [0.009, 0.038, 0.011]}, {"id": "finger2", "type": "ellipsoid", "center": [-0.33299999999999996, 0.798, 0.01], "radii": [0.009, 0.034, 0.011]}, {"id": "finger3", "type": "ellipsoid", "center": [-0.349, 0.804, 0.01], "radii": [0.009, 0.03, 0.011]}, {"id": "thumb", "type": "ellipsoid", "center": [-0.29, 0.84, 0.027], "radii": [0.017, 0.029, 0.014]}], "operations": [{"id": "blend0", "type": "smooth-union", "left": "palm", "right": "finger0", "radius": 0.003}, {"id": "blend1", "type": "smooth-union", "left": "blend0", "right": "finger1", "radius": 0.003}, {"id": "blend2", "type": "smooth-union", "left": "blend1", "right": "finger2", "radius": 0.003}, {"id": "blend3", "type": "smooth-union", "left": "blend2", "right": "finger3", "radius": 0.003}, {"id": "blend4", "type": "smooth-union", "left": "blend3", "right": "thumb", "radius": 0.003}], "bounds": {"min": [-0.388, 0.729, -0.044], "max": [-0.24799999999999997, 0.924, 0.066]}, "resolution": 40}, "normalStrategy": "smooth vertex normals"}, "parent": "root", "attachment": null, "dimensions": {"width": 1, "height": 1, "depth": 1, "units": "meters", "confidence": 0.78}, "transform": {"position": [0, 0, 0], "rotation": [0, 0, 0], "scale": [1, 1, 1]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "hand-r", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "skin", "materialLayers": ["skin"], "deformations": [], "joints": [], "seams": [], "localFeatures": [], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(213, 154, 115, 1)", "secondaryAlbedo": "rgba(213, 154, 115, 1)", "materialClass": "skin", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
-  node_hand_r_12.add(mesh_hand_r_12);
-  meshes["hand-r"] = mesh_hand_r_12;
-  colliders["hand-r"] = {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"};
-  destructionGroups["hand-r"] ??= [];
-  destructionGroups["hand-r"].push(node_hand_r_12);
-
-  const endpoint_shoe_r_13 = makeAttachmentEndpoint(null);
-  const node_shoe_r_13 = new THREE.Group();
-  node_shoe_r_13.name = "shoe-r__pivot";
-  node_shoe_r_13.scale.set(1, 1, 1);
-  if (endpoint_shoe_r_13) {
-    node_shoe_r_13.position.copy(endpoint_shoe_r_13.start);
-    node_shoe_r_13.rotation.set(0.0, 0.0, 0.0);
-  } else {
-    node_shoe_r_13.position.set(0.0, 0.0, 0.0);
-    node_shoe_r_13.rotation.set(0.0, 0.0, 0.0);
-  }
-  node_shoe_r_13.userData.sculptComponent = {"id": "shoe-r", "name": "shoe-r", "level": "meso", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "ellipsoid", "topologyClass": "implicit", "topologyRationale": "Continuous sculpt volume made from smoothly blended fields, not independently rendered spheres.", "geometryDescriptor": {"sdf": {"primitives": [{"id": "ankle", "type": "ellipsoid", "center": [-0.115, 0.105, -0.003], "radii": [0.065, 0.08, 0.075]}, {"id": "toe", "type": "ellipsoid", "center": [-0.115, 0.053, 0.065], "radii": [0.068, 0.05, 0.115]}], "operations": [{"id": "blend0", "type": "smooth-union", "left": "ankle", "right": "toe", "radius": 0.022}], "bounds": {"min": [-0.208, -0.022000000000000006, -0.10300000000000001], "max": [-0.022, 0.21, 0.205]}, "resolution": 40}, "normalStrategy": "smooth vertex normals"}, "parent": "root", "attachment": null, "dimensions": {"width": 1, "height": 1, "depth": 1, "units": "meters", "confidence": 0.78}, "transform": {"position": [0, 0, 0], "rotation": [0, 0, 0], "scale": [1, 1, 1]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "shoe-r", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "shoes", "materialLayers": ["shoes"], "deformations": [], "joints": [], "seams": [], "localFeatures": [], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(39, 41, 50, 1)", "secondaryAlbedo": "rgba(39, 41, 50, 1)", "materialClass": "plastic", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
-  node_shoe_r_13.userData.actionProfile = {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "shoe-r", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}};
-  (nodes["root"] ?? root).add(node_shoe_r_13);
-  nodes["shoe-r"] = node_shoe_r_13;
-  const mesh_shoe_r_13Geometry = polygonizeSdf({"primitives": [{"id": "ankle", "type": "ellipsoid", "center": [-0.115, 0.105, -0.003], "radii": [0.065, 0.08, 0.075]}, {"id": "toe", "type": "ellipsoid", "center": [-0.115, 0.053, 0.065], "radii": [0.068, 0.05, 0.115]}], "operations": [{"id": "blend0", "type": "smooth-union", "left": "ankle", "right": "toe", "radius": 0.022}], "bounds": {"min": [-0.208, -0.022000000000000006, -0.10300000000000001], "max": [-0.022, 0.21, 0.205]}, "resolution": 40});
-  if (!endpoint_shoe_r_13) {
-    mesh_shoe_r_13Geometry.scale(1.0, 1.0, 1.0);
-  }
-  const mesh_shoe_r_13 = new THREE.Mesh(
-    mesh_shoe_r_13Geometry,
-    createSculptMaterial("shoes", {"id": "shoes", "name": "shoes", "type": "standard", "shaderModel": "MeshStandardMaterial", "baseColor": "#272932", "color": "#272932", "roughness": 0.78, "metalness": 0, "textureless": {"declared": true, "evidence": ["reference-isolated.png: broad smooth color regions, no observable pore/grain pattern at target game distance; simplified art requested by user"]}, "albedo": {"dominant": "#272932", "secondary": ["#272932"]}, "ambientOcclusion": {"cavityStrength": 0.16, "contactShadowBias": 0.25}, "localOverrides": []}, options, true)
-  );
-  mesh_shoe_r_13.name = "shoe-r";
-  if (endpoint_shoe_r_13) {
-    mesh_shoe_r_13.position.copy(endpoint_shoe_r_13.midpoint);
-    mesh_shoe_r_13.quaternion.copy(endpoint_shoe_r_13.quaternion);
-  }
-  mesh_shoe_r_13.castShadow = options.castShadow ?? true;
-  mesh_shoe_r_13.receiveShadow = options.receiveShadow ?? true;
-  mesh_shoe_r_13.userData.sculptComponent = {"id": "shoe-r", "name": "shoe-r", "level": "meso", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "ellipsoid", "topologyClass": "implicit", "topologyRationale": "Continuous sculpt volume made from smoothly blended fields, not independently rendered spheres.", "geometryDescriptor": {"sdf": {"primitives": [{"id": "ankle", "type": "ellipsoid", "center": [-0.115, 0.105, -0.003], "radii": [0.065, 0.08, 0.075]}, {"id": "toe", "type": "ellipsoid", "center": [-0.115, 0.053, 0.065], "radii": [0.068, 0.05, 0.115]}], "operations": [{"id": "blend0", "type": "smooth-union", "left": "ankle", "right": "toe", "radius": 0.022}], "bounds": {"min": [-0.208, -0.022000000000000006, -0.10300000000000001], "max": [-0.022, 0.21, 0.205]}, "resolution": 40}, "normalStrategy": "smooth vertex normals"}, "parent": "root", "attachment": null, "dimensions": {"width": 1, "height": 1, "depth": 1, "units": "meters", "confidence": 0.78}, "transform": {"position": [0, 0, 0], "rotation": [0, 0, 0], "scale": [1, 1, 1]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "shoe-r", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "shoes", "materialLayers": ["shoes"], "deformations": [], "joints": [], "seams": [], "localFeatures": [], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(39, 41, 50, 1)", "secondaryAlbedo": "rgba(39, 41, 50, 1)", "materialClass": "plastic", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
-  node_shoe_r_13.add(mesh_shoe_r_13);
-  meshes["shoe-r"] = mesh_shoe_r_13;
+  mesh_shoe_r_11.castShadow = options.castShadow ?? true;
+  mesh_shoe_r_11.receiveShadow = options.receiveShadow ?? true;
+  mesh_shoe_r_11.userData.sculptComponent = {"id": "shoe-r", "name": "shoe-r", "level": "meso", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "tapered-sweep", "topologyClass": "continuous-sculpt", "topologyRationale": "Continuous high-top shoe contour: flat broad toe, shaped instep and ankle collar, replacing rounded overlapping blobs.", "geometryDescriptor": {"taperedSweep": {"stations": [{"position": [-0.115, 0.012, 0.035], "rx": 0.024, "rz": 0.015}, {"position": [-0.115, 0.025, 0.035], "rx": 0.118, "rz": 0.063}, {"position": [-0.115, 0.045, 0.035], "rx": 0.121, "rz": 0.067}, {"position": [-0.115, 0.062, 0.03], "rx": 0.115, "rz": 0.064}, {"position": [-0.115, 0.08, 0.015], "rx": 0.096, "rz": 0.06}, {"position": [-0.115, 0.1, -0.002], "rx": 0.075, "rz": 0.056}, {"position": [-0.115, 0.13, -0.018], "rx": 0.059, "rz": 0.054}, {"position": [-0.115, 0.17, -0.023], "rx": 0.052, "rz": 0.052}, {"position": [-0.115, 0.178, -0.023], "rx": 0.05, "rz": 0.05}], "radialSegments": 28, "capEnds": true, "fixedFrame": "horizontal"}, "normalStrategy": "Smooth horizontal shoe contours; separate outsole", "sourceNotes": "Broad reference toe and dark high-top sneakers, independent shoe module"}, "parent": "root", "attachment": null, "dimensions": {"width": 1, "height": 1, "depth": 1, "units": "meters", "confidence": 0.78}, "transform": {"position": [0, 0, 0], "rotation": [0, 0, 0], "scale": [1, 1, 1]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "shoe-r", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "shoes", "materialLayers": ["shoes"], "deformations": [], "joints": [], "seams": [], "localFeatures": [], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(39, 41, 50, 1)", "secondaryAlbedo": "rgba(39, 41, 50, 1)", "materialClass": "plastic", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
+  node_shoe_r_11.add(mesh_shoe_r_11);
+  meshes["shoe-r"] = mesh_shoe_r_11;
   colliders["shoe-r"] = {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"};
   destructionGroups["shoe-r"] ??= [];
-  destructionGroups["shoe-r"].push(node_shoe_r_13);
+  destructionGroups["shoe-r"].push(node_shoe_r_11);
 
-  const endpoint_sole_r_14 = makeAttachmentEndpoint(null);
-  const node_sole_r_14 = new THREE.Group();
-  node_sole_r_14.name = "sole-r__pivot";
-  node_sole_r_14.scale.set(1, 1, 1);
-  if (endpoint_sole_r_14) {
-    node_sole_r_14.position.copy(endpoint_sole_r_14.start);
-    node_sole_r_14.rotation.set(1.5707963267948966, 0.0, 0.0);
+  const endpoint_sole_r_12 = makeAttachmentEndpoint(null);
+  const node_sole_r_12 = new THREE.Group();
+  node_sole_r_12.name = "sole-r__pivot";
+  node_sole_r_12.scale.set(1, 1, 1);
+  if (endpoint_sole_r_12) {
+    node_sole_r_12.position.copy(endpoint_sole_r_12.start);
+    node_sole_r_12.rotation.set(1.5707963267948966, 0.0, 0.0);
   } else {
-    node_sole_r_14.position.set(-0.115, 0.025, 0.035);
-    node_sole_r_14.rotation.set(1.5707963267948966, 0.0, 0.0);
+    node_sole_r_12.position.set(-0.115, 0.026, 0.035);
+    node_sole_r_12.rotation.set(1.5707963267948966, 0.0, 0.0);
   }
-  node_sole_r_14.userData.sculptComponent = {"id": "sole-r", "name": "sole-r", "level": "micro", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "extrude", "topologyClass": "assembled-solid", "topologyRationale": "Contour follows the reference silhouette; depth is inferred and tested in orbit.", "geometryDescriptor": {"profile2D": {"points": [[-0.42, -0.45], [0.42, -0.45], [0.5, -0.1], [0.47, 0.45], [0.28, 0.5], [-0.28, 0.5], [-0.47, 0.45], [-0.5, -0.1]], "depth": 1, "bevelEnabled": true, "bevelSize": 0.035, "bevelThickness": 0.035, "bevelSegments": 2}}, "parent": "root", "attachment": null, "dimensions": {"width": 0.145, "height": 0.25, "depth": 0.014, "units": "meters", "confidence": 0.78}, "transform": {"position": [-0.115, 0.025, 0.035], "rotation": [1.5707963267948966, 0, 0], "scale": [0.145, 0.25, 0.014]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "sole-r", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "sole", "materialLayers": ["sole"], "deformations": [], "joints": [], "seams": [], "localFeatures": [], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(23, 26, 34, 1)", "secondaryAlbedo": "rgba(23, 26, 34, 1)", "materialClass": "plastic", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
-  node_sole_r_14.userData.actionProfile = {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "sole-r", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}};
-  (nodes["root"] ?? root).add(node_sole_r_14);
-  nodes["sole-r"] = node_sole_r_14;
-  const mesh_sole_r_14Geometry = endpoint_sole_r_14
-    ? new THREE.CylinderGeometry(endpoint_sole_r_14.endRadius, endpoint_sole_r_14.baseRadius, endpoint_sole_r_14.length, 16, 6)
-    : buildExtrudeGeometry({"points": [[-0.42, -0.45], [0.42, -0.45], [0.5, -0.1], [0.47, 0.45], [0.28, 0.5], [-0.28, 0.5], [-0.47, 0.45], [-0.5, -0.1]], "depth": 1, "bevelEnabled": true, "bevelSize": 0.035, "bevelThickness": 0.035, "bevelSegments": 2});
-  if (!endpoint_sole_r_14) {
-    mesh_sole_r_14Geometry.scale(0.145, 0.25, 0.014);
+  node_sole_r_12.userData.sculptComponent = {"id": "sole-r", "name": "sole-r", "level": "micro", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "extrude", "topologyClass": "assembled-solid", "topologyRationale": "Contour follows the reference silhouette; depth is inferred and tested in orbit.", "geometryDescriptor": {"profile2D": {"points": [[0.42769999999999997, 0.0], [0.41805772288557197, 0.10232070351484124], [0.405118990788356, 0.1732426103684521], [0.38764313024846664, 0.23404723308381586], [0.36561897893722106, 0.28749781270113345], [0.33914098771003437, 0.33449234126967875], [0.30830758094922195, 0.3753317575473136], [0.2731685825266422, 0.41007447486767296], [0.2336630366055767, 0.4386748333756851], [0.1895037006540926, 0.46104821625249315], [0.13989014717124748, 0.4771054426630118], [0.08248650863723848, 0.4867721764671055], [1.3329809914788902e-13, 0.49], [-0.08248650863723843, 0.4867721764671055], [-0.13989014717124743, 0.4771054426630118], [-0.18950370065409247, 0.4610482162524932], [-0.23366303660557658, 0.43867483337568514], [-0.2731685825266422, 0.41007447486767296], [-0.3083075809492219, 0.3753317575473136], [-0.3391409877100343, 0.3344923412696788], [-0.36561897893722106, 0.28749781270113345], [-0.38764313024846664, 0.23404723308381592], [-0.40511899078835595, 0.17324261036845223], [-0.41805772288557197, 0.10232070351484147], [-0.42769999999998104, 2.819709889450938e-13], [-0.43170741946128943, -0.10232070351484136], [-0.42777079626050174, -0.17324261036845212], [-0.41721532726660004, -0.2340472330838158], [-0.40018194447004646, -0.28749781270113334], [-0.37673188127324614, -0.33449234126967875], [-0.34691443008337425, -0.3753317575473134], [-0.3107594760898541, -0.41007447486767284], [-0.26822600213840225, -0.4386748333756851], [-0.2190758976722258, -0.4610482162524932], [-0.16254195264339313, -0.4771054426630118], [-0.09613620521295588, -0.4867721764671055], [-3.6206545950956876e-13, -0.49], [0.09613620521295567, -0.4867721764671056], [0.162541952643393, -0.4771054426630118], [0.21907589767222568, -0.46104821625249326], [0.2682260021384021, -0.4386748333756851], [0.31075947608985377, -0.4100744748676732], [0.3469144300833741, -0.3753317575473136], [0.3767318812732461, -0.33449234126967886], [0.40018194447004635, -0.28749781270113367], [0.41721532726660004, -0.23404723308381575], [0.42777079626050174, -0.17324261036845254], [0.43170741946128943, -0.10232070351484131]], "depth": 1, "bevelEnabled": true, "bevelSize": 0.018, "bevelThickness": 0.06, "bevelSegments": 2}}, "parent": "root", "attachment": null, "dimensions": {"width": 0.145, "height": 0.25, "depth": 0.014, "units": "meters", "confidence": 0.78}, "transform": {"position": [-0.115, 0.026, 0.035], "rotation": [1.5707963267948966, 0, 0], "scale": [0.145, 0.248, 0.013]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "sole-r", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "sole", "materialLayers": ["sole"], "deformations": [], "joints": [], "seams": [], "localFeatures": [], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(23, 26, 34, 1)", "secondaryAlbedo": "rgba(23, 26, 34, 1)", "materialClass": "plastic", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
+  node_sole_r_12.userData.actionProfile = {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "sole-r", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}};
+  (nodes["root"] ?? root).add(node_sole_r_12);
+  nodes["sole-r"] = node_sole_r_12;
+  const mesh_sole_r_12Geometry = endpoint_sole_r_12
+    ? new THREE.CylinderGeometry(endpoint_sole_r_12.endRadius, endpoint_sole_r_12.baseRadius, endpoint_sole_r_12.length, 16, 6)
+    : buildExtrudeGeometry({"points": [[0.42769999999999997, 0.0], [0.41805772288557197, 0.10232070351484124], [0.405118990788356, 0.1732426103684521], [0.38764313024846664, 0.23404723308381586], [0.36561897893722106, 0.28749781270113345], [0.33914098771003437, 0.33449234126967875], [0.30830758094922195, 0.3753317575473136], [0.2731685825266422, 0.41007447486767296], [0.2336630366055767, 0.4386748333756851], [0.1895037006540926, 0.46104821625249315], [0.13989014717124748, 0.4771054426630118], [0.08248650863723848, 0.4867721764671055], [1.3329809914788902e-13, 0.49], [-0.08248650863723843, 0.4867721764671055], [-0.13989014717124743, 0.4771054426630118], [-0.18950370065409247, 0.4610482162524932], [-0.23366303660557658, 0.43867483337568514], [-0.2731685825266422, 0.41007447486767296], [-0.3083075809492219, 0.3753317575473136], [-0.3391409877100343, 0.3344923412696788], [-0.36561897893722106, 0.28749781270113345], [-0.38764313024846664, 0.23404723308381592], [-0.40511899078835595, 0.17324261036845223], [-0.41805772288557197, 0.10232070351484147], [-0.42769999999998104, 2.819709889450938e-13], [-0.43170741946128943, -0.10232070351484136], [-0.42777079626050174, -0.17324261036845212], [-0.41721532726660004, -0.2340472330838158], [-0.40018194447004646, -0.28749781270113334], [-0.37673188127324614, -0.33449234126967875], [-0.34691443008337425, -0.3753317575473134], [-0.3107594760898541, -0.41007447486767284], [-0.26822600213840225, -0.4386748333756851], [-0.2190758976722258, -0.4610482162524932], [-0.16254195264339313, -0.4771054426630118], [-0.09613620521295588, -0.4867721764671055], [-3.6206545950956876e-13, -0.49], [0.09613620521295567, -0.4867721764671056], [0.162541952643393, -0.4771054426630118], [0.21907589767222568, -0.46104821625249326], [0.2682260021384021, -0.4386748333756851], [0.31075947608985377, -0.4100744748676732], [0.3469144300833741, -0.3753317575473136], [0.3767318812732461, -0.33449234126967886], [0.40018194447004635, -0.28749781270113367], [0.41721532726660004, -0.23404723308381575], [0.42777079626050174, -0.17324261036845254], [0.43170741946128943, -0.10232070351484131]], "depth": 1, "bevelEnabled": true, "bevelSize": 0.018, "bevelThickness": 0.06, "bevelSegments": 2});
+  if (!endpoint_sole_r_12) {
+    mesh_sole_r_12Geometry.scale(0.145, 0.248, 0.013);
   }
-  const mesh_sole_r_14 = new THREE.Mesh(
-    mesh_sole_r_14Geometry,
+  const mesh_sole_r_12 = new THREE.Mesh(
+    mesh_sole_r_12Geometry,
     materialMap["sole"] ?? new THREE.MeshStandardMaterial({ color: 0x888888 })
   );
-  mesh_sole_r_14.name = "sole-r";
-  if (endpoint_sole_r_14) {
-    mesh_sole_r_14.position.copy(endpoint_sole_r_14.midpoint);
-    mesh_sole_r_14.quaternion.copy(endpoint_sole_r_14.quaternion);
+  mesh_sole_r_12.name = "sole-r";
+  if (endpoint_sole_r_12) {
+    mesh_sole_r_12.position.copy(endpoint_sole_r_12.midpoint);
+    mesh_sole_r_12.quaternion.copy(endpoint_sole_r_12.quaternion);
   }
-  mesh_sole_r_14.castShadow = options.castShadow ?? true;
-  mesh_sole_r_14.receiveShadow = options.receiveShadow ?? true;
-  mesh_sole_r_14.userData.sculptComponent = {"id": "sole-r", "name": "sole-r", "level": "micro", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "extrude", "topologyClass": "assembled-solid", "topologyRationale": "Contour follows the reference silhouette; depth is inferred and tested in orbit.", "geometryDescriptor": {"profile2D": {"points": [[-0.42, -0.45], [0.42, -0.45], [0.5, -0.1], [0.47, 0.45], [0.28, 0.5], [-0.28, 0.5], [-0.47, 0.45], [-0.5, -0.1]], "depth": 1, "bevelEnabled": true, "bevelSize": 0.035, "bevelThickness": 0.035, "bevelSegments": 2}}, "parent": "root", "attachment": null, "dimensions": {"width": 0.145, "height": 0.25, "depth": 0.014, "units": "meters", "confidence": 0.78}, "transform": {"position": [-0.115, 0.025, 0.035], "rotation": [1.5707963267948966, 0, 0], "scale": [0.145, 0.25, 0.014]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "sole-r", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "sole", "materialLayers": ["sole"], "deformations": [], "joints": [], "seams": [], "localFeatures": [], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(23, 26, 34, 1)", "secondaryAlbedo": "rgba(23, 26, 34, 1)", "materialClass": "plastic", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
-  node_sole_r_14.add(mesh_sole_r_14);
-  meshes["sole-r"] = mesh_sole_r_14;
+  mesh_sole_r_12.castShadow = options.castShadow ?? true;
+  mesh_sole_r_12.receiveShadow = options.receiveShadow ?? true;
+  mesh_sole_r_12.userData.sculptComponent = {"id": "sole-r", "name": "sole-r", "level": "micro", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "extrude", "topologyClass": "assembled-solid", "topologyRationale": "Contour follows the reference silhouette; depth is inferred and tested in orbit.", "geometryDescriptor": {"profile2D": {"points": [[0.42769999999999997, 0.0], [0.41805772288557197, 0.10232070351484124], [0.405118990788356, 0.1732426103684521], [0.38764313024846664, 0.23404723308381586], [0.36561897893722106, 0.28749781270113345], [0.33914098771003437, 0.33449234126967875], [0.30830758094922195, 0.3753317575473136], [0.2731685825266422, 0.41007447486767296], [0.2336630366055767, 0.4386748333756851], [0.1895037006540926, 0.46104821625249315], [0.13989014717124748, 0.4771054426630118], [0.08248650863723848, 0.4867721764671055], [1.3329809914788902e-13, 0.49], [-0.08248650863723843, 0.4867721764671055], [-0.13989014717124743, 0.4771054426630118], [-0.18950370065409247, 0.4610482162524932], [-0.23366303660557658, 0.43867483337568514], [-0.2731685825266422, 0.41007447486767296], [-0.3083075809492219, 0.3753317575473136], [-0.3391409877100343, 0.3344923412696788], [-0.36561897893722106, 0.28749781270113345], [-0.38764313024846664, 0.23404723308381592], [-0.40511899078835595, 0.17324261036845223], [-0.41805772288557197, 0.10232070351484147], [-0.42769999999998104, 2.819709889450938e-13], [-0.43170741946128943, -0.10232070351484136], [-0.42777079626050174, -0.17324261036845212], [-0.41721532726660004, -0.2340472330838158], [-0.40018194447004646, -0.28749781270113334], [-0.37673188127324614, -0.33449234126967875], [-0.34691443008337425, -0.3753317575473134], [-0.3107594760898541, -0.41007447486767284], [-0.26822600213840225, -0.4386748333756851], [-0.2190758976722258, -0.4610482162524932], [-0.16254195264339313, -0.4771054426630118], [-0.09613620521295588, -0.4867721764671055], [-3.6206545950956876e-13, -0.49], [0.09613620521295567, -0.4867721764671056], [0.162541952643393, -0.4771054426630118], [0.21907589767222568, -0.46104821625249326], [0.2682260021384021, -0.4386748333756851], [0.31075947608985377, -0.4100744748676732], [0.3469144300833741, -0.3753317575473136], [0.3767318812732461, -0.33449234126967886], [0.40018194447004635, -0.28749781270113367], [0.41721532726660004, -0.23404723308381575], [0.42777079626050174, -0.17324261036845254], [0.43170741946128943, -0.10232070351484131]], "depth": 1, "bevelEnabled": true, "bevelSize": 0.018, "bevelThickness": 0.06, "bevelSegments": 2}}, "parent": "root", "attachment": null, "dimensions": {"width": 0.145, "height": 0.25, "depth": 0.014, "units": "meters", "confidence": 0.78}, "transform": {"position": [-0.115, 0.026, 0.035], "rotation": [1.5707963267948966, 0, 0], "scale": [0.145, 0.248, 0.013]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "sole-r", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "sole", "materialLayers": ["sole"], "deformations": [], "joints": [], "seams": [], "localFeatures": [], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(23, 26, 34, 1)", "secondaryAlbedo": "rgba(23, 26, 34, 1)", "materialClass": "plastic", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
+  node_sole_r_12.add(mesh_sole_r_12);
+  meshes["sole-r"] = mesh_sole_r_12;
   colliders["sole-r"] = {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"};
   destructionGroups["sole-r"] ??= [];
-  destructionGroups["sole-r"].push(node_sole_r_14);
+  destructionGroups["sole-r"].push(node_sole_r_12);
 
-  const attachment_lace_r_0_15 = {"parentSocket": "shoe-r", "localStart": [-0.155, 0.093, 0.11], "localEnd": [-0.07500000000000001, 0.093, 0.09], "contactType": "surface-embed", "embedDepth": 0.002, "gapTolerance": 0.003};
-  const endpoint_lace_r_0_15 = null; // authored tubePath already in model coordinates
-  const node_lace_r_0_15 = new THREE.Group();
-  node_lace_r_0_15.name = "lace-r-0__pivot";
-  node_lace_r_0_15.scale.set(1, 1, 1);
-  if (endpoint_lace_r_0_15) {
-    node_lace_r_0_15.position.copy(endpoint_lace_r_0_15.start);
-    node_lace_r_0_15.rotation.set(0.0, 0.0, 0.0);
+  const attachment_lace_r_0_13 = {"parentSocket": "shoe-r", "localStart": [-0.155, 0.093, 0.11], "localEnd": [-0.07500000000000001, 0.093, 0.09], "contactType": "surface-embed", "embedDepth": 0.002, "gapTolerance": 0.003};
+  const endpoint_lace_r_0_13 = null; // authored tubePath already in model coordinates
+  const node_lace_r_0_13 = new THREE.Group();
+  node_lace_r_0_13.name = "lace-r-0__pivot";
+  node_lace_r_0_13.scale.set(1, 1, 1);
+  if (endpoint_lace_r_0_13) {
+    node_lace_r_0_13.position.copy(endpoint_lace_r_0_13.start);
+    node_lace_r_0_13.rotation.set(0.0, 0.0, 0.0);
   } else {
-    node_lace_r_0_15.position.set(0.0, 0.0, 0.0);
-    node_lace_r_0_15.rotation.set(0.0, 0.0, 0.0);
+    node_lace_r_0_13.position.set(0.0, 0.0, 0.0);
+    node_lace_r_0_13.rotation.set(0.0, 0.0, 0.0);
   }
-  node_lace_r_0_15.userData.sculptComponent = {"id": "lace-r-0", "name": "lace-r-0", "level": "micro", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "tube", "topologyClass": "assembled-solid", "topologyRationale": "Contour follows the reference silhouette; depth is inferred and tested in orbit.", "geometryDescriptor": {"tubePath": {"points": [[-0.155, 0.093, 0.11], [-0.07500000000000001, 0.093, 0.09]], "radius": 0.003, "closed": false}, "attachmentGeometry": "authored-path"}, "parent": "root", "attachment": {"parentSocket": "shoe-r", "localStart": [-0.155, 0.093, 0.11], "localEnd": [-0.07500000000000001, 0.093, 0.09], "contactType": "surface-embed", "embedDepth": 0.002, "gapTolerance": 0.003}, "dimensions": {"width": 1, "height": 1, "depth": 1, "units": "meters", "confidence": 0.78}, "transform": {"position": [0, 0, 0], "rotation": [0, 0, 0], "scale": [1, 1, 1]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "lace-r-0", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "sole", "materialLayers": ["sole"], "deformations": [], "joints": [], "seams": [], "localFeatures": [], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(23, 26, 34, 1)", "secondaryAlbedo": "rgba(23, 26, 34, 1)", "materialClass": "plastic", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
-  node_lace_r_0_15.userData.actionProfile = {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "lace-r-0", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}};
-  (nodes["root"] ?? root).add(node_lace_r_0_15);
-  nodes["lace-r-0"] = node_lace_r_0_15;
-  const mesh_lace_r_0_15Geometry = endpoint_lace_r_0_15
-    ? new THREE.CylinderGeometry(endpoint_lace_r_0_15.endRadius, endpoint_lace_r_0_15.baseRadius, endpoint_lace_r_0_15.length, 16, 6)
-    : buildTubeGeometry({"points": [[-0.155, 0.093, 0.11], [-0.07500000000000001, 0.093, 0.09]], "radius": 0.003, "closed": false});
-  if (!endpoint_lace_r_0_15) {
-    mesh_lace_r_0_15Geometry.scale(1.0, 1.0, 1.0);
+  node_lace_r_0_13.userData.sculptComponent = {"id": "lace-r-0", "name": "lace-r-0", "level": "micro", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "tube", "topologyClass": "assembled-solid", "topologyRationale": "Contour follows the reference silhouette; depth is inferred and tested in orbit.", "geometryDescriptor": {"tubePath": {"points": [[-0.152, 0.082, 0.098], [-0.07800000000000001, 0.082, 0.09]], "radius": 0.0025, "closed": false}, "attachmentGeometry": "authored-path"}, "parent": "root", "attachment": {"parentSocket": "shoe-r", "localStart": [-0.155, 0.093, 0.11], "localEnd": [-0.07500000000000001, 0.093, 0.09], "contactType": "surface-embed", "embedDepth": 0.002, "gapTolerance": 0.003}, "dimensions": {"width": 1, "height": 1, "depth": 1, "units": "meters", "confidence": 0.78}, "transform": {"position": [0, 0, 0], "rotation": [0, 0, 0], "scale": [1, 1, 1]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "lace-r-0", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "sole", "materialLayers": ["sole"], "deformations": [], "joints": [], "seams": [], "localFeatures": [], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(23, 26, 34, 1)", "secondaryAlbedo": "rgba(23, 26, 34, 1)", "materialClass": "plastic", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
+  node_lace_r_0_13.userData.actionProfile = {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "lace-r-0", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}};
+  (nodes["root"] ?? root).add(node_lace_r_0_13);
+  nodes["lace-r-0"] = node_lace_r_0_13;
+  const mesh_lace_r_0_13Geometry = endpoint_lace_r_0_13
+    ? new THREE.CylinderGeometry(endpoint_lace_r_0_13.endRadius, endpoint_lace_r_0_13.baseRadius, endpoint_lace_r_0_13.length, 16, 6)
+    : buildTubeGeometry({"points": [[-0.152, 0.082, 0.098], [-0.07800000000000001, 0.082, 0.09]], "radius": 0.0025, "closed": false});
+  if (!endpoint_lace_r_0_13) {
+    mesh_lace_r_0_13Geometry.scale(1.0, 1.0, 1.0);
   }
-  const mesh_lace_r_0_15 = new THREE.Mesh(
-    mesh_lace_r_0_15Geometry,
+  const mesh_lace_r_0_13 = new THREE.Mesh(
+    mesh_lace_r_0_13Geometry,
     materialMap["sole"] ?? new THREE.MeshStandardMaterial({ color: 0x888888 })
   );
-  mesh_lace_r_0_15.name = "lace-r-0";
-  if (endpoint_lace_r_0_15) {
-    mesh_lace_r_0_15.position.copy(endpoint_lace_r_0_15.midpoint);
-    mesh_lace_r_0_15.quaternion.copy(endpoint_lace_r_0_15.quaternion);
+  mesh_lace_r_0_13.name = "lace-r-0";
+  if (endpoint_lace_r_0_13) {
+    mesh_lace_r_0_13.position.copy(endpoint_lace_r_0_13.midpoint);
+    mesh_lace_r_0_13.quaternion.copy(endpoint_lace_r_0_13.quaternion);
   }
-  mesh_lace_r_0_15.castShadow = options.castShadow ?? true;
-  mesh_lace_r_0_15.receiveShadow = options.receiveShadow ?? true;
-  mesh_lace_r_0_15.userData.sculptComponent = {"id": "lace-r-0", "name": "lace-r-0", "level": "micro", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "tube", "topologyClass": "assembled-solid", "topologyRationale": "Contour follows the reference silhouette; depth is inferred and tested in orbit.", "geometryDescriptor": {"tubePath": {"points": [[-0.155, 0.093, 0.11], [-0.07500000000000001, 0.093, 0.09]], "radius": 0.003, "closed": false}, "attachmentGeometry": "authored-path"}, "parent": "root", "attachment": {"parentSocket": "shoe-r", "localStart": [-0.155, 0.093, 0.11], "localEnd": [-0.07500000000000001, 0.093, 0.09], "contactType": "surface-embed", "embedDepth": 0.002, "gapTolerance": 0.003}, "dimensions": {"width": 1, "height": 1, "depth": 1, "units": "meters", "confidence": 0.78}, "transform": {"position": [0, 0, 0], "rotation": [0, 0, 0], "scale": [1, 1, 1]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "lace-r-0", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "sole", "materialLayers": ["sole"], "deformations": [], "joints": [], "seams": [], "localFeatures": [], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(23, 26, 34, 1)", "secondaryAlbedo": "rgba(23, 26, 34, 1)", "materialClass": "plastic", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
-  node_lace_r_0_15.add(mesh_lace_r_0_15);
-  meshes["lace-r-0"] = mesh_lace_r_0_15;
+  mesh_lace_r_0_13.castShadow = options.castShadow ?? true;
+  mesh_lace_r_0_13.receiveShadow = options.receiveShadow ?? true;
+  mesh_lace_r_0_13.userData.sculptComponent = {"id": "lace-r-0", "name": "lace-r-0", "level": "micro", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "tube", "topologyClass": "assembled-solid", "topologyRationale": "Contour follows the reference silhouette; depth is inferred and tested in orbit.", "geometryDescriptor": {"tubePath": {"points": [[-0.152, 0.082, 0.098], [-0.07800000000000001, 0.082, 0.09]], "radius": 0.0025, "closed": false}, "attachmentGeometry": "authored-path"}, "parent": "root", "attachment": {"parentSocket": "shoe-r", "localStart": [-0.155, 0.093, 0.11], "localEnd": [-0.07500000000000001, 0.093, 0.09], "contactType": "surface-embed", "embedDepth": 0.002, "gapTolerance": 0.003}, "dimensions": {"width": 1, "height": 1, "depth": 1, "units": "meters", "confidence": 0.78}, "transform": {"position": [0, 0, 0], "rotation": [0, 0, 0], "scale": [1, 1, 1]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "lace-r-0", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "sole", "materialLayers": ["sole"], "deformations": [], "joints": [], "seams": [], "localFeatures": [], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(23, 26, 34, 1)", "secondaryAlbedo": "rgba(23, 26, 34, 1)", "materialClass": "plastic", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
+  node_lace_r_0_13.add(mesh_lace_r_0_13);
+  meshes["lace-r-0"] = mesh_lace_r_0_13;
   colliders["lace-r-0"] = {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"};
   destructionGroups["lace-r-0"] ??= [];
-  destructionGroups["lace-r-0"].push(node_lace_r_0_15);
+  destructionGroups["lace-r-0"].push(node_lace_r_0_13);
 
-  const attachment_lace_r_1_16 = {"parentSocket": "shoe-r", "localStart": [-0.155, 0.102, 0.086], "localEnd": [-0.07500000000000001, 0.102, 0.066], "contactType": "surface-embed", "embedDepth": 0.002, "gapTolerance": 0.003};
-  const endpoint_lace_r_1_16 = null; // authored tubePath already in model coordinates
-  const node_lace_r_1_16 = new THREE.Group();
-  node_lace_r_1_16.name = "lace-r-1__pivot";
-  node_lace_r_1_16.scale.set(1, 1, 1);
-  if (endpoint_lace_r_1_16) {
-    node_lace_r_1_16.position.copy(endpoint_lace_r_1_16.start);
-    node_lace_r_1_16.rotation.set(0.0, 0.0, 0.0);
+  const attachment_lace_r_1_14 = {"parentSocket": "shoe-r", "localStart": [-0.155, 0.102, 0.086], "localEnd": [-0.07500000000000001, 0.102, 0.066], "contactType": "surface-embed", "embedDepth": 0.002, "gapTolerance": 0.003};
+  const endpoint_lace_r_1_14 = null; // authored tubePath already in model coordinates
+  const node_lace_r_1_14 = new THREE.Group();
+  node_lace_r_1_14.name = "lace-r-1__pivot";
+  node_lace_r_1_14.scale.set(1, 1, 1);
+  if (endpoint_lace_r_1_14) {
+    node_lace_r_1_14.position.copy(endpoint_lace_r_1_14.start);
+    node_lace_r_1_14.rotation.set(0.0, 0.0, 0.0);
   } else {
-    node_lace_r_1_16.position.set(0.0, 0.0, 0.0);
-    node_lace_r_1_16.rotation.set(0.0, 0.0, 0.0);
+    node_lace_r_1_14.position.set(0.0, 0.0, 0.0);
+    node_lace_r_1_14.rotation.set(0.0, 0.0, 0.0);
   }
-  node_lace_r_1_16.userData.sculptComponent = {"id": "lace-r-1", "name": "lace-r-1", "level": "micro", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "tube", "topologyClass": "assembled-solid", "topologyRationale": "Contour follows the reference silhouette; depth is inferred and tested in orbit.", "geometryDescriptor": {"tubePath": {"points": [[-0.155, 0.102, 0.086], [-0.07500000000000001, 0.102, 0.066]], "radius": 0.003, "closed": false}, "attachmentGeometry": "authored-path"}, "parent": "root", "attachment": {"parentSocket": "shoe-r", "localStart": [-0.155, 0.102, 0.086], "localEnd": [-0.07500000000000001, 0.102, 0.066], "contactType": "surface-embed", "embedDepth": 0.002, "gapTolerance": 0.003}, "dimensions": {"width": 1, "height": 1, "depth": 1, "units": "meters", "confidence": 0.78}, "transform": {"position": [0, 0, 0], "rotation": [0, 0, 0], "scale": [1, 1, 1]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "lace-r-1", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "sole", "materialLayers": ["sole"], "deformations": [], "joints": [], "seams": [], "localFeatures": [], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(23, 26, 34, 1)", "secondaryAlbedo": "rgba(23, 26, 34, 1)", "materialClass": "plastic", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
-  node_lace_r_1_16.userData.actionProfile = {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "lace-r-1", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}};
-  (nodes["root"] ?? root).add(node_lace_r_1_16);
-  nodes["lace-r-1"] = node_lace_r_1_16;
-  const mesh_lace_r_1_16Geometry = endpoint_lace_r_1_16
-    ? new THREE.CylinderGeometry(endpoint_lace_r_1_16.endRadius, endpoint_lace_r_1_16.baseRadius, endpoint_lace_r_1_16.length, 16, 6)
-    : buildTubeGeometry({"points": [[-0.155, 0.102, 0.086], [-0.07500000000000001, 0.102, 0.066]], "radius": 0.003, "closed": false});
-  if (!endpoint_lace_r_1_16) {
-    mesh_lace_r_1_16Geometry.scale(1.0, 1.0, 1.0);
+  node_lace_r_1_14.userData.sculptComponent = {"id": "lace-r-1", "name": "lace-r-1", "level": "micro", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "tube", "topologyClass": "assembled-solid", "topologyRationale": "Contour follows the reference silhouette; depth is inferred and tested in orbit.", "geometryDescriptor": {"tubePath": {"points": [[-0.152, 0.101, 0.077], [-0.07800000000000001, 0.101, 0.069]], "radius": 0.0025, "closed": false}, "attachmentGeometry": "authored-path"}, "parent": "root", "attachment": {"parentSocket": "shoe-r", "localStart": [-0.155, 0.102, 0.086], "localEnd": [-0.07500000000000001, 0.102, 0.066], "contactType": "surface-embed", "embedDepth": 0.002, "gapTolerance": 0.003}, "dimensions": {"width": 1, "height": 1, "depth": 1, "units": "meters", "confidence": 0.78}, "transform": {"position": [0, 0, 0], "rotation": [0, 0, 0], "scale": [1, 1, 1]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "lace-r-1", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "sole", "materialLayers": ["sole"], "deformations": [], "joints": [], "seams": [], "localFeatures": [], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(23, 26, 34, 1)", "secondaryAlbedo": "rgba(23, 26, 34, 1)", "materialClass": "plastic", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
+  node_lace_r_1_14.userData.actionProfile = {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "lace-r-1", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}};
+  (nodes["root"] ?? root).add(node_lace_r_1_14);
+  nodes["lace-r-1"] = node_lace_r_1_14;
+  const mesh_lace_r_1_14Geometry = endpoint_lace_r_1_14
+    ? new THREE.CylinderGeometry(endpoint_lace_r_1_14.endRadius, endpoint_lace_r_1_14.baseRadius, endpoint_lace_r_1_14.length, 16, 6)
+    : buildTubeGeometry({"points": [[-0.152, 0.101, 0.077], [-0.07800000000000001, 0.101, 0.069]], "radius": 0.0025, "closed": false});
+  if (!endpoint_lace_r_1_14) {
+    mesh_lace_r_1_14Geometry.scale(1.0, 1.0, 1.0);
   }
-  const mesh_lace_r_1_16 = new THREE.Mesh(
-    mesh_lace_r_1_16Geometry,
+  const mesh_lace_r_1_14 = new THREE.Mesh(
+    mesh_lace_r_1_14Geometry,
     materialMap["sole"] ?? new THREE.MeshStandardMaterial({ color: 0x888888 })
   );
-  mesh_lace_r_1_16.name = "lace-r-1";
-  if (endpoint_lace_r_1_16) {
-    mesh_lace_r_1_16.position.copy(endpoint_lace_r_1_16.midpoint);
-    mesh_lace_r_1_16.quaternion.copy(endpoint_lace_r_1_16.quaternion);
+  mesh_lace_r_1_14.name = "lace-r-1";
+  if (endpoint_lace_r_1_14) {
+    mesh_lace_r_1_14.position.copy(endpoint_lace_r_1_14.midpoint);
+    mesh_lace_r_1_14.quaternion.copy(endpoint_lace_r_1_14.quaternion);
   }
-  mesh_lace_r_1_16.castShadow = options.castShadow ?? true;
-  mesh_lace_r_1_16.receiveShadow = options.receiveShadow ?? true;
-  mesh_lace_r_1_16.userData.sculptComponent = {"id": "lace-r-1", "name": "lace-r-1", "level": "micro", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "tube", "topologyClass": "assembled-solid", "topologyRationale": "Contour follows the reference silhouette; depth is inferred and tested in orbit.", "geometryDescriptor": {"tubePath": {"points": [[-0.155, 0.102, 0.086], [-0.07500000000000001, 0.102, 0.066]], "radius": 0.003, "closed": false}, "attachmentGeometry": "authored-path"}, "parent": "root", "attachment": {"parentSocket": "shoe-r", "localStart": [-0.155, 0.102, 0.086], "localEnd": [-0.07500000000000001, 0.102, 0.066], "contactType": "surface-embed", "embedDepth": 0.002, "gapTolerance": 0.003}, "dimensions": {"width": 1, "height": 1, "depth": 1, "units": "meters", "confidence": 0.78}, "transform": {"position": [0, 0, 0], "rotation": [0, 0, 0], "scale": [1, 1, 1]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "lace-r-1", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "sole", "materialLayers": ["sole"], "deformations": [], "joints": [], "seams": [], "localFeatures": [], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(23, 26, 34, 1)", "secondaryAlbedo": "rgba(23, 26, 34, 1)", "materialClass": "plastic", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
-  node_lace_r_1_16.add(mesh_lace_r_1_16);
-  meshes["lace-r-1"] = mesh_lace_r_1_16;
+  mesh_lace_r_1_14.castShadow = options.castShadow ?? true;
+  mesh_lace_r_1_14.receiveShadow = options.receiveShadow ?? true;
+  mesh_lace_r_1_14.userData.sculptComponent = {"id": "lace-r-1", "name": "lace-r-1", "level": "micro", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "tube", "topologyClass": "assembled-solid", "topologyRationale": "Contour follows the reference silhouette; depth is inferred and tested in orbit.", "geometryDescriptor": {"tubePath": {"points": [[-0.152, 0.101, 0.077], [-0.07800000000000001, 0.101, 0.069]], "radius": 0.0025, "closed": false}, "attachmentGeometry": "authored-path"}, "parent": "root", "attachment": {"parentSocket": "shoe-r", "localStart": [-0.155, 0.102, 0.086], "localEnd": [-0.07500000000000001, 0.102, 0.066], "contactType": "surface-embed", "embedDepth": 0.002, "gapTolerance": 0.003}, "dimensions": {"width": 1, "height": 1, "depth": 1, "units": "meters", "confidence": 0.78}, "transform": {"position": [0, 0, 0], "rotation": [0, 0, 0], "scale": [1, 1, 1]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "lace-r-1", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "sole", "materialLayers": ["sole"], "deformations": [], "joints": [], "seams": [], "localFeatures": [], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(23, 26, 34, 1)", "secondaryAlbedo": "rgba(23, 26, 34, 1)", "materialClass": "plastic", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
+  node_lace_r_1_14.add(mesh_lace_r_1_14);
+  meshes["lace-r-1"] = mesh_lace_r_1_14;
   colliders["lace-r-1"] = {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"};
   destructionGroups["lace-r-1"] ??= [];
-  destructionGroups["lace-r-1"].push(node_lace_r_1_16);
+  destructionGroups["lace-r-1"].push(node_lace_r_1_14);
 
-  const attachment_lace_r_2_17 = {"parentSocket": "shoe-r", "localStart": [-0.155, 0.111, 0.062], "localEnd": [-0.07500000000000001, 0.111, 0.041999999999999996], "contactType": "surface-embed", "embedDepth": 0.002, "gapTolerance": 0.003};
-  const endpoint_lace_r_2_17 = null; // authored tubePath already in model coordinates
-  const node_lace_r_2_17 = new THREE.Group();
-  node_lace_r_2_17.name = "lace-r-2__pivot";
-  node_lace_r_2_17.scale.set(1, 1, 1);
-  if (endpoint_lace_r_2_17) {
-    node_lace_r_2_17.position.copy(endpoint_lace_r_2_17.start);
-    node_lace_r_2_17.rotation.set(0.0, 0.0, 0.0);
+  const attachment_lace_r_2_15 = {"parentSocket": "shoe-r", "localStart": [-0.155, 0.111, 0.062], "localEnd": [-0.07500000000000001, 0.111, 0.041999999999999996], "contactType": "surface-embed", "embedDepth": 0.002, "gapTolerance": 0.003};
+  const endpoint_lace_r_2_15 = null; // authored tubePath already in model coordinates
+  const node_lace_r_2_15 = new THREE.Group();
+  node_lace_r_2_15.name = "lace-r-2__pivot";
+  node_lace_r_2_15.scale.set(1, 1, 1);
+  if (endpoint_lace_r_2_15) {
+    node_lace_r_2_15.position.copy(endpoint_lace_r_2_15.start);
+    node_lace_r_2_15.rotation.set(0.0, 0.0, 0.0);
   } else {
-    node_lace_r_2_17.position.set(0.0, 0.0, 0.0);
-    node_lace_r_2_17.rotation.set(0.0, 0.0, 0.0);
+    node_lace_r_2_15.position.set(0.0, 0.0, 0.0);
+    node_lace_r_2_15.rotation.set(0.0, 0.0, 0.0);
   }
-  node_lace_r_2_17.userData.sculptComponent = {"id": "lace-r-2", "name": "lace-r-2", "level": "micro", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "tube", "topologyClass": "assembled-solid", "topologyRationale": "Contour follows the reference silhouette; depth is inferred and tested in orbit.", "geometryDescriptor": {"tubePath": {"points": [[-0.155, 0.111, 0.062], [-0.07500000000000001, 0.111, 0.041999999999999996]], "radius": 0.003, "closed": false}, "attachmentGeometry": "authored-path"}, "parent": "root", "attachment": {"parentSocket": "shoe-r", "localStart": [-0.155, 0.111, 0.062], "localEnd": [-0.07500000000000001, 0.111, 0.041999999999999996], "contactType": "surface-embed", "embedDepth": 0.002, "gapTolerance": 0.003}, "dimensions": {"width": 1, "height": 1, "depth": 1, "units": "meters", "confidence": 0.78}, "transform": {"position": [0, 0, 0], "rotation": [0, 0, 0], "scale": [1, 1, 1]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "lace-r-2", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "sole", "materialLayers": ["sole"], "deformations": [], "joints": [], "seams": [], "localFeatures": [], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(23, 26, 34, 1)", "secondaryAlbedo": "rgba(23, 26, 34, 1)", "materialClass": "plastic", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
-  node_lace_r_2_17.userData.actionProfile = {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "lace-r-2", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}};
-  (nodes["root"] ?? root).add(node_lace_r_2_17);
-  nodes["lace-r-2"] = node_lace_r_2_17;
-  const mesh_lace_r_2_17Geometry = endpoint_lace_r_2_17
-    ? new THREE.CylinderGeometry(endpoint_lace_r_2_17.endRadius, endpoint_lace_r_2_17.baseRadius, endpoint_lace_r_2_17.length, 16, 6)
-    : buildTubeGeometry({"points": [[-0.155, 0.111, 0.062], [-0.07500000000000001, 0.111, 0.041999999999999996]], "radius": 0.003, "closed": false});
-  if (!endpoint_lace_r_2_17) {
-    mesh_lace_r_2_17Geometry.scale(1.0, 1.0, 1.0);
+  node_lace_r_2_15.userData.sculptComponent = {"id": "lace-r-2", "name": "lace-r-2", "level": "micro", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "tube", "topologyClass": "assembled-solid", "topologyRationale": "Contour follows the reference silhouette; depth is inferred and tested in orbit.", "geometryDescriptor": {"tubePath": {"points": [[-0.152, 0.12, 0.056], [-0.07800000000000001, 0.12, 0.048]], "radius": 0.0025, "closed": false}, "attachmentGeometry": "authored-path"}, "parent": "root", "attachment": {"parentSocket": "shoe-r", "localStart": [-0.155, 0.111, 0.062], "localEnd": [-0.07500000000000001, 0.111, 0.041999999999999996], "contactType": "surface-embed", "embedDepth": 0.002, "gapTolerance": 0.003}, "dimensions": {"width": 1, "height": 1, "depth": 1, "units": "meters", "confidence": 0.78}, "transform": {"position": [0, 0, 0], "rotation": [0, 0, 0], "scale": [1, 1, 1]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "lace-r-2", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "sole", "materialLayers": ["sole"], "deformations": [], "joints": [], "seams": [], "localFeatures": [], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(23, 26, 34, 1)", "secondaryAlbedo": "rgba(23, 26, 34, 1)", "materialClass": "plastic", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
+  node_lace_r_2_15.userData.actionProfile = {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "lace-r-2", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}};
+  (nodes["root"] ?? root).add(node_lace_r_2_15);
+  nodes["lace-r-2"] = node_lace_r_2_15;
+  const mesh_lace_r_2_15Geometry = endpoint_lace_r_2_15
+    ? new THREE.CylinderGeometry(endpoint_lace_r_2_15.endRadius, endpoint_lace_r_2_15.baseRadius, endpoint_lace_r_2_15.length, 16, 6)
+    : buildTubeGeometry({"points": [[-0.152, 0.12, 0.056], [-0.07800000000000001, 0.12, 0.048]], "radius": 0.0025, "closed": false});
+  if (!endpoint_lace_r_2_15) {
+    mesh_lace_r_2_15Geometry.scale(1.0, 1.0, 1.0);
   }
-  const mesh_lace_r_2_17 = new THREE.Mesh(
-    mesh_lace_r_2_17Geometry,
+  const mesh_lace_r_2_15 = new THREE.Mesh(
+    mesh_lace_r_2_15Geometry,
     materialMap["sole"] ?? new THREE.MeshStandardMaterial({ color: 0x888888 })
   );
-  mesh_lace_r_2_17.name = "lace-r-2";
-  if (endpoint_lace_r_2_17) {
-    mesh_lace_r_2_17.position.copy(endpoint_lace_r_2_17.midpoint);
-    mesh_lace_r_2_17.quaternion.copy(endpoint_lace_r_2_17.quaternion);
+  mesh_lace_r_2_15.name = "lace-r-2";
+  if (endpoint_lace_r_2_15) {
+    mesh_lace_r_2_15.position.copy(endpoint_lace_r_2_15.midpoint);
+    mesh_lace_r_2_15.quaternion.copy(endpoint_lace_r_2_15.quaternion);
   }
-  mesh_lace_r_2_17.castShadow = options.castShadow ?? true;
-  mesh_lace_r_2_17.receiveShadow = options.receiveShadow ?? true;
-  mesh_lace_r_2_17.userData.sculptComponent = {"id": "lace-r-2", "name": "lace-r-2", "level": "micro", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "tube", "topologyClass": "assembled-solid", "topologyRationale": "Contour follows the reference silhouette; depth is inferred and tested in orbit.", "geometryDescriptor": {"tubePath": {"points": [[-0.155, 0.111, 0.062], [-0.07500000000000001, 0.111, 0.041999999999999996]], "radius": 0.003, "closed": false}, "attachmentGeometry": "authored-path"}, "parent": "root", "attachment": {"parentSocket": "shoe-r", "localStart": [-0.155, 0.111, 0.062], "localEnd": [-0.07500000000000001, 0.111, 0.041999999999999996], "contactType": "surface-embed", "embedDepth": 0.002, "gapTolerance": 0.003}, "dimensions": {"width": 1, "height": 1, "depth": 1, "units": "meters", "confidence": 0.78}, "transform": {"position": [0, 0, 0], "rotation": [0, 0, 0], "scale": [1, 1, 1]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "lace-r-2", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "sole", "materialLayers": ["sole"], "deformations": [], "joints": [], "seams": [], "localFeatures": [], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(23, 26, 34, 1)", "secondaryAlbedo": "rgba(23, 26, 34, 1)", "materialClass": "plastic", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
-  node_lace_r_2_17.add(mesh_lace_r_2_17);
-  meshes["lace-r-2"] = mesh_lace_r_2_17;
+  mesh_lace_r_2_15.castShadow = options.castShadow ?? true;
+  mesh_lace_r_2_15.receiveShadow = options.receiveShadow ?? true;
+  mesh_lace_r_2_15.userData.sculptComponent = {"id": "lace-r-2", "name": "lace-r-2", "level": "micro", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "tube", "topologyClass": "assembled-solid", "topologyRationale": "Contour follows the reference silhouette; depth is inferred and tested in orbit.", "geometryDescriptor": {"tubePath": {"points": [[-0.152, 0.12, 0.056], [-0.07800000000000001, 0.12, 0.048]], "radius": 0.0025, "closed": false}, "attachmentGeometry": "authored-path"}, "parent": "root", "attachment": {"parentSocket": "shoe-r", "localStart": [-0.155, 0.111, 0.062], "localEnd": [-0.07500000000000001, 0.111, 0.041999999999999996], "contactType": "surface-embed", "embedDepth": 0.002, "gapTolerance": 0.003}, "dimensions": {"width": 1, "height": 1, "depth": 1, "units": "meters", "confidence": 0.78}, "transform": {"position": [0, 0, 0], "rotation": [0, 0, 0], "scale": [1, 1, 1]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "lace-r-2", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "sole", "materialLayers": ["sole"], "deformations": [], "joints": [], "seams": [], "localFeatures": [], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(23, 26, 34, 1)", "secondaryAlbedo": "rgba(23, 26, 34, 1)", "materialClass": "plastic", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
+  node_lace_r_2_15.add(mesh_lace_r_2_15);
+  meshes["lace-r-2"] = mesh_lace_r_2_15;
   colliders["lace-r-2"] = {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"};
   destructionGroups["lace-r-2"] ??= [];
-  destructionGroups["lace-r-2"].push(node_lace_r_2_17);
+  destructionGroups["lace-r-2"].push(node_lace_r_2_15);
 
-  const attachment_lace_r_3_18 = {"parentSocket": "shoe-r", "localStart": [-0.155, 0.12, 0.03799999999999999], "localEnd": [-0.07500000000000001, 0.12, 0.017999999999999988], "contactType": "surface-embed", "embedDepth": 0.002, "gapTolerance": 0.003};
-  const endpoint_lace_r_3_18 = null; // authored tubePath already in model coordinates
-  const node_lace_r_3_18 = new THREE.Group();
-  node_lace_r_3_18.name = "lace-r-3__pivot";
-  node_lace_r_3_18.scale.set(1, 1, 1);
-  if (endpoint_lace_r_3_18) {
-    node_lace_r_3_18.position.copy(endpoint_lace_r_3_18.start);
-    node_lace_r_3_18.rotation.set(0.0, 0.0, 0.0);
+  const attachment_lace_r_3_16 = {"parentSocket": "shoe-r", "localStart": [-0.155, 0.12, 0.03799999999999999], "localEnd": [-0.07500000000000001, 0.12, 0.017999999999999988], "contactType": "surface-embed", "embedDepth": 0.002, "gapTolerance": 0.003};
+  const endpoint_lace_r_3_16 = null; // authored tubePath already in model coordinates
+  const node_lace_r_3_16 = new THREE.Group();
+  node_lace_r_3_16.name = "lace-r-3__pivot";
+  node_lace_r_3_16.scale.set(1, 1, 1);
+  if (endpoint_lace_r_3_16) {
+    node_lace_r_3_16.position.copy(endpoint_lace_r_3_16.start);
+    node_lace_r_3_16.rotation.set(0.0, 0.0, 0.0);
   } else {
-    node_lace_r_3_18.position.set(0.0, 0.0, 0.0);
-    node_lace_r_3_18.rotation.set(0.0, 0.0, 0.0);
+    node_lace_r_3_16.position.set(0.0, 0.0, 0.0);
+    node_lace_r_3_16.rotation.set(0.0, 0.0, 0.0);
   }
-  node_lace_r_3_18.userData.sculptComponent = {"id": "lace-r-3", "name": "lace-r-3", "level": "micro", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "tube", "topologyClass": "assembled-solid", "topologyRationale": "Contour follows the reference silhouette; depth is inferred and tested in orbit.", "geometryDescriptor": {"tubePath": {"points": [[-0.155, 0.12, 0.03799999999999999], [-0.07500000000000001, 0.12, 0.017999999999999988]], "radius": 0.003, "closed": false}, "attachmentGeometry": "authored-path"}, "parent": "root", "attachment": {"parentSocket": "shoe-r", "localStart": [-0.155, 0.12, 0.03799999999999999], "localEnd": [-0.07500000000000001, 0.12, 0.017999999999999988], "contactType": "surface-embed", "embedDepth": 0.002, "gapTolerance": 0.003}, "dimensions": {"width": 1, "height": 1, "depth": 1, "units": "meters", "confidence": 0.78}, "transform": {"position": [0, 0, 0], "rotation": [0, 0, 0], "scale": [1, 1, 1]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "lace-r-3", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "sole", "materialLayers": ["sole"], "deformations": [], "joints": [], "seams": [], "localFeatures": [], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(23, 26, 34, 1)", "secondaryAlbedo": "rgba(23, 26, 34, 1)", "materialClass": "plastic", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
-  node_lace_r_3_18.userData.actionProfile = {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "lace-r-3", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}};
-  (nodes["root"] ?? root).add(node_lace_r_3_18);
-  nodes["lace-r-3"] = node_lace_r_3_18;
-  const mesh_lace_r_3_18Geometry = endpoint_lace_r_3_18
-    ? new THREE.CylinderGeometry(endpoint_lace_r_3_18.endRadius, endpoint_lace_r_3_18.baseRadius, endpoint_lace_r_3_18.length, 16, 6)
-    : buildTubeGeometry({"points": [[-0.155, 0.12, 0.03799999999999999], [-0.07500000000000001, 0.12, 0.017999999999999988]], "radius": 0.003, "closed": false});
-  if (!endpoint_lace_r_3_18) {
-    mesh_lace_r_3_18Geometry.scale(1.0, 1.0, 1.0);
+  node_lace_r_3_16.userData.sculptComponent = {"id": "lace-r-3", "name": "lace-r-3", "level": "micro", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "tube", "topologyClass": "assembled-solid", "topologyRationale": "Contour follows the reference silhouette; depth is inferred and tested in orbit.", "geometryDescriptor": {"tubePath": {"points": [[-0.152, 0.139, 0.035], [-0.07800000000000001, 0.139, 0.027000000000000003]], "radius": 0.0025, "closed": false}, "attachmentGeometry": "authored-path"}, "parent": "root", "attachment": {"parentSocket": "shoe-r", "localStart": [-0.155, 0.12, 0.03799999999999999], "localEnd": [-0.07500000000000001, 0.12, 0.017999999999999988], "contactType": "surface-embed", "embedDepth": 0.002, "gapTolerance": 0.003}, "dimensions": {"width": 1, "height": 1, "depth": 1, "units": "meters", "confidence": 0.78}, "transform": {"position": [0, 0, 0], "rotation": [0, 0, 0], "scale": [1, 1, 1]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "lace-r-3", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "sole", "materialLayers": ["sole"], "deformations": [], "joints": [], "seams": [], "localFeatures": [], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(23, 26, 34, 1)", "secondaryAlbedo": "rgba(23, 26, 34, 1)", "materialClass": "plastic", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
+  node_lace_r_3_16.userData.actionProfile = {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "lace-r-3", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}};
+  (nodes["root"] ?? root).add(node_lace_r_3_16);
+  nodes["lace-r-3"] = node_lace_r_3_16;
+  const mesh_lace_r_3_16Geometry = endpoint_lace_r_3_16
+    ? new THREE.CylinderGeometry(endpoint_lace_r_3_16.endRadius, endpoint_lace_r_3_16.baseRadius, endpoint_lace_r_3_16.length, 16, 6)
+    : buildTubeGeometry({"points": [[-0.152, 0.139, 0.035], [-0.07800000000000001, 0.139, 0.027000000000000003]], "radius": 0.0025, "closed": false});
+  if (!endpoint_lace_r_3_16) {
+    mesh_lace_r_3_16Geometry.scale(1.0, 1.0, 1.0);
   }
-  const mesh_lace_r_3_18 = new THREE.Mesh(
-    mesh_lace_r_3_18Geometry,
+  const mesh_lace_r_3_16 = new THREE.Mesh(
+    mesh_lace_r_3_16Geometry,
     materialMap["sole"] ?? new THREE.MeshStandardMaterial({ color: 0x888888 })
   );
-  mesh_lace_r_3_18.name = "lace-r-3";
-  if (endpoint_lace_r_3_18) {
-    mesh_lace_r_3_18.position.copy(endpoint_lace_r_3_18.midpoint);
-    mesh_lace_r_3_18.quaternion.copy(endpoint_lace_r_3_18.quaternion);
+  mesh_lace_r_3_16.name = "lace-r-3";
+  if (endpoint_lace_r_3_16) {
+    mesh_lace_r_3_16.position.copy(endpoint_lace_r_3_16.midpoint);
+    mesh_lace_r_3_16.quaternion.copy(endpoint_lace_r_3_16.quaternion);
   }
-  mesh_lace_r_3_18.castShadow = options.castShadow ?? true;
-  mesh_lace_r_3_18.receiveShadow = options.receiveShadow ?? true;
-  mesh_lace_r_3_18.userData.sculptComponent = {"id": "lace-r-3", "name": "lace-r-3", "level": "micro", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "tube", "topologyClass": "assembled-solid", "topologyRationale": "Contour follows the reference silhouette; depth is inferred and tested in orbit.", "geometryDescriptor": {"tubePath": {"points": [[-0.155, 0.12, 0.03799999999999999], [-0.07500000000000001, 0.12, 0.017999999999999988]], "radius": 0.003, "closed": false}, "attachmentGeometry": "authored-path"}, "parent": "root", "attachment": {"parentSocket": "shoe-r", "localStart": [-0.155, 0.12, 0.03799999999999999], "localEnd": [-0.07500000000000001, 0.12, 0.017999999999999988], "contactType": "surface-embed", "embedDepth": 0.002, "gapTolerance": 0.003}, "dimensions": {"width": 1, "height": 1, "depth": 1, "units": "meters", "confidence": 0.78}, "transform": {"position": [0, 0, 0], "rotation": [0, 0, 0], "scale": [1, 1, 1]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "lace-r-3", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "sole", "materialLayers": ["sole"], "deformations": [], "joints": [], "seams": [], "localFeatures": [], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(23, 26, 34, 1)", "secondaryAlbedo": "rgba(23, 26, 34, 1)", "materialClass": "plastic", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
-  node_lace_r_3_18.add(mesh_lace_r_3_18);
-  meshes["lace-r-3"] = mesh_lace_r_3_18;
+  mesh_lace_r_3_16.castShadow = options.castShadow ?? true;
+  mesh_lace_r_3_16.receiveShadow = options.receiveShadow ?? true;
+  mesh_lace_r_3_16.userData.sculptComponent = {"id": "lace-r-3", "name": "lace-r-3", "level": "micro", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "tube", "topologyClass": "assembled-solid", "topologyRationale": "Contour follows the reference silhouette; depth is inferred and tested in orbit.", "geometryDescriptor": {"tubePath": {"points": [[-0.152, 0.139, 0.035], [-0.07800000000000001, 0.139, 0.027000000000000003]], "radius": 0.0025, "closed": false}, "attachmentGeometry": "authored-path"}, "parent": "root", "attachment": {"parentSocket": "shoe-r", "localStart": [-0.155, 0.12, 0.03799999999999999], "localEnd": [-0.07500000000000001, 0.12, 0.017999999999999988], "contactType": "surface-embed", "embedDepth": 0.002, "gapTolerance": 0.003}, "dimensions": {"width": 1, "height": 1, "depth": 1, "units": "meters", "confidence": 0.78}, "transform": {"position": [0, 0, 0], "rotation": [0, 0, 0], "scale": [1, 1, 1]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "lace-r-3", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "sole", "materialLayers": ["sole"], "deformations": [], "joints": [], "seams": [], "localFeatures": [], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(23, 26, 34, 1)", "secondaryAlbedo": "rgba(23, 26, 34, 1)", "materialClass": "plastic", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
+  node_lace_r_3_16.add(mesh_lace_r_3_16);
+  meshes["lace-r-3"] = mesh_lace_r_3_16;
   colliders["lace-r-3"] = {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"};
   destructionGroups["lace-r-3"] ??= [];
-  destructionGroups["lace-r-3"].push(node_lace_r_3_18);
+  destructionGroups["lace-r-3"].push(node_lace_r_3_16);
 
-  const endpoint_neck_19 = makeAttachmentEndpoint(null);
-  const node_neck_19 = new THREE.Group();
-  node_neck_19.name = "neck__pivot";
-  node_neck_19.scale.set(1, 1, 1);
-  if (endpoint_neck_19) {
-    node_neck_19.position.copy(endpoint_neck_19.start);
-    node_neck_19.rotation.set(0.0, 0.0, 0.0);
+  const endpoint_neck_17 = makeAttachmentEndpoint(null);
+  const node_neck_17 = new THREE.Group();
+  node_neck_17.name = "neck__pivot";
+  node_neck_17.scale.set(1, 1, 1);
+  if (endpoint_neck_17) {
+    node_neck_17.position.copy(endpoint_neck_17.start);
+    node_neck_17.rotation.set(0.0, 0.0, 0.0);
   } else {
-    node_neck_19.position.set(0.0, 0.0, 0.0);
-    node_neck_19.rotation.set(0.0, 0.0, 0.0);
+    node_neck_17.position.set(0.0, 0.0, 0.0);
+    node_neck_17.rotation.set(0.0, 0.0, 0.0);
   }
-  node_neck_19.userData.sculptComponent = {"id": "neck", "name": "neck", "level": "meso", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "ellipsoid", "topologyClass": "implicit", "topologyRationale": "Continuous sculpt volume made from smoothly blended fields, not independently rendered spheres.", "geometryDescriptor": {"sdf": {"primitives": [{"id": "neck-shaft", "type": "ellipsoid", "center": [0, 1.49, -0.012], "radii": [0.049, 0.085, 0.045]}], "operations": [], "bounds": {"min": [-0.07400000000000001, 1.382, -0.08199999999999999], "max": [0.07400000000000001, 1.628, 0.058]}, "resolution": 36}, "normalStrategy": "smooth vertex normals"}, "parent": "root", "attachment": null, "dimensions": {"width": 1, "height": 1, "depth": 1, "units": "meters", "confidence": 0.78}, "transform": {"position": [0, 0, 0], "rotation": [0, 0, 0], "scale": [1, 1, 1]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "neck", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "skin", "materialLayers": ["skin"], "deformations": [], "joints": [], "seams": [], "localFeatures": [], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(213, 154, 115, 1)", "secondaryAlbedo": "rgba(213, 154, 115, 1)", "materialClass": "skin", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
-  node_neck_19.userData.actionProfile = {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "neck", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}};
-  (nodes["root"] ?? root).add(node_neck_19);
-  nodes["neck"] = node_neck_19;
-  const mesh_neck_19Geometry = polygonizeSdf({"primitives": [{"id": "neck-shaft", "type": "ellipsoid", "center": [0, 1.49, -0.012], "radii": [0.049, 0.085, 0.045]}], "operations": [], "bounds": {"min": [-0.07400000000000001, 1.382, -0.08199999999999999], "max": [0.07400000000000001, 1.628, 0.058]}, "resolution": 36});
-  if (!endpoint_neck_19) {
-    mesh_neck_19Geometry.scale(1.0, 1.0, 1.0);
+  node_neck_17.userData.sculptComponent = {"id": "neck", "name": "neck", "level": "meso", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "ellipsoid", "topologyClass": "implicit", "topologyRationale": "Continuous sculpt volume made from smoothly blended fields, not independently rendered spheres.", "geometryDescriptor": {"sdf": {"primitives": [{"id": "neck-shaft", "type": "ellipsoid", "center": [0, 1.49, -0.012], "radii": [0.049, 0.085, 0.045]}], "operations": [], "bounds": {"min": [-0.07400000000000001, 1.382, -0.08199999999999999], "max": [0.07400000000000001, 1.628, 0.058]}, "resolution": 36}, "normalStrategy": "smooth vertex normals"}, "parent": "root", "attachment": null, "dimensions": {"width": 1, "height": 1, "depth": 1, "units": "meters", "confidence": 0.78}, "transform": {"position": [0, 0, 0], "rotation": [0, 0, 0], "scale": [1, 1, 1]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "neck", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "skin", "materialLayers": ["skin"], "deformations": [], "joints": [], "seams": [], "localFeatures": [], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(213, 154, 115, 1)", "secondaryAlbedo": "rgba(213, 154, 115, 1)", "materialClass": "skin", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
+  node_neck_17.userData.actionProfile = {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "neck", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}};
+  (nodes["root"] ?? root).add(node_neck_17);
+  nodes["neck"] = node_neck_17;
+  const mesh_neck_17Geometry = polygonizeSdf({"primitives": [{"id": "neck-shaft", "type": "ellipsoid", "center": [0, 1.49, -0.012], "radii": [0.049, 0.085, 0.045]}], "operations": [], "bounds": {"min": [-0.07400000000000001, 1.382, -0.08199999999999999], "max": [0.07400000000000001, 1.628, 0.058]}, "resolution": 36});
+  if (!endpoint_neck_17) {
+    mesh_neck_17Geometry.scale(1.0, 1.0, 1.0);
   }
-  const mesh_neck_19 = new THREE.Mesh(
-    mesh_neck_19Geometry,
+  const mesh_neck_17 = new THREE.Mesh(
+    mesh_neck_17Geometry,
     createSculptMaterial("skin", {"id": "skin", "name": "skin", "type": "standard", "shaderModel": "MeshStandardMaterial", "baseColor": "#d59a73", "color": "#d59a73", "roughness": 0.78, "metalness": 0, "textureless": {"declared": true, "evidence": ["reference-isolated.png: broad smooth color regions, no observable pore/grain pattern at target game distance; simplified art requested by user"]}, "albedo": {"dominant": "#d59a73", "secondary": ["#d59a73"]}, "ambientOcclusion": {"cavityStrength": 0.16, "contactShadowBias": 0.25}, "localOverrides": []}, options, true)
   );
-  mesh_neck_19.name = "neck";
-  if (endpoint_neck_19) {
-    mesh_neck_19.position.copy(endpoint_neck_19.midpoint);
-    mesh_neck_19.quaternion.copy(endpoint_neck_19.quaternion);
+  mesh_neck_17.name = "neck";
+  if (endpoint_neck_17) {
+    mesh_neck_17.position.copy(endpoint_neck_17.midpoint);
+    mesh_neck_17.quaternion.copy(endpoint_neck_17.quaternion);
   }
-  mesh_neck_19.castShadow = options.castShadow ?? true;
-  mesh_neck_19.receiveShadow = options.receiveShadow ?? true;
-  mesh_neck_19.userData.sculptComponent = {"id": "neck", "name": "neck", "level": "meso", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "ellipsoid", "topologyClass": "implicit", "topologyRationale": "Continuous sculpt volume made from smoothly blended fields, not independently rendered spheres.", "geometryDescriptor": {"sdf": {"primitives": [{"id": "neck-shaft", "type": "ellipsoid", "center": [0, 1.49, -0.012], "radii": [0.049, 0.085, 0.045]}], "operations": [], "bounds": {"min": [-0.07400000000000001, 1.382, -0.08199999999999999], "max": [0.07400000000000001, 1.628, 0.058]}, "resolution": 36}, "normalStrategy": "smooth vertex normals"}, "parent": "root", "attachment": null, "dimensions": {"width": 1, "height": 1, "depth": 1, "units": "meters", "confidence": 0.78}, "transform": {"position": [0, 0, 0], "rotation": [0, 0, 0], "scale": [1, 1, 1]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "neck", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "skin", "materialLayers": ["skin"], "deformations": [], "joints": [], "seams": [], "localFeatures": [], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(213, 154, 115, 1)", "secondaryAlbedo": "rgba(213, 154, 115, 1)", "materialClass": "skin", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
-  node_neck_19.add(mesh_neck_19);
-  meshes["neck"] = mesh_neck_19;
+  mesh_neck_17.castShadow = options.castShadow ?? true;
+  mesh_neck_17.receiveShadow = options.receiveShadow ?? true;
+  mesh_neck_17.userData.sculptComponent = {"id": "neck", "name": "neck", "level": "meso", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "ellipsoid", "topologyClass": "implicit", "topologyRationale": "Continuous sculpt volume made from smoothly blended fields, not independently rendered spheres.", "geometryDescriptor": {"sdf": {"primitives": [{"id": "neck-shaft", "type": "ellipsoid", "center": [0, 1.49, -0.012], "radii": [0.049, 0.085, 0.045]}], "operations": [], "bounds": {"min": [-0.07400000000000001, 1.382, -0.08199999999999999], "max": [0.07400000000000001, 1.628, 0.058]}, "resolution": 36}, "normalStrategy": "smooth vertex normals"}, "parent": "root", "attachment": null, "dimensions": {"width": 1, "height": 1, "depth": 1, "units": "meters", "confidence": 0.78}, "transform": {"position": [0, 0, 0], "rotation": [0, 0, 0], "scale": [1, 1, 1]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "neck", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "skin", "materialLayers": ["skin"], "deformations": [], "joints": [], "seams": [], "localFeatures": [], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(213, 154, 115, 1)", "secondaryAlbedo": "rgba(213, 154, 115, 1)", "materialClass": "skin", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
+  node_neck_17.add(mesh_neck_17);
+  meshes["neck"] = mesh_neck_17;
   colliders["neck"] = {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"};
   destructionGroups["neck"] ??= [];
-  destructionGroups["neck"].push(node_neck_19);
+  destructionGroups["neck"].push(node_neck_17);
 
-  const endpoint_head_20 = makeAttachmentEndpoint(null);
-  const node_head_20 = new THREE.Group();
-  node_head_20.name = "head__pivot";
-  node_head_20.scale.set(1, 1, 1);
-  if (endpoint_head_20) {
-    node_head_20.position.copy(endpoint_head_20.start);
-    node_head_20.rotation.set(0.0, 0.0, 0.0);
+  const endpoint_head_18 = makeAttachmentEndpoint(null);
+  const node_head_18 = new THREE.Group();
+  node_head_18.name = "head__pivot";
+  node_head_18.scale.set(1, 1, 1);
+  if (endpoint_head_18) {
+    node_head_18.position.copy(endpoint_head_18.start);
+    node_head_18.rotation.set(0.0, 0.0, 0.0);
   } else {
-    node_head_20.position.set(0.0, 0.0, 0.0);
-    node_head_20.rotation.set(0.0, 0.0, 0.0);
+    node_head_18.position.set(0.0, 0.0, 0.0);
+    node_head_18.rotation.set(0.0, 0.0, 0.0);
   }
-  node_head_20.userData.sculptComponent = {"id": "head", "name": "head", "level": "macro", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "tapered-sweep", "topologyClass": "continuous-sculpt", "topologyRationale": "Single closed head contour with continuously sculpted nose, brow and lips. No separate cheek or jaw lobes.", "geometryDescriptor": {"taperedSweep": {"stations": [{"position": [0, 1.57, 0.027], "rx": 0.036, "rz": 0.042}, {"position": [0, 1.58, 0.014], "rx": 0.05, "rz": 0.056}, {"position": [0, 1.599, 0.005], "rx": 0.059, "rz": 0.067}, {"position": [0, 1.63, -0.006], "rx": 0.071, "rz": 0.081}, {"position": [0, 1.67, -0.012], "rx": 0.078, "rz": 0.096}, {"position": [0, 1.706, -0.013], "rx": 0.078, "rz": 0.099}, {"position": [0, 1.74, -0.018], "rx": 0.08, "rz": 0.096}, {"position": [0, 1.775, -0.02], "rx": 0.072, "rz": 0.082}, {"position": [0, 1.8, -0.02], "rx": 0.053, "rz": 0.057}, {"position": [0, 1.815, -0.02], "rx": 0.005, "rz": 0.005}], "radialSegments": 64, "capEnds": true, "fixedFrame": "horizontal"}, "normalStrategy": "Horizontal anatomical contour sections: preserve world Y cross-section planes to avoid mouth/jaw folding when centre depth changes.", "faceSculpt": {"frontAxis": "+Z", "nose": [0, 1.661, 0.026, 0.014, 0.022], "bridge": [0, 1.69, 0.014, 0.027, 0.011], "cheeks": [[0.052, 1.653, 0.026, 0.03, 0.003], [-0.052, 1.653, 0.026, 0.03, 0.003]], "lipRidge": [0, 1.632, 0.025, 0.007, 0.002], "jawExponent": 2.25}, "displayHeadScale": 1.07, "displayHeadOffsetY": -0.018}, "parent": "root", "attachment": null, "dimensions": {"width": 1, "height": 1, "depth": 1, "units": "meters", "confidence": 0.78}, "transform": {"position": [0, 0, 0], "rotation": [0, 0, 0], "scale": [1, 1, 1]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "head", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "skin", "materialLayers": ["skin"], "deformations": [], "joints": [], "seams": [], "localFeatures": [], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(213, 154, 115, 1)", "secondaryAlbedo": "rgba(213, 154, 115, 1)", "materialClass": "skin", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
-  node_head_20.userData.actionProfile = {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "head", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}};
-  (nodes["root"] ?? root).add(node_head_20);
-  nodes["head"] = node_head_20;
-  const mesh_head_20Geometry = endpoint_head_20
-    ? new THREE.CylinderGeometry(endpoint_head_20.endRadius, endpoint_head_20.baseRadius, endpoint_head_20.length, 16, 6)
+  node_head_18.userData.sculptComponent = {"id": "head", "name": "head", "level": "macro", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "tapered-sweep", "topologyClass": "continuous-sculpt", "topologyRationale": "Single closed head contour with continuously sculpted nose, brow and lips. No separate cheek or jaw lobes.", "geometryDescriptor": {"taperedSweep": {"stations": [{"position": [0, 1.57, 0.027], "rx": 0.036, "rz": 0.042}, {"position": [0, 1.58, 0.014], "rx": 0.05, "rz": 0.056}, {"position": [0, 1.599, 0.005], "rx": 0.059, "rz": 0.067}, {"position": [0, 1.63, -0.006], "rx": 0.071, "rz": 0.081}, {"position": [0, 1.67, -0.012], "rx": 0.078, "rz": 0.096}, {"position": [0, 1.706, -0.013], "rx": 0.078, "rz": 0.099}, {"position": [0, 1.74, -0.018], "rx": 0.08, "rz": 0.096}, {"position": [0, 1.775, -0.02], "rx": 0.072, "rz": 0.082}, {"position": [0, 1.8, -0.02], "rx": 0.053, "rz": 0.057}, {"position": [0, 1.815, -0.02], "rx": 0.005, "rz": 0.005}], "radialSegments": 64, "capEnds": true, "fixedFrame": "horizontal"}, "normalStrategy": "Horizontal anatomical contour sections: preserve world Y cross-section planes to avoid mouth/jaw folding when centre depth changes.", "faceSculpt": {"frontAxis": "+Z", "nose": [0, 1.661, 0.021, 0.016, 0.019], "bridge": [0, 1.69, 0.014, 0.027, 0.009], "cheeks": [[0.052, 1.653, 0.026, 0.03, 0.003], [-0.052, 1.653, 0.026, 0.03, 0.003]], "lipRidge": [0, 1.631, 0.023, 0.008, 0.003], "jawExponent": 2.25, "backRoundness": {"centreY": 1.715, "heightRadius": 0.075, "depth": 0.022}}, "displayHeadScale": 1.07, "displayHeadOffsetY": -0.018}, "parent": "root", "attachment": null, "dimensions": {"width": 1, "height": 1, "depth": 1, "units": "meters", "confidence": 0.78}, "transform": {"position": [0, 0, 0], "rotation": [0, 0, 0], "scale": [1, 1, 1]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "head", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "skin", "materialLayers": ["skin"], "deformations": [], "joints": [], "seams": [], "localFeatures": [], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(213, 154, 115, 1)", "secondaryAlbedo": "rgba(213, 154, 115, 1)", "materialClass": "skin", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
+  node_head_18.userData.actionProfile = {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "head", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}};
+  (nodes["root"] ?? root).add(node_head_18);
+  nodes["head"] = node_head_18;
+  const mesh_head_18Geometry = endpoint_head_18
+    ? new THREE.CylinderGeometry(endpoint_head_18.endRadius, endpoint_head_18.baseRadius, endpoint_head_18.length, 16, 6)
     : buildTaperedSweepGeometry({"stations": [{"position": [0, 1.57, 0.027], "rx": 0.036, "rz": 0.042}, {"position": [0, 1.58, 0.014], "rx": 0.05, "rz": 0.056}, {"position": [0, 1.599, 0.005], "rx": 0.059, "rz": 0.067}, {"position": [0, 1.63, -0.006], "rx": 0.071, "rz": 0.081}, {"position": [0, 1.67, -0.012], "rx": 0.078, "rz": 0.096}, {"position": [0, 1.706, -0.013], "rx": 0.078, "rz": 0.099}, {"position": [0, 1.74, -0.018], "rx": 0.08, "rz": 0.096}, {"position": [0, 1.775, -0.02], "rx": 0.072, "rz": 0.082}, {"position": [0, 1.8, -0.02], "rx": 0.053, "rz": 0.057}, {"position": [0, 1.815, -0.02], "rx": 0.005, "rz": 0.005}], "radialSegments": 64, "capEnds": true, "fixedFrame": "horizontal"});
-  if (!endpoint_head_20) {
-    mesh_head_20Geometry.scale(1.0, 1.0, 1.0);
+  if (!endpoint_head_18) {
+    mesh_head_18Geometry.scale(1.0, 1.0, 1.0);
   }
-  const mesh_head_20 = new THREE.Mesh(
-    mesh_head_20Geometry,
+  const mesh_head_18 = new THREE.Mesh(
+    mesh_head_18Geometry,
     materialMap["skin"] ?? new THREE.MeshStandardMaterial({ color: 0x888888 })
   );
-  mesh_head_20.name = "head";
-  if (endpoint_head_20) {
-    mesh_head_20.position.copy(endpoint_head_20.midpoint);
-    mesh_head_20.quaternion.copy(endpoint_head_20.quaternion);
+  mesh_head_18.name = "head";
+  if (endpoint_head_18) {
+    mesh_head_18.position.copy(endpoint_head_18.midpoint);
+    mesh_head_18.quaternion.copy(endpoint_head_18.quaternion);
   }
-  mesh_head_20.castShadow = options.castShadow ?? true;
-  mesh_head_20.receiveShadow = options.receiveShadow ?? true;
-  mesh_head_20.userData.sculptComponent = {"id": "head", "name": "head", "level": "macro", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "tapered-sweep", "topologyClass": "continuous-sculpt", "topologyRationale": "Single closed head contour with continuously sculpted nose, brow and lips. No separate cheek or jaw lobes.", "geometryDescriptor": {"taperedSweep": {"stations": [{"position": [0, 1.57, 0.027], "rx": 0.036, "rz": 0.042}, {"position": [0, 1.58, 0.014], "rx": 0.05, "rz": 0.056}, {"position": [0, 1.599, 0.005], "rx": 0.059, "rz": 0.067}, {"position": [0, 1.63, -0.006], "rx": 0.071, "rz": 0.081}, {"position": [0, 1.67, -0.012], "rx": 0.078, "rz": 0.096}, {"position": [0, 1.706, -0.013], "rx": 0.078, "rz": 0.099}, {"position": [0, 1.74, -0.018], "rx": 0.08, "rz": 0.096}, {"position": [0, 1.775, -0.02], "rx": 0.072, "rz": 0.082}, {"position": [0, 1.8, -0.02], "rx": 0.053, "rz": 0.057}, {"position": [0, 1.815, -0.02], "rx": 0.005, "rz": 0.005}], "radialSegments": 64, "capEnds": true, "fixedFrame": "horizontal"}, "normalStrategy": "Horizontal anatomical contour sections: preserve world Y cross-section planes to avoid mouth/jaw folding when centre depth changes.", "faceSculpt": {"frontAxis": "+Z", "nose": [0, 1.661, 0.026, 0.014, 0.022], "bridge": [0, 1.69, 0.014, 0.027, 0.011], "cheeks": [[0.052, 1.653, 0.026, 0.03, 0.003], [-0.052, 1.653, 0.026, 0.03, 0.003]], "lipRidge": [0, 1.632, 0.025, 0.007, 0.002], "jawExponent": 2.25}, "displayHeadScale": 1.07, "displayHeadOffsetY": -0.018}, "parent": "root", "attachment": null, "dimensions": {"width": 1, "height": 1, "depth": 1, "units": "meters", "confidence": 0.78}, "transform": {"position": [0, 0, 0], "rotation": [0, 0, 0], "scale": [1, 1, 1]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "head", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "skin", "materialLayers": ["skin"], "deformations": [], "joints": [], "seams": [], "localFeatures": [], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(213, 154, 115, 1)", "secondaryAlbedo": "rgba(213, 154, 115, 1)", "materialClass": "skin", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
-  node_head_20.add(mesh_head_20);
-  meshes["head"] = mesh_head_20;
+  mesh_head_18.castShadow = options.castShadow ?? true;
+  mesh_head_18.receiveShadow = options.receiveShadow ?? true;
+  mesh_head_18.userData.sculptComponent = {"id": "head", "name": "head", "level": "macro", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "tapered-sweep", "topologyClass": "continuous-sculpt", "topologyRationale": "Single closed head contour with continuously sculpted nose, brow and lips. No separate cheek or jaw lobes.", "geometryDescriptor": {"taperedSweep": {"stations": [{"position": [0, 1.57, 0.027], "rx": 0.036, "rz": 0.042}, {"position": [0, 1.58, 0.014], "rx": 0.05, "rz": 0.056}, {"position": [0, 1.599, 0.005], "rx": 0.059, "rz": 0.067}, {"position": [0, 1.63, -0.006], "rx": 0.071, "rz": 0.081}, {"position": [0, 1.67, -0.012], "rx": 0.078, "rz": 0.096}, {"position": [0, 1.706, -0.013], "rx": 0.078, "rz": 0.099}, {"position": [0, 1.74, -0.018], "rx": 0.08, "rz": 0.096}, {"position": [0, 1.775, -0.02], "rx": 0.072, "rz": 0.082}, {"position": [0, 1.8, -0.02], "rx": 0.053, "rz": 0.057}, {"position": [0, 1.815, -0.02], "rx": 0.005, "rz": 0.005}], "radialSegments": 64, "capEnds": true, "fixedFrame": "horizontal"}, "normalStrategy": "Horizontal anatomical contour sections: preserve world Y cross-section planes to avoid mouth/jaw folding when centre depth changes.", "faceSculpt": {"frontAxis": "+Z", "nose": [0, 1.661, 0.021, 0.016, 0.019], "bridge": [0, 1.69, 0.014, 0.027, 0.009], "cheeks": [[0.052, 1.653, 0.026, 0.03, 0.003], [-0.052, 1.653, 0.026, 0.03, 0.003]], "lipRidge": [0, 1.631, 0.023, 0.008, 0.003], "jawExponent": 2.25, "backRoundness": {"centreY": 1.715, "heightRadius": 0.075, "depth": 0.022}}, "displayHeadScale": 1.07, "displayHeadOffsetY": -0.018}, "parent": "root", "attachment": null, "dimensions": {"width": 1, "height": 1, "depth": 1, "units": "meters", "confidence": 0.78}, "transform": {"position": [0, 0, 0], "rotation": [0, 0, 0], "scale": [1, 1, 1]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "head", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "skin", "materialLayers": ["skin"], "deformations": [], "joints": [], "seams": [], "localFeatures": [], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(213, 154, 115, 1)", "secondaryAlbedo": "rgba(213, 154, 115, 1)", "materialClass": "skin", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
+  node_head_18.add(mesh_head_18);
+  meshes["head"] = mesh_head_18;
   colliders["head"] = {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"};
   destructionGroups["head"] ??= [];
-  destructionGroups["head"].push(node_head_20);
+  destructionGroups["head"].push(node_head_18);
 
-  const endpoint_ear__1_21 = makeAttachmentEndpoint(null);
-  const node_ear__1_21 = new THREE.Group();
-  node_ear__1_21.name = "ear--1__pivot";
-  node_ear__1_21.scale.set(1, 1, 1);
-  if (endpoint_ear__1_21) {
-    node_ear__1_21.position.copy(endpoint_ear__1_21.start);
-    node_ear__1_21.rotation.set(0.0, 0.0, 0.0);
+  const endpoint_ear__1_19 = makeAttachmentEndpoint(null);
+  const node_ear__1_19 = new THREE.Group();
+  node_ear__1_19.name = "ear--1__pivot";
+  node_ear__1_19.scale.set(1, 1, 1);
+  if (endpoint_ear__1_19) {
+    node_ear__1_19.position.copy(endpoint_ear__1_19.start);
+    node_ear__1_19.rotation.set(0.0, 0.0, 0.0);
   } else {
-    node_ear__1_21.position.set(-0.098, 1.684, -0.005);
-    node_ear__1_21.rotation.set(0.0, 0.0, 0.0);
+    node_ear__1_19.position.set(-0.098, 1.684, -0.005);
+    node_ear__1_19.rotation.set(0.0, 0.0, 0.0);
   }
-  node_ear__1_21.userData.sculptComponent = {"id": "ear--1", "name": "ear--1", "level": "meso", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "ellipsoid", "topologyClass": "assembled-solid", "topologyRationale": "Contour follows the reference silhouette; depth is inferred and tested in orbit.", "geometryDescriptor": {"normalStrategy": "smooth vertex normals", "uvStrategy": "generated procedural coordinates", "edgeTreatment": {"type": "none", "bevelRadius": 0, "segments": 1}, "deformationStack": []}, "parent": "root", "attachment": null, "dimensions": {"width": 0.035, "height": 0.061, "depth": 0.033, "units": "meters", "confidence": 0.78}, "transform": {"position": [-0.098, 1.684, -0.005], "rotation": [0, 0, 0], "scale": [0.035, 0.061, 0.033]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "ear--1", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "skin", "materialLayers": ["skin"], "deformations": [], "joints": [], "seams": [], "localFeatures": [], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(213, 154, 115, 1)", "secondaryAlbedo": "rgba(213, 154, 115, 1)", "materialClass": "skin", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
-  node_ear__1_21.userData.actionProfile = {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "ear--1", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}};
-  (nodes["root"] ?? root).add(node_ear__1_21);
-  nodes["ear--1"] = node_ear__1_21;
-  const mesh_ear__1_21Geometry = endpoint_ear__1_21
-    ? new THREE.CylinderGeometry(endpoint_ear__1_21.endRadius, endpoint_ear__1_21.baseRadius, endpoint_ear__1_21.length, 16, 6)
+  node_ear__1_19.userData.sculptComponent = {"id": "ear--1", "name": "ear--1", "level": "meso", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "ellipsoid", "topologyClass": "assembled-solid", "topologyRationale": "Contour follows the reference silhouette; depth is inferred and tested in orbit.", "geometryDescriptor": {"normalStrategy": "smooth vertex normals", "uvStrategy": "generated procedural coordinates", "edgeTreatment": {"type": "none", "bevelRadius": 0, "segments": 1}, "deformationStack": []}, "parent": "root", "attachment": null, "dimensions": {"width": 0.035, "height": 0.061, "depth": 0.033, "units": "meters", "confidence": 0.78}, "transform": {"position": [-0.098, 1.684, -0.005], "rotation": [0, 0, 0], "scale": [0.035, 0.061, 0.033]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "ear--1", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "skin", "materialLayers": ["skin"], "deformations": [], "joints": [], "seams": [], "localFeatures": [], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(213, 154, 115, 1)", "secondaryAlbedo": "rgba(213, 154, 115, 1)", "materialClass": "skin", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
+  node_ear__1_19.userData.actionProfile = {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "ear--1", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}};
+  (nodes["root"] ?? root).add(node_ear__1_19);
+  nodes["ear--1"] = node_ear__1_19;
+  const mesh_ear__1_19Geometry = endpoint_ear__1_19
+    ? new THREE.CylinderGeometry(endpoint_ear__1_19.endRadius, endpoint_ear__1_19.baseRadius, endpoint_ear__1_19.length, 16, 6)
     : new THREE.SphereGeometry(0.5, 32, 20);
-  if (!endpoint_ear__1_21) {
-    mesh_ear__1_21Geometry.scale(0.035, 0.061, 0.033);
+  if (!endpoint_ear__1_19) {
+    mesh_ear__1_19Geometry.scale(0.035, 0.061, 0.033);
   }
-  const mesh_ear__1_21 = new THREE.Mesh(
-    mesh_ear__1_21Geometry,
+  const mesh_ear__1_19 = new THREE.Mesh(
+    mesh_ear__1_19Geometry,
     materialMap["skin"] ?? new THREE.MeshStandardMaterial({ color: 0x888888 })
   );
-  mesh_ear__1_21.name = "ear--1";
-  if (endpoint_ear__1_21) {
-    mesh_ear__1_21.position.copy(endpoint_ear__1_21.midpoint);
-    mesh_ear__1_21.quaternion.copy(endpoint_ear__1_21.quaternion);
+  mesh_ear__1_19.name = "ear--1";
+  if (endpoint_ear__1_19) {
+    mesh_ear__1_19.position.copy(endpoint_ear__1_19.midpoint);
+    mesh_ear__1_19.quaternion.copy(endpoint_ear__1_19.quaternion);
   }
-  mesh_ear__1_21.castShadow = options.castShadow ?? true;
-  mesh_ear__1_21.receiveShadow = options.receiveShadow ?? true;
-  mesh_ear__1_21.userData.sculptComponent = {"id": "ear--1", "name": "ear--1", "level": "meso", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "ellipsoid", "topologyClass": "assembled-solid", "topologyRationale": "Contour follows the reference silhouette; depth is inferred and tested in orbit.", "geometryDescriptor": {"normalStrategy": "smooth vertex normals", "uvStrategy": "generated procedural coordinates", "edgeTreatment": {"type": "none", "bevelRadius": 0, "segments": 1}, "deformationStack": []}, "parent": "root", "attachment": null, "dimensions": {"width": 0.035, "height": 0.061, "depth": 0.033, "units": "meters", "confidence": 0.78}, "transform": {"position": [-0.098, 1.684, -0.005], "rotation": [0, 0, 0], "scale": [0.035, 0.061, 0.033]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "ear--1", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "skin", "materialLayers": ["skin"], "deformations": [], "joints": [], "seams": [], "localFeatures": [], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(213, 154, 115, 1)", "secondaryAlbedo": "rgba(213, 154, 115, 1)", "materialClass": "skin", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
-  node_ear__1_21.add(mesh_ear__1_21);
-  meshes["ear--1"] = mesh_ear__1_21;
+  mesh_ear__1_19.castShadow = options.castShadow ?? true;
+  mesh_ear__1_19.receiveShadow = options.receiveShadow ?? true;
+  mesh_ear__1_19.userData.sculptComponent = {"id": "ear--1", "name": "ear--1", "level": "meso", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "ellipsoid", "topologyClass": "assembled-solid", "topologyRationale": "Contour follows the reference silhouette; depth is inferred and tested in orbit.", "geometryDescriptor": {"normalStrategy": "smooth vertex normals", "uvStrategy": "generated procedural coordinates", "edgeTreatment": {"type": "none", "bevelRadius": 0, "segments": 1}, "deformationStack": []}, "parent": "root", "attachment": null, "dimensions": {"width": 0.035, "height": 0.061, "depth": 0.033, "units": "meters", "confidence": 0.78}, "transform": {"position": [-0.098, 1.684, -0.005], "rotation": [0, 0, 0], "scale": [0.035, 0.061, 0.033]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "ear--1", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "skin", "materialLayers": ["skin"], "deformations": [], "joints": [], "seams": [], "localFeatures": [], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(213, 154, 115, 1)", "secondaryAlbedo": "rgba(213, 154, 115, 1)", "materialClass": "skin", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
+  node_ear__1_19.add(mesh_ear__1_19);
+  meshes["ear--1"] = mesh_ear__1_19;
   colliders["ear--1"] = {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"};
   destructionGroups["ear--1"] ??= [];
-  destructionGroups["ear--1"].push(node_ear__1_21);
+  destructionGroups["ear--1"].push(node_ear__1_19);
 
-  const endpoint_eye__1_22 = makeAttachmentEndpoint(null);
-  const node_eye__1_22 = new THREE.Group();
-  node_eye__1_22.name = "eye--1__pivot";
-  node_eye__1_22.scale.set(1, 1, 1);
-  if (endpoint_eye__1_22) {
-    node_eye__1_22.position.copy(endpoint_eye__1_22.start);
-    node_eye__1_22.rotation.set(0.0, 0.0, 0.0);
+  const endpoint_eye__1_20 = makeAttachmentEndpoint(null);
+  const node_eye__1_20 = new THREE.Group();
+  node_eye__1_20.name = "eye--1__pivot";
+  node_eye__1_20.scale.set(1, 1, 1);
+  if (endpoint_eye__1_20) {
+    node_eye__1_20.position.copy(endpoint_eye__1_20.start);
+    node_eye__1_20.rotation.set(0.0, 0.0, 0.0);
   } else {
-    node_eye__1_22.position.set(-0.039, 1.709, 0.07);
-    node_eye__1_22.rotation.set(0.0, 0.0, 0.0);
+    node_eye__1_20.position.set(-0.039, 1.709, 0.07);
+    node_eye__1_20.rotation.set(0.0, 0.0, 0.0);
   }
-  node_eye__1_22.userData.sculptComponent = {"id": "eye--1", "name": "eye--1", "level": "micro", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "ellipsoid", "topologyClass": "assembled-solid", "topologyRationale": "Contour follows the reference silhouette; depth is inferred and tested in orbit.", "geometryDescriptor": {"normalStrategy": "smooth vertex normals", "uvStrategy": "generated procedural coordinates", "edgeTreatment": {"type": "none", "bevelRadius": 0, "segments": 1}, "deformationStack": []}, "parent": "root", "attachment": null, "dimensions": {"width": 0.035, "height": 0.018, "depth": 0.014, "units": "meters", "confidence": 0.78}, "transform": {"position": [-0.039, 1.709, 0.07], "rotation": [0, 0, 0], "scale": [0.035, 0.018, 0.014]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "eye--1", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "eye", "materialLayers": ["eye"], "deformations": [], "joints": [], "seams": [], "localFeatures": [], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(238, 232, 222, 1)", "secondaryAlbedo": "rgba(238, 232, 222, 1)", "materialClass": "plastic", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
-  node_eye__1_22.userData.actionProfile = {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "eye--1", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}};
-  (nodes["root"] ?? root).add(node_eye__1_22);
-  nodes["eye--1"] = node_eye__1_22;
-  const mesh_eye__1_22Geometry = endpoint_eye__1_22
-    ? new THREE.CylinderGeometry(endpoint_eye__1_22.endRadius, endpoint_eye__1_22.baseRadius, endpoint_eye__1_22.length, 16, 6)
+  node_eye__1_20.userData.sculptComponent = {"id": "eye--1", "name": "eye--1", "level": "micro", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "ellipsoid", "topologyClass": "assembled-solid", "topologyRationale": "Contour follows the reference silhouette; depth is inferred and tested in orbit.", "geometryDescriptor": {"normalStrategy": "smooth vertex normals", "uvStrategy": "generated procedural coordinates", "edgeTreatment": {"type": "none", "bevelRadius": 0, "segments": 1}, "deformationStack": []}, "parent": "root", "attachment": null, "dimensions": {"width": 0.035, "height": 0.018, "depth": 0.014, "units": "meters", "confidence": 0.78}, "transform": {"position": [-0.039, 1.709, 0.07], "rotation": [0, 0, 0], "scale": [0.035, 0.018, 0.014]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "eye--1", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "eye", "materialLayers": ["eye"], "deformations": [], "joints": [], "seams": [], "localFeatures": [], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(238, 232, 222, 1)", "secondaryAlbedo": "rgba(238, 232, 222, 1)", "materialClass": "plastic", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
+  node_eye__1_20.userData.actionProfile = {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "eye--1", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}};
+  (nodes["root"] ?? root).add(node_eye__1_20);
+  nodes["eye--1"] = node_eye__1_20;
+  const mesh_eye__1_20Geometry = endpoint_eye__1_20
+    ? new THREE.CylinderGeometry(endpoint_eye__1_20.endRadius, endpoint_eye__1_20.baseRadius, endpoint_eye__1_20.length, 16, 6)
     : new THREE.SphereGeometry(0.5, 32, 20);
-  if (!endpoint_eye__1_22) {
-    mesh_eye__1_22Geometry.scale(0.035, 0.018, 0.014);
+  if (!endpoint_eye__1_20) {
+    mesh_eye__1_20Geometry.scale(0.035, 0.018, 0.014);
   }
-  const mesh_eye__1_22 = new THREE.Mesh(
-    mesh_eye__1_22Geometry,
+  const mesh_eye__1_20 = new THREE.Mesh(
+    mesh_eye__1_20Geometry,
     materialMap["eye"] ?? new THREE.MeshStandardMaterial({ color: 0x888888 })
   );
-  mesh_eye__1_22.name = "eye--1";
-  if (endpoint_eye__1_22) {
-    mesh_eye__1_22.position.copy(endpoint_eye__1_22.midpoint);
-    mesh_eye__1_22.quaternion.copy(endpoint_eye__1_22.quaternion);
+  mesh_eye__1_20.name = "eye--1";
+  if (endpoint_eye__1_20) {
+    mesh_eye__1_20.position.copy(endpoint_eye__1_20.midpoint);
+    mesh_eye__1_20.quaternion.copy(endpoint_eye__1_20.quaternion);
   }
-  mesh_eye__1_22.castShadow = options.castShadow ?? true;
-  mesh_eye__1_22.receiveShadow = options.receiveShadow ?? true;
-  mesh_eye__1_22.userData.sculptComponent = {"id": "eye--1", "name": "eye--1", "level": "micro", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "ellipsoid", "topologyClass": "assembled-solid", "topologyRationale": "Contour follows the reference silhouette; depth is inferred and tested in orbit.", "geometryDescriptor": {"normalStrategy": "smooth vertex normals", "uvStrategy": "generated procedural coordinates", "edgeTreatment": {"type": "none", "bevelRadius": 0, "segments": 1}, "deformationStack": []}, "parent": "root", "attachment": null, "dimensions": {"width": 0.035, "height": 0.018, "depth": 0.014, "units": "meters", "confidence": 0.78}, "transform": {"position": [-0.039, 1.709, 0.07], "rotation": [0, 0, 0], "scale": [0.035, 0.018, 0.014]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "eye--1", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "eye", "materialLayers": ["eye"], "deformations": [], "joints": [], "seams": [], "localFeatures": [], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(238, 232, 222, 1)", "secondaryAlbedo": "rgba(238, 232, 222, 1)", "materialClass": "plastic", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
-  node_eye__1_22.add(mesh_eye__1_22);
-  meshes["eye--1"] = mesh_eye__1_22;
+  mesh_eye__1_20.castShadow = options.castShadow ?? true;
+  mesh_eye__1_20.receiveShadow = options.receiveShadow ?? true;
+  mesh_eye__1_20.userData.sculptComponent = {"id": "eye--1", "name": "eye--1", "level": "micro", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "ellipsoid", "topologyClass": "assembled-solid", "topologyRationale": "Contour follows the reference silhouette; depth is inferred and tested in orbit.", "geometryDescriptor": {"normalStrategy": "smooth vertex normals", "uvStrategy": "generated procedural coordinates", "edgeTreatment": {"type": "none", "bevelRadius": 0, "segments": 1}, "deformationStack": []}, "parent": "root", "attachment": null, "dimensions": {"width": 0.035, "height": 0.018, "depth": 0.014, "units": "meters", "confidence": 0.78}, "transform": {"position": [-0.039, 1.709, 0.07], "rotation": [0, 0, 0], "scale": [0.035, 0.018, 0.014]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "eye--1", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "eye", "materialLayers": ["eye"], "deformations": [], "joints": [], "seams": [], "localFeatures": [], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(238, 232, 222, 1)", "secondaryAlbedo": "rgba(238, 232, 222, 1)", "materialClass": "plastic", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
+  node_eye__1_20.add(mesh_eye__1_20);
+  meshes["eye--1"] = mesh_eye__1_20;
   colliders["eye--1"] = {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"};
   destructionGroups["eye--1"] ??= [];
-  destructionGroups["eye--1"].push(node_eye__1_22);
+  destructionGroups["eye--1"].push(node_eye__1_20);
 
-  const endpoint_glasses__1_23 = makeAttachmentEndpoint(null);
-  const node_glasses__1_23 = new THREE.Group();
-  node_glasses__1_23.name = "glasses--1__pivot";
-  node_glasses__1_23.scale.set(1, 1, 1);
-  if (endpoint_glasses__1_23) {
-    node_glasses__1_23.position.copy(endpoint_glasses__1_23.start);
-    node_glasses__1_23.rotation.set(0.0, 0.0, 0.0);
+  const endpoint_glasses__1_21 = makeAttachmentEndpoint(null);
+  const node_glasses__1_21 = new THREE.Group();
+  node_glasses__1_21.name = "glasses--1__pivot";
+  node_glasses__1_21.scale.set(1, 1, 1);
+  if (endpoint_glasses__1_21) {
+    node_glasses__1_21.position.copy(endpoint_glasses__1_21.start);
+    node_glasses__1_21.rotation.set(0.0, 0.0, 0.0);
   } else {
-    node_glasses__1_23.position.set(-0.047, 1.703, 0.088);
-    node_glasses__1_23.rotation.set(0.0, 0.0, 0.0);
+    node_glasses__1_21.position.set(-0.047, 1.703, 0.088);
+    node_glasses__1_21.rotation.set(0.0, 0.0, 0.0);
   }
-  node_glasses__1_23.userData.sculptComponent = {"id": "glasses--1", "name": "glasses--1", "level": "micro", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "extrude", "topologyClass": "assembled-solid", "topologyRationale": "Contour follows the reference silhouette; depth is inferred and tested in orbit.", "geometryDescriptor": {"profile2D": {"points": [[-0.5, 0.35], [-0.4, 0.5], [0.42, 0.5], [0.5, 0.3], [0.4, -0.42], [-0.35, -0.5]], "depth": 1, "bevelEnabled": true, "bevelSize": 0.05, "bevelThickness": 0.03, "bevelSegments": 2}}, "parent": "root", "attachment": null, "dimensions": {"width": 0.082, "height": 0.048, "depth": 0.012, "units": "meters", "confidence": 0.78}, "transform": {"position": [-0.047, 1.703, 0.088], "rotation": [0, 0, 0], "scale": [0.082, 0.048, 0.012]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "glasses--1", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "glasses-frame", "materialLayers": ["glasses-frame"], "deformations": [], "joints": [], "seams": [], "localFeatures": [], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(25, 30, 37, 1)", "secondaryAlbedo": "rgba(25, 30, 37, 1)", "materialClass": "plastic", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
-  node_glasses__1_23.userData.actionProfile = {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "glasses--1", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}};
-  (nodes["root"] ?? root).add(node_glasses__1_23);
-  nodes["glasses--1"] = node_glasses__1_23;
-  const mesh_glasses__1_23Geometry = endpoint_glasses__1_23
-    ? new THREE.CylinderGeometry(endpoint_glasses__1_23.endRadius, endpoint_glasses__1_23.baseRadius, endpoint_glasses__1_23.length, 16, 6)
+  node_glasses__1_21.userData.sculptComponent = {"id": "glasses--1", "name": "glasses--1", "level": "micro", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "extrude", "topologyClass": "assembled-solid", "topologyRationale": "Contour follows the reference silhouette; depth is inferred and tested in orbit.", "geometryDescriptor": {"profile2D": {"points": [[-0.5, 0.35], [-0.4, 0.5], [0.42, 0.5], [0.5, 0.3], [0.4, -0.42], [-0.35, -0.5]], "depth": 1, "bevelEnabled": true, "bevelSize": 0.05, "bevelThickness": 0.03, "bevelSegments": 2}}, "parent": "root", "attachment": null, "dimensions": {"width": 0.082, "height": 0.048, "depth": 0.012, "units": "meters", "confidence": 0.78}, "transform": {"position": [-0.047, 1.703, 0.088], "rotation": [0, 0, 0], "scale": [0.082, 0.048, 0.012]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "glasses--1", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "glasses-frame", "materialLayers": ["glasses-frame"], "deformations": [], "joints": [], "seams": [], "localFeatures": [], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(25, 30, 37, 1)", "secondaryAlbedo": "rgba(25, 30, 37, 1)", "materialClass": "plastic", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
+  node_glasses__1_21.userData.actionProfile = {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "glasses--1", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}};
+  (nodes["root"] ?? root).add(node_glasses__1_21);
+  nodes["glasses--1"] = node_glasses__1_21;
+  const mesh_glasses__1_21Geometry = endpoint_glasses__1_21
+    ? new THREE.CylinderGeometry(endpoint_glasses__1_21.endRadius, endpoint_glasses__1_21.baseRadius, endpoint_glasses__1_21.length, 16, 6)
     : buildExtrudeGeometry({"points": [[-0.5, 0.35], [-0.4, 0.5], [0.42, 0.5], [0.5, 0.3], [0.4, -0.42], [-0.35, -0.5]], "depth": 1, "bevelEnabled": true, "bevelSize": 0.05, "bevelThickness": 0.03, "bevelSegments": 2});
-  if (!endpoint_glasses__1_23) {
-    mesh_glasses__1_23Geometry.scale(0.082, 0.048, 0.012);
+  if (!endpoint_glasses__1_21) {
+    mesh_glasses__1_21Geometry.scale(0.082, 0.048, 0.012);
   }
-  const mesh_glasses__1_23 = new THREE.Mesh(
-    mesh_glasses__1_23Geometry,
+  const mesh_glasses__1_21 = new THREE.Mesh(
+    mesh_glasses__1_21Geometry,
     materialMap["glasses-frame"] ?? new THREE.MeshStandardMaterial({ color: 0x888888 })
   );
-  mesh_glasses__1_23.name = "glasses--1";
-  if (endpoint_glasses__1_23) {
-    mesh_glasses__1_23.position.copy(endpoint_glasses__1_23.midpoint);
-    mesh_glasses__1_23.quaternion.copy(endpoint_glasses__1_23.quaternion);
+  mesh_glasses__1_21.name = "glasses--1";
+  if (endpoint_glasses__1_21) {
+    mesh_glasses__1_21.position.copy(endpoint_glasses__1_21.midpoint);
+    mesh_glasses__1_21.quaternion.copy(endpoint_glasses__1_21.quaternion);
   }
-  mesh_glasses__1_23.castShadow = options.castShadow ?? true;
-  mesh_glasses__1_23.receiveShadow = options.receiveShadow ?? true;
-  mesh_glasses__1_23.userData.sculptComponent = {"id": "glasses--1", "name": "glasses--1", "level": "micro", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "extrude", "topologyClass": "assembled-solid", "topologyRationale": "Contour follows the reference silhouette; depth is inferred and tested in orbit.", "geometryDescriptor": {"profile2D": {"points": [[-0.5, 0.35], [-0.4, 0.5], [0.42, 0.5], [0.5, 0.3], [0.4, -0.42], [-0.35, -0.5]], "depth": 1, "bevelEnabled": true, "bevelSize": 0.05, "bevelThickness": 0.03, "bevelSegments": 2}}, "parent": "root", "attachment": null, "dimensions": {"width": 0.082, "height": 0.048, "depth": 0.012, "units": "meters", "confidence": 0.78}, "transform": {"position": [-0.047, 1.703, 0.088], "rotation": [0, 0, 0], "scale": [0.082, 0.048, 0.012]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "glasses--1", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "glasses-frame", "materialLayers": ["glasses-frame"], "deformations": [], "joints": [], "seams": [], "localFeatures": [], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(25, 30, 37, 1)", "secondaryAlbedo": "rgba(25, 30, 37, 1)", "materialClass": "plastic", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
-  node_glasses__1_23.add(mesh_glasses__1_23);
-  meshes["glasses--1"] = mesh_glasses__1_23;
+  mesh_glasses__1_21.castShadow = options.castShadow ?? true;
+  mesh_glasses__1_21.receiveShadow = options.receiveShadow ?? true;
+  mesh_glasses__1_21.userData.sculptComponent = {"id": "glasses--1", "name": "glasses--1", "level": "micro", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "extrude", "topologyClass": "assembled-solid", "topologyRationale": "Contour follows the reference silhouette; depth is inferred and tested in orbit.", "geometryDescriptor": {"profile2D": {"points": [[-0.5, 0.35], [-0.4, 0.5], [0.42, 0.5], [0.5, 0.3], [0.4, -0.42], [-0.35, -0.5]], "depth": 1, "bevelEnabled": true, "bevelSize": 0.05, "bevelThickness": 0.03, "bevelSegments": 2}}, "parent": "root", "attachment": null, "dimensions": {"width": 0.082, "height": 0.048, "depth": 0.012, "units": "meters", "confidence": 0.78}, "transform": {"position": [-0.047, 1.703, 0.088], "rotation": [0, 0, 0], "scale": [0.082, 0.048, 0.012]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "glasses--1", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "glasses-frame", "materialLayers": ["glasses-frame"], "deformations": [], "joints": [], "seams": [], "localFeatures": [], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(25, 30, 37, 1)", "secondaryAlbedo": "rgba(25, 30, 37, 1)", "materialClass": "plastic", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
+  node_glasses__1_21.add(mesh_glasses__1_21);
+  meshes["glasses--1"] = mesh_glasses__1_21;
   colliders["glasses--1"] = {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"};
   destructionGroups["glasses--1"] ??= [];
-  destructionGroups["glasses--1"].push(node_glasses__1_23);
+  destructionGroups["glasses--1"].push(node_glasses__1_21);
 
-  const attachment_temple__1_24 = {"parentSocket": "head", "localStart": [-0.088, 1.715, 0.088], "localEnd": [-0.099, 1.69, -0.012], "contactType": "surface-embed", "embedDepth": 0.002, "gapTolerance": 0.003};
-  const endpoint_temple__1_24 = null; // authored tubePath already in model coordinates
-  const node_temple__1_24 = new THREE.Group();
-  node_temple__1_24.name = "temple--1__pivot";
-  node_temple__1_24.scale.set(1, 1, 1);
-  if (endpoint_temple__1_24) {
-    node_temple__1_24.position.copy(endpoint_temple__1_24.start);
-    node_temple__1_24.rotation.set(0.0, 0.0, 0.0);
+  const attachment_temple__1_22 = {"parentSocket": "head", "localStart": [-0.088, 1.715, 0.088], "localEnd": [-0.099, 1.69, -0.012], "contactType": "surface-embed", "embedDepth": 0.002, "gapTolerance": 0.003};
+  const endpoint_temple__1_22 = null; // authored tubePath already in model coordinates
+  const node_temple__1_22 = new THREE.Group();
+  node_temple__1_22.name = "temple--1__pivot";
+  node_temple__1_22.scale.set(1, 1, 1);
+  if (endpoint_temple__1_22) {
+    node_temple__1_22.position.copy(endpoint_temple__1_22.start);
+    node_temple__1_22.rotation.set(0.0, 0.0, 0.0);
   } else {
-    node_temple__1_24.position.set(0.0, 0.0, 0.0);
-    node_temple__1_24.rotation.set(0.0, 0.0, 0.0);
+    node_temple__1_22.position.set(0.0, 0.0, 0.0);
+    node_temple__1_22.rotation.set(0.0, 0.0, 0.0);
   }
-  node_temple__1_24.userData.sculptComponent = {"id": "temple--1", "name": "temple--1", "level": "micro", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "tube", "topologyClass": "assembled-solid", "topologyRationale": "Contour follows the reference silhouette; depth is inferred and tested in orbit.", "geometryDescriptor": {"tubePath": {"points": [[-0.088, 1.715, 0.088], [-0.105, 1.711, 0.03], [-0.099, 1.69, -0.012]], "radius": 0.004, "closed": false}, "attachmentGeometry": "authored-path"}, "parent": "root", "attachment": {"parentSocket": "head", "localStart": [-0.088, 1.715, 0.088], "localEnd": [-0.099, 1.69, -0.012], "contactType": "surface-embed", "embedDepth": 0.002, "gapTolerance": 0.003}, "dimensions": {"width": 1, "height": 1, "depth": 1, "units": "meters", "confidence": 0.78}, "transform": {"position": [0, 0, 0], "rotation": [0, 0, 0], "scale": [1, 1, 1]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "temple--1", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "glasses-frame", "materialLayers": ["glasses-frame"], "deformations": [], "joints": [], "seams": [], "localFeatures": [], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(25, 30, 37, 1)", "secondaryAlbedo": "rgba(25, 30, 37, 1)", "materialClass": "plastic", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
-  node_temple__1_24.userData.actionProfile = {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "temple--1", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}};
-  (nodes["root"] ?? root).add(node_temple__1_24);
-  nodes["temple--1"] = node_temple__1_24;
-  const mesh_temple__1_24Geometry = endpoint_temple__1_24
-    ? new THREE.CylinderGeometry(endpoint_temple__1_24.endRadius, endpoint_temple__1_24.baseRadius, endpoint_temple__1_24.length, 16, 6)
+  node_temple__1_22.userData.sculptComponent = {"id": "temple--1", "name": "temple--1", "level": "micro", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "tube", "topologyClass": "assembled-solid", "topologyRationale": "Contour follows the reference silhouette; depth is inferred and tested in orbit.", "geometryDescriptor": {"tubePath": {"points": [[-0.088, 1.715, 0.088], [-0.105, 1.711, 0.03], [-0.099, 1.69, -0.012]], "radius": 0.004, "closed": false}, "attachmentGeometry": "authored-path"}, "parent": "root", "attachment": {"parentSocket": "head", "localStart": [-0.088, 1.715, 0.088], "localEnd": [-0.099, 1.69, -0.012], "contactType": "surface-embed", "embedDepth": 0.002, "gapTolerance": 0.003}, "dimensions": {"width": 1, "height": 1, "depth": 1, "units": "meters", "confidence": 0.78}, "transform": {"position": [0, 0, 0], "rotation": [0, 0, 0], "scale": [1, 1, 1]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "temple--1", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "glasses-frame", "materialLayers": ["glasses-frame"], "deformations": [], "joints": [], "seams": [], "localFeatures": [], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(25, 30, 37, 1)", "secondaryAlbedo": "rgba(25, 30, 37, 1)", "materialClass": "plastic", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
+  node_temple__1_22.userData.actionProfile = {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "temple--1", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}};
+  (nodes["root"] ?? root).add(node_temple__1_22);
+  nodes["temple--1"] = node_temple__1_22;
+  const mesh_temple__1_22Geometry = endpoint_temple__1_22
+    ? new THREE.CylinderGeometry(endpoint_temple__1_22.endRadius, endpoint_temple__1_22.baseRadius, endpoint_temple__1_22.length, 16, 6)
     : buildTubeGeometry({"points": [[-0.088, 1.715, 0.088], [-0.105, 1.711, 0.03], [-0.099, 1.69, -0.012]], "radius": 0.004, "closed": false});
-  if (!endpoint_temple__1_24) {
-    mesh_temple__1_24Geometry.scale(1.0, 1.0, 1.0);
+  if (!endpoint_temple__1_22) {
+    mesh_temple__1_22Geometry.scale(1.0, 1.0, 1.0);
   }
-  const mesh_temple__1_24 = new THREE.Mesh(
-    mesh_temple__1_24Geometry,
+  const mesh_temple__1_22 = new THREE.Mesh(
+    mesh_temple__1_22Geometry,
     materialMap["glasses-frame"] ?? new THREE.MeshStandardMaterial({ color: 0x888888 })
   );
-  mesh_temple__1_24.name = "temple--1";
-  if (endpoint_temple__1_24) {
-    mesh_temple__1_24.position.copy(endpoint_temple__1_24.midpoint);
-    mesh_temple__1_24.quaternion.copy(endpoint_temple__1_24.quaternion);
+  mesh_temple__1_22.name = "temple--1";
+  if (endpoint_temple__1_22) {
+    mesh_temple__1_22.position.copy(endpoint_temple__1_22.midpoint);
+    mesh_temple__1_22.quaternion.copy(endpoint_temple__1_22.quaternion);
   }
-  mesh_temple__1_24.castShadow = options.castShadow ?? true;
-  mesh_temple__1_24.receiveShadow = options.receiveShadow ?? true;
-  mesh_temple__1_24.userData.sculptComponent = {"id": "temple--1", "name": "temple--1", "level": "micro", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "tube", "topologyClass": "assembled-solid", "topologyRationale": "Contour follows the reference silhouette; depth is inferred and tested in orbit.", "geometryDescriptor": {"tubePath": {"points": [[-0.088, 1.715, 0.088], [-0.105, 1.711, 0.03], [-0.099, 1.69, -0.012]], "radius": 0.004, "closed": false}, "attachmentGeometry": "authored-path"}, "parent": "root", "attachment": {"parentSocket": "head", "localStart": [-0.088, 1.715, 0.088], "localEnd": [-0.099, 1.69, -0.012], "contactType": "surface-embed", "embedDepth": 0.002, "gapTolerance": 0.003}, "dimensions": {"width": 1, "height": 1, "depth": 1, "units": "meters", "confidence": 0.78}, "transform": {"position": [0, 0, 0], "rotation": [0, 0, 0], "scale": [1, 1, 1]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "temple--1", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "glasses-frame", "materialLayers": ["glasses-frame"], "deformations": [], "joints": [], "seams": [], "localFeatures": [], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(25, 30, 37, 1)", "secondaryAlbedo": "rgba(25, 30, 37, 1)", "materialClass": "plastic", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
-  node_temple__1_24.add(mesh_temple__1_24);
-  meshes["temple--1"] = mesh_temple__1_24;
+  mesh_temple__1_22.castShadow = options.castShadow ?? true;
+  mesh_temple__1_22.receiveShadow = options.receiveShadow ?? true;
+  mesh_temple__1_22.userData.sculptComponent = {"id": "temple--1", "name": "temple--1", "level": "micro", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "tube", "topologyClass": "assembled-solid", "topologyRationale": "Contour follows the reference silhouette; depth is inferred and tested in orbit.", "geometryDescriptor": {"tubePath": {"points": [[-0.088, 1.715, 0.088], [-0.105, 1.711, 0.03], [-0.099, 1.69, -0.012]], "radius": 0.004, "closed": false}, "attachmentGeometry": "authored-path"}, "parent": "root", "attachment": {"parentSocket": "head", "localStart": [-0.088, 1.715, 0.088], "localEnd": [-0.099, 1.69, -0.012], "contactType": "surface-embed", "embedDepth": 0.002, "gapTolerance": 0.003}, "dimensions": {"width": 1, "height": 1, "depth": 1, "units": "meters", "confidence": 0.78}, "transform": {"position": [0, 0, 0], "rotation": [0, 0, 0], "scale": [1, 1, 1]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "temple--1", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "glasses-frame", "materialLayers": ["glasses-frame"], "deformations": [], "joints": [], "seams": [], "localFeatures": [], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(25, 30, 37, 1)", "secondaryAlbedo": "rgba(25, 30, 37, 1)", "materialClass": "plastic", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
+  node_temple__1_22.add(mesh_temple__1_22);
+  meshes["temple--1"] = mesh_temple__1_22;
   colliders["temple--1"] = {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"};
   destructionGroups["temple--1"] ??= [];
-  destructionGroups["temple--1"].push(node_temple__1_24);
+  destructionGroups["temple--1"].push(node_temple__1_22);
 
-  const endpoint_ear_1_25 = makeAttachmentEndpoint(null);
-  const node_ear_1_25 = new THREE.Group();
-  node_ear_1_25.name = "ear-1__pivot";
-  node_ear_1_25.scale.set(1, 1, 1);
-  if (endpoint_ear_1_25) {
-    node_ear_1_25.position.copy(endpoint_ear_1_25.start);
-    node_ear_1_25.rotation.set(0.0, 0.0, 0.0);
+  const endpoint_ear_1_23 = makeAttachmentEndpoint(null);
+  const node_ear_1_23 = new THREE.Group();
+  node_ear_1_23.name = "ear-1__pivot";
+  node_ear_1_23.scale.set(1, 1, 1);
+  if (endpoint_ear_1_23) {
+    node_ear_1_23.position.copy(endpoint_ear_1_23.start);
+    node_ear_1_23.rotation.set(0.0, 0.0, 0.0);
   } else {
-    node_ear_1_25.position.set(0.098, 1.684, -0.005);
-    node_ear_1_25.rotation.set(0.0, 0.0, 0.0);
+    node_ear_1_23.position.set(0.098, 1.684, -0.005);
+    node_ear_1_23.rotation.set(0.0, 0.0, 0.0);
   }
-  node_ear_1_25.userData.sculptComponent = {"id": "ear-1", "name": "ear-1", "level": "meso", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "ellipsoid", "topologyClass": "assembled-solid", "topologyRationale": "Contour follows the reference silhouette; depth is inferred and tested in orbit.", "geometryDescriptor": {"normalStrategy": "smooth vertex normals", "uvStrategy": "generated procedural coordinates", "edgeTreatment": {"type": "none", "bevelRadius": 0, "segments": 1}, "deformationStack": []}, "parent": "root", "attachment": null, "dimensions": {"width": 0.035, "height": 0.061, "depth": 0.033, "units": "meters", "confidence": 0.78}, "transform": {"position": [0.098, 1.684, -0.005], "rotation": [0, 0, 0], "scale": [0.035, 0.061, 0.033]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "ear-1", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "skin", "materialLayers": ["skin"], "deformations": [], "joints": [], "seams": [], "localFeatures": [], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(213, 154, 115, 1)", "secondaryAlbedo": "rgba(213, 154, 115, 1)", "materialClass": "skin", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
-  node_ear_1_25.userData.actionProfile = {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "ear-1", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}};
-  (nodes["root"] ?? root).add(node_ear_1_25);
-  nodes["ear-1"] = node_ear_1_25;
-  const mesh_ear_1_25Geometry = endpoint_ear_1_25
-    ? new THREE.CylinderGeometry(endpoint_ear_1_25.endRadius, endpoint_ear_1_25.baseRadius, endpoint_ear_1_25.length, 16, 6)
+  node_ear_1_23.userData.sculptComponent = {"id": "ear-1", "name": "ear-1", "level": "meso", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "ellipsoid", "topologyClass": "assembled-solid", "topologyRationale": "Contour follows the reference silhouette; depth is inferred and tested in orbit.", "geometryDescriptor": {"normalStrategy": "smooth vertex normals", "uvStrategy": "generated procedural coordinates", "edgeTreatment": {"type": "none", "bevelRadius": 0, "segments": 1}, "deformationStack": []}, "parent": "root", "attachment": null, "dimensions": {"width": 0.035, "height": 0.061, "depth": 0.033, "units": "meters", "confidence": 0.78}, "transform": {"position": [0.098, 1.684, -0.005], "rotation": [0, 0, 0], "scale": [0.035, 0.061, 0.033]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "ear-1", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "skin", "materialLayers": ["skin"], "deformations": [], "joints": [], "seams": [], "localFeatures": [], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(213, 154, 115, 1)", "secondaryAlbedo": "rgba(213, 154, 115, 1)", "materialClass": "skin", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
+  node_ear_1_23.userData.actionProfile = {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "ear-1", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}};
+  (nodes["root"] ?? root).add(node_ear_1_23);
+  nodes["ear-1"] = node_ear_1_23;
+  const mesh_ear_1_23Geometry = endpoint_ear_1_23
+    ? new THREE.CylinderGeometry(endpoint_ear_1_23.endRadius, endpoint_ear_1_23.baseRadius, endpoint_ear_1_23.length, 16, 6)
     : new THREE.SphereGeometry(0.5, 32, 20);
-  if (!endpoint_ear_1_25) {
-    mesh_ear_1_25Geometry.scale(0.035, 0.061, 0.033);
+  if (!endpoint_ear_1_23) {
+    mesh_ear_1_23Geometry.scale(0.035, 0.061, 0.033);
   }
-  const mesh_ear_1_25 = new THREE.Mesh(
-    mesh_ear_1_25Geometry,
+  const mesh_ear_1_23 = new THREE.Mesh(
+    mesh_ear_1_23Geometry,
     materialMap["skin"] ?? new THREE.MeshStandardMaterial({ color: 0x888888 })
   );
-  mesh_ear_1_25.name = "ear-1";
-  if (endpoint_ear_1_25) {
-    mesh_ear_1_25.position.copy(endpoint_ear_1_25.midpoint);
-    mesh_ear_1_25.quaternion.copy(endpoint_ear_1_25.quaternion);
+  mesh_ear_1_23.name = "ear-1";
+  if (endpoint_ear_1_23) {
+    mesh_ear_1_23.position.copy(endpoint_ear_1_23.midpoint);
+    mesh_ear_1_23.quaternion.copy(endpoint_ear_1_23.quaternion);
   }
-  mesh_ear_1_25.castShadow = options.castShadow ?? true;
-  mesh_ear_1_25.receiveShadow = options.receiveShadow ?? true;
-  mesh_ear_1_25.userData.sculptComponent = {"id": "ear-1", "name": "ear-1", "level": "meso", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "ellipsoid", "topologyClass": "assembled-solid", "topologyRationale": "Contour follows the reference silhouette; depth is inferred and tested in orbit.", "geometryDescriptor": {"normalStrategy": "smooth vertex normals", "uvStrategy": "generated procedural coordinates", "edgeTreatment": {"type": "none", "bevelRadius": 0, "segments": 1}, "deformationStack": []}, "parent": "root", "attachment": null, "dimensions": {"width": 0.035, "height": 0.061, "depth": 0.033, "units": "meters", "confidence": 0.78}, "transform": {"position": [0.098, 1.684, -0.005], "rotation": [0, 0, 0], "scale": [0.035, 0.061, 0.033]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "ear-1", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "skin", "materialLayers": ["skin"], "deformations": [], "joints": [], "seams": [], "localFeatures": [], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(213, 154, 115, 1)", "secondaryAlbedo": "rgba(213, 154, 115, 1)", "materialClass": "skin", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
-  node_ear_1_25.add(mesh_ear_1_25);
-  meshes["ear-1"] = mesh_ear_1_25;
+  mesh_ear_1_23.castShadow = options.castShadow ?? true;
+  mesh_ear_1_23.receiveShadow = options.receiveShadow ?? true;
+  mesh_ear_1_23.userData.sculptComponent = {"id": "ear-1", "name": "ear-1", "level": "meso", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "ellipsoid", "topologyClass": "assembled-solid", "topologyRationale": "Contour follows the reference silhouette; depth is inferred and tested in orbit.", "geometryDescriptor": {"normalStrategy": "smooth vertex normals", "uvStrategy": "generated procedural coordinates", "edgeTreatment": {"type": "none", "bevelRadius": 0, "segments": 1}, "deformationStack": []}, "parent": "root", "attachment": null, "dimensions": {"width": 0.035, "height": 0.061, "depth": 0.033, "units": "meters", "confidence": 0.78}, "transform": {"position": [0.098, 1.684, -0.005], "rotation": [0, 0, 0], "scale": [0.035, 0.061, 0.033]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "ear-1", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "skin", "materialLayers": ["skin"], "deformations": [], "joints": [], "seams": [], "localFeatures": [], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(213, 154, 115, 1)", "secondaryAlbedo": "rgba(213, 154, 115, 1)", "materialClass": "skin", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
+  node_ear_1_23.add(mesh_ear_1_23);
+  meshes["ear-1"] = mesh_ear_1_23;
   colliders["ear-1"] = {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"};
   destructionGroups["ear-1"] ??= [];
-  destructionGroups["ear-1"].push(node_ear_1_25);
+  destructionGroups["ear-1"].push(node_ear_1_23);
 
-  const endpoint_eye_1_26 = makeAttachmentEndpoint(null);
-  const node_eye_1_26 = new THREE.Group();
-  node_eye_1_26.name = "eye-1__pivot";
-  node_eye_1_26.scale.set(1, 1, 1);
-  if (endpoint_eye_1_26) {
-    node_eye_1_26.position.copy(endpoint_eye_1_26.start);
-    node_eye_1_26.rotation.set(0.0, 0.0, 0.0);
+  const endpoint_eye_1_24 = makeAttachmentEndpoint(null);
+  const node_eye_1_24 = new THREE.Group();
+  node_eye_1_24.name = "eye-1__pivot";
+  node_eye_1_24.scale.set(1, 1, 1);
+  if (endpoint_eye_1_24) {
+    node_eye_1_24.position.copy(endpoint_eye_1_24.start);
+    node_eye_1_24.rotation.set(0.0, 0.0, 0.0);
   } else {
-    node_eye_1_26.position.set(0.039, 1.709, 0.07);
-    node_eye_1_26.rotation.set(0.0, 0.0, 0.0);
+    node_eye_1_24.position.set(0.039, 1.709, 0.07);
+    node_eye_1_24.rotation.set(0.0, 0.0, 0.0);
   }
-  node_eye_1_26.userData.sculptComponent = {"id": "eye-1", "name": "eye-1", "level": "micro", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "ellipsoid", "topologyClass": "assembled-solid", "topologyRationale": "Contour follows the reference silhouette; depth is inferred and tested in orbit.", "geometryDescriptor": {"normalStrategy": "smooth vertex normals", "uvStrategy": "generated procedural coordinates", "edgeTreatment": {"type": "none", "bevelRadius": 0, "segments": 1}, "deformationStack": []}, "parent": "root", "attachment": null, "dimensions": {"width": 0.035, "height": 0.018, "depth": 0.014, "units": "meters", "confidence": 0.78}, "transform": {"position": [0.039, 1.709, 0.07], "rotation": [0, 0, 0], "scale": [0.035, 0.018, 0.014]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "eye-1", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "eye", "materialLayers": ["eye"], "deformations": [], "joints": [], "seams": [], "localFeatures": [], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(238, 232, 222, 1)", "secondaryAlbedo": "rgba(238, 232, 222, 1)", "materialClass": "plastic", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
-  node_eye_1_26.userData.actionProfile = {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "eye-1", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}};
-  (nodes["root"] ?? root).add(node_eye_1_26);
-  nodes["eye-1"] = node_eye_1_26;
-  const mesh_eye_1_26Geometry = endpoint_eye_1_26
-    ? new THREE.CylinderGeometry(endpoint_eye_1_26.endRadius, endpoint_eye_1_26.baseRadius, endpoint_eye_1_26.length, 16, 6)
+  node_eye_1_24.userData.sculptComponent = {"id": "eye-1", "name": "eye-1", "level": "micro", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "ellipsoid", "topologyClass": "assembled-solid", "topologyRationale": "Contour follows the reference silhouette; depth is inferred and tested in orbit.", "geometryDescriptor": {"normalStrategy": "smooth vertex normals", "uvStrategy": "generated procedural coordinates", "edgeTreatment": {"type": "none", "bevelRadius": 0, "segments": 1}, "deformationStack": []}, "parent": "root", "attachment": null, "dimensions": {"width": 0.035, "height": 0.018, "depth": 0.014, "units": "meters", "confidence": 0.78}, "transform": {"position": [0.039, 1.709, 0.07], "rotation": [0, 0, 0], "scale": [0.035, 0.018, 0.014]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "eye-1", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "eye", "materialLayers": ["eye"], "deformations": [], "joints": [], "seams": [], "localFeatures": [], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(238, 232, 222, 1)", "secondaryAlbedo": "rgba(238, 232, 222, 1)", "materialClass": "plastic", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
+  node_eye_1_24.userData.actionProfile = {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "eye-1", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}};
+  (nodes["root"] ?? root).add(node_eye_1_24);
+  nodes["eye-1"] = node_eye_1_24;
+  const mesh_eye_1_24Geometry = endpoint_eye_1_24
+    ? new THREE.CylinderGeometry(endpoint_eye_1_24.endRadius, endpoint_eye_1_24.baseRadius, endpoint_eye_1_24.length, 16, 6)
     : new THREE.SphereGeometry(0.5, 32, 20);
-  if (!endpoint_eye_1_26) {
-    mesh_eye_1_26Geometry.scale(0.035, 0.018, 0.014);
+  if (!endpoint_eye_1_24) {
+    mesh_eye_1_24Geometry.scale(0.035, 0.018, 0.014);
   }
-  const mesh_eye_1_26 = new THREE.Mesh(
-    mesh_eye_1_26Geometry,
+  const mesh_eye_1_24 = new THREE.Mesh(
+    mesh_eye_1_24Geometry,
     materialMap["eye"] ?? new THREE.MeshStandardMaterial({ color: 0x888888 })
   );
-  mesh_eye_1_26.name = "eye-1";
-  if (endpoint_eye_1_26) {
-    mesh_eye_1_26.position.copy(endpoint_eye_1_26.midpoint);
-    mesh_eye_1_26.quaternion.copy(endpoint_eye_1_26.quaternion);
+  mesh_eye_1_24.name = "eye-1";
+  if (endpoint_eye_1_24) {
+    mesh_eye_1_24.position.copy(endpoint_eye_1_24.midpoint);
+    mesh_eye_1_24.quaternion.copy(endpoint_eye_1_24.quaternion);
   }
-  mesh_eye_1_26.castShadow = options.castShadow ?? true;
-  mesh_eye_1_26.receiveShadow = options.receiveShadow ?? true;
-  mesh_eye_1_26.userData.sculptComponent = {"id": "eye-1", "name": "eye-1", "level": "micro", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "ellipsoid", "topologyClass": "assembled-solid", "topologyRationale": "Contour follows the reference silhouette; depth is inferred and tested in orbit.", "geometryDescriptor": {"normalStrategy": "smooth vertex normals", "uvStrategy": "generated procedural coordinates", "edgeTreatment": {"type": "none", "bevelRadius": 0, "segments": 1}, "deformationStack": []}, "parent": "root", "attachment": null, "dimensions": {"width": 0.035, "height": 0.018, "depth": 0.014, "units": "meters", "confidence": 0.78}, "transform": {"position": [0.039, 1.709, 0.07], "rotation": [0, 0, 0], "scale": [0.035, 0.018, 0.014]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "eye-1", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "eye", "materialLayers": ["eye"], "deformations": [], "joints": [], "seams": [], "localFeatures": [], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(238, 232, 222, 1)", "secondaryAlbedo": "rgba(238, 232, 222, 1)", "materialClass": "plastic", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
-  node_eye_1_26.add(mesh_eye_1_26);
-  meshes["eye-1"] = mesh_eye_1_26;
+  mesh_eye_1_24.castShadow = options.castShadow ?? true;
+  mesh_eye_1_24.receiveShadow = options.receiveShadow ?? true;
+  mesh_eye_1_24.userData.sculptComponent = {"id": "eye-1", "name": "eye-1", "level": "micro", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "ellipsoid", "topologyClass": "assembled-solid", "topologyRationale": "Contour follows the reference silhouette; depth is inferred and tested in orbit.", "geometryDescriptor": {"normalStrategy": "smooth vertex normals", "uvStrategy": "generated procedural coordinates", "edgeTreatment": {"type": "none", "bevelRadius": 0, "segments": 1}, "deformationStack": []}, "parent": "root", "attachment": null, "dimensions": {"width": 0.035, "height": 0.018, "depth": 0.014, "units": "meters", "confidence": 0.78}, "transform": {"position": [0.039, 1.709, 0.07], "rotation": [0, 0, 0], "scale": [0.035, 0.018, 0.014]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "eye-1", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "eye", "materialLayers": ["eye"], "deformations": [], "joints": [], "seams": [], "localFeatures": [], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(238, 232, 222, 1)", "secondaryAlbedo": "rgba(238, 232, 222, 1)", "materialClass": "plastic", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
+  node_eye_1_24.add(mesh_eye_1_24);
+  meshes["eye-1"] = mesh_eye_1_24;
   colliders["eye-1"] = {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"};
   destructionGroups["eye-1"] ??= [];
-  destructionGroups["eye-1"].push(node_eye_1_26);
+  destructionGroups["eye-1"].push(node_eye_1_24);
 
-  const endpoint_glasses_1_27 = makeAttachmentEndpoint(null);
-  const node_glasses_1_27 = new THREE.Group();
-  node_glasses_1_27.name = "glasses-1__pivot";
-  node_glasses_1_27.scale.set(1, 1, 1);
-  if (endpoint_glasses_1_27) {
-    node_glasses_1_27.position.copy(endpoint_glasses_1_27.start);
-    node_glasses_1_27.rotation.set(0.0, 0.0, 0.0);
+  const endpoint_glasses_1_25 = makeAttachmentEndpoint(null);
+  const node_glasses_1_25 = new THREE.Group();
+  node_glasses_1_25.name = "glasses-1__pivot";
+  node_glasses_1_25.scale.set(1, 1, 1);
+  if (endpoint_glasses_1_25) {
+    node_glasses_1_25.position.copy(endpoint_glasses_1_25.start);
+    node_glasses_1_25.rotation.set(0.0, 0.0, 0.0);
   } else {
-    node_glasses_1_27.position.set(0.047, 1.703, 0.088);
-    node_glasses_1_27.rotation.set(0.0, 0.0, 0.0);
+    node_glasses_1_25.position.set(0.047, 1.703, 0.088);
+    node_glasses_1_25.rotation.set(0.0, 0.0, 0.0);
   }
-  node_glasses_1_27.userData.sculptComponent = {"id": "glasses-1", "name": "glasses-1", "level": "micro", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "extrude", "topologyClass": "assembled-solid", "topologyRationale": "Contour follows the reference silhouette; depth is inferred and tested in orbit.", "geometryDescriptor": {"profile2D": {"points": [[-0.5, 0.35], [-0.4, 0.5], [0.42, 0.5], [0.5, 0.3], [0.4, -0.42], [-0.35, -0.5]], "depth": 1, "bevelEnabled": true, "bevelSize": 0.05, "bevelThickness": 0.03, "bevelSegments": 2}}, "parent": "root", "attachment": null, "dimensions": {"width": 0.082, "height": 0.048, "depth": 0.012, "units": "meters", "confidence": 0.78}, "transform": {"position": [0.047, 1.703, 0.088], "rotation": [0, 0, 0], "scale": [0.082, 0.048, 0.012]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "glasses-1", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "glasses-frame", "materialLayers": ["glasses-frame"], "deformations": [], "joints": [], "seams": [], "localFeatures": [{"id": "smoked-lens", "kind": "gloss", "description": "smoked-lens", "evidenceRefs": ["full-object"]}], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(25, 30, 37, 1)", "secondaryAlbedo": "rgba(25, 30, 37, 1)", "materialClass": "plastic", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
-  node_glasses_1_27.userData.actionProfile = {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "glasses-1", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}};
-  (nodes["root"] ?? root).add(node_glasses_1_27);
-  nodes["glasses-1"] = node_glasses_1_27;
-  const mesh_glasses_1_27Geometry = endpoint_glasses_1_27
-    ? new THREE.CylinderGeometry(endpoint_glasses_1_27.endRadius, endpoint_glasses_1_27.baseRadius, endpoint_glasses_1_27.length, 16, 6)
+  node_glasses_1_25.userData.sculptComponent = {"id": "glasses-1", "name": "glasses-1", "level": "micro", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "extrude", "topologyClass": "assembled-solid", "topologyRationale": "Contour follows the reference silhouette; depth is inferred and tested in orbit.", "geometryDescriptor": {"profile2D": {"points": [[-0.5, 0.35], [-0.4, 0.5], [0.42, 0.5], [0.5, 0.3], [0.4, -0.42], [-0.35, -0.5]], "depth": 1, "bevelEnabled": true, "bevelSize": 0.05, "bevelThickness": 0.03, "bevelSegments": 2}}, "parent": "root", "attachment": null, "dimensions": {"width": 0.082, "height": 0.048, "depth": 0.012, "units": "meters", "confidence": 0.78}, "transform": {"position": [0.047, 1.703, 0.088], "rotation": [0, 0, 0], "scale": [0.082, 0.048, 0.012]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "glasses-1", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "glasses-frame", "materialLayers": ["glasses-frame"], "deformations": [], "joints": [], "seams": [], "localFeatures": [{"id": "smoked-lens", "kind": "gloss", "description": "smoked-lens", "evidenceRefs": ["full-object"]}], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(25, 30, 37, 1)", "secondaryAlbedo": "rgba(25, 30, 37, 1)", "materialClass": "plastic", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
+  node_glasses_1_25.userData.actionProfile = {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "glasses-1", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}};
+  (nodes["root"] ?? root).add(node_glasses_1_25);
+  nodes["glasses-1"] = node_glasses_1_25;
+  const mesh_glasses_1_25Geometry = endpoint_glasses_1_25
+    ? new THREE.CylinderGeometry(endpoint_glasses_1_25.endRadius, endpoint_glasses_1_25.baseRadius, endpoint_glasses_1_25.length, 16, 6)
     : buildExtrudeGeometry({"points": [[-0.5, 0.35], [-0.4, 0.5], [0.42, 0.5], [0.5, 0.3], [0.4, -0.42], [-0.35, -0.5]], "depth": 1, "bevelEnabled": true, "bevelSize": 0.05, "bevelThickness": 0.03, "bevelSegments": 2});
-  if (!endpoint_glasses_1_27) {
-    mesh_glasses_1_27Geometry.scale(0.082, 0.048, 0.012);
+  if (!endpoint_glasses_1_25) {
+    mesh_glasses_1_25Geometry.scale(0.082, 0.048, 0.012);
   }
-  const mesh_glasses_1_27 = new THREE.Mesh(
-    mesh_glasses_1_27Geometry,
+  const mesh_glasses_1_25 = new THREE.Mesh(
+    mesh_glasses_1_25Geometry,
     materialMap["glasses-frame"] ?? new THREE.MeshStandardMaterial({ color: 0x888888 })
   );
-  mesh_glasses_1_27.name = "glasses-1";
-  if (endpoint_glasses_1_27) {
-    mesh_glasses_1_27.position.copy(endpoint_glasses_1_27.midpoint);
-    mesh_glasses_1_27.quaternion.copy(endpoint_glasses_1_27.quaternion);
+  mesh_glasses_1_25.name = "glasses-1";
+  if (endpoint_glasses_1_25) {
+    mesh_glasses_1_25.position.copy(endpoint_glasses_1_25.midpoint);
+    mesh_glasses_1_25.quaternion.copy(endpoint_glasses_1_25.quaternion);
   }
-  mesh_glasses_1_27.castShadow = options.castShadow ?? true;
-  mesh_glasses_1_27.receiveShadow = options.receiveShadow ?? true;
-  mesh_glasses_1_27.userData.sculptComponent = {"id": "glasses-1", "name": "glasses-1", "level": "micro", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "extrude", "topologyClass": "assembled-solid", "topologyRationale": "Contour follows the reference silhouette; depth is inferred and tested in orbit.", "geometryDescriptor": {"profile2D": {"points": [[-0.5, 0.35], [-0.4, 0.5], [0.42, 0.5], [0.5, 0.3], [0.4, -0.42], [-0.35, -0.5]], "depth": 1, "bevelEnabled": true, "bevelSize": 0.05, "bevelThickness": 0.03, "bevelSegments": 2}}, "parent": "root", "attachment": null, "dimensions": {"width": 0.082, "height": 0.048, "depth": 0.012, "units": "meters", "confidence": 0.78}, "transform": {"position": [0.047, 1.703, 0.088], "rotation": [0, 0, 0], "scale": [0.082, 0.048, 0.012]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "glasses-1", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "glasses-frame", "materialLayers": ["glasses-frame"], "deformations": [], "joints": [], "seams": [], "localFeatures": [{"id": "smoked-lens", "kind": "gloss", "description": "smoked-lens", "evidenceRefs": ["full-object"]}], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(25, 30, 37, 1)", "secondaryAlbedo": "rgba(25, 30, 37, 1)", "materialClass": "plastic", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
-  node_glasses_1_27.add(mesh_glasses_1_27);
-  meshes["glasses-1"] = mesh_glasses_1_27;
+  mesh_glasses_1_25.castShadow = options.castShadow ?? true;
+  mesh_glasses_1_25.receiveShadow = options.receiveShadow ?? true;
+  mesh_glasses_1_25.userData.sculptComponent = {"id": "glasses-1", "name": "glasses-1", "level": "micro", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "extrude", "topologyClass": "assembled-solid", "topologyRationale": "Contour follows the reference silhouette; depth is inferred and tested in orbit.", "geometryDescriptor": {"profile2D": {"points": [[-0.5, 0.35], [-0.4, 0.5], [0.42, 0.5], [0.5, 0.3], [0.4, -0.42], [-0.35, -0.5]], "depth": 1, "bevelEnabled": true, "bevelSize": 0.05, "bevelThickness": 0.03, "bevelSegments": 2}}, "parent": "root", "attachment": null, "dimensions": {"width": 0.082, "height": 0.048, "depth": 0.012, "units": "meters", "confidence": 0.78}, "transform": {"position": [0.047, 1.703, 0.088], "rotation": [0, 0, 0], "scale": [0.082, 0.048, 0.012]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "glasses-1", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "glasses-frame", "materialLayers": ["glasses-frame"], "deformations": [], "joints": [], "seams": [], "localFeatures": [{"id": "smoked-lens", "kind": "gloss", "description": "smoked-lens", "evidenceRefs": ["full-object"]}], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(25, 30, 37, 1)", "secondaryAlbedo": "rgba(25, 30, 37, 1)", "materialClass": "plastic", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
+  node_glasses_1_25.add(mesh_glasses_1_25);
+  meshes["glasses-1"] = mesh_glasses_1_25;
   colliders["glasses-1"] = {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"};
   destructionGroups["glasses-1"] ??= [];
-  destructionGroups["glasses-1"].push(node_glasses_1_27);
+  destructionGroups["glasses-1"].push(node_glasses_1_25);
 
-  const attachment_temple_1_28 = {"parentSocket": "head", "localStart": [0.088, 1.715, 0.088], "localEnd": [0.099, 1.69, -0.012], "contactType": "surface-embed", "embedDepth": 0.002, "gapTolerance": 0.003};
-  const endpoint_temple_1_28 = null; // authored tubePath already in model coordinates
-  const node_temple_1_28 = new THREE.Group();
-  node_temple_1_28.name = "temple-1__pivot";
-  node_temple_1_28.scale.set(1, 1, 1);
-  if (endpoint_temple_1_28) {
-    node_temple_1_28.position.copy(endpoint_temple_1_28.start);
-    node_temple_1_28.rotation.set(0.0, 0.0, 0.0);
+  const attachment_temple_1_26 = {"parentSocket": "head", "localStart": [0.088, 1.715, 0.088], "localEnd": [0.099, 1.69, -0.012], "contactType": "surface-embed", "embedDepth": 0.002, "gapTolerance": 0.003};
+  const endpoint_temple_1_26 = null; // authored tubePath already in model coordinates
+  const node_temple_1_26 = new THREE.Group();
+  node_temple_1_26.name = "temple-1__pivot";
+  node_temple_1_26.scale.set(1, 1, 1);
+  if (endpoint_temple_1_26) {
+    node_temple_1_26.position.copy(endpoint_temple_1_26.start);
+    node_temple_1_26.rotation.set(0.0, 0.0, 0.0);
   } else {
-    node_temple_1_28.position.set(0.0, 0.0, 0.0);
-    node_temple_1_28.rotation.set(0.0, 0.0, 0.0);
+    node_temple_1_26.position.set(0.0, 0.0, 0.0);
+    node_temple_1_26.rotation.set(0.0, 0.0, 0.0);
   }
-  node_temple_1_28.userData.sculptComponent = {"id": "temple-1", "name": "temple-1", "level": "micro", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "tube", "topologyClass": "assembled-solid", "topologyRationale": "Contour follows the reference silhouette; depth is inferred and tested in orbit.", "geometryDescriptor": {"tubePath": {"points": [[0.088, 1.715, 0.088], [0.105, 1.711, 0.03], [0.099, 1.69, -0.012]], "radius": 0.004, "closed": false}, "attachmentGeometry": "authored-path"}, "parent": "root", "attachment": {"parentSocket": "head", "localStart": [0.088, 1.715, 0.088], "localEnd": [0.099, 1.69, -0.012], "contactType": "surface-embed", "embedDepth": 0.002, "gapTolerance": 0.003}, "dimensions": {"width": 1, "height": 1, "depth": 1, "units": "meters", "confidence": 0.78}, "transform": {"position": [0, 0, 0], "rotation": [0, 0, 0], "scale": [1, 1, 1]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "temple-1", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "glasses-frame", "materialLayers": ["glasses-frame"], "deformations": [], "joints": [], "seams": [], "localFeatures": [], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(25, 30, 37, 1)", "secondaryAlbedo": "rgba(25, 30, 37, 1)", "materialClass": "plastic", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
-  node_temple_1_28.userData.actionProfile = {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "temple-1", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}};
-  (nodes["root"] ?? root).add(node_temple_1_28);
-  nodes["temple-1"] = node_temple_1_28;
-  const mesh_temple_1_28Geometry = endpoint_temple_1_28
-    ? new THREE.CylinderGeometry(endpoint_temple_1_28.endRadius, endpoint_temple_1_28.baseRadius, endpoint_temple_1_28.length, 16, 6)
+  node_temple_1_26.userData.sculptComponent = {"id": "temple-1", "name": "temple-1", "level": "micro", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "tube", "topologyClass": "assembled-solid", "topologyRationale": "Contour follows the reference silhouette; depth is inferred and tested in orbit.", "geometryDescriptor": {"tubePath": {"points": [[0.088, 1.715, 0.088], [0.105, 1.711, 0.03], [0.099, 1.69, -0.012]], "radius": 0.004, "closed": false}, "attachmentGeometry": "authored-path"}, "parent": "root", "attachment": {"parentSocket": "head", "localStart": [0.088, 1.715, 0.088], "localEnd": [0.099, 1.69, -0.012], "contactType": "surface-embed", "embedDepth": 0.002, "gapTolerance": 0.003}, "dimensions": {"width": 1, "height": 1, "depth": 1, "units": "meters", "confidence": 0.78}, "transform": {"position": [0, 0, 0], "rotation": [0, 0, 0], "scale": [1, 1, 1]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "temple-1", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "glasses-frame", "materialLayers": ["glasses-frame"], "deformations": [], "joints": [], "seams": [], "localFeatures": [], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(25, 30, 37, 1)", "secondaryAlbedo": "rgba(25, 30, 37, 1)", "materialClass": "plastic", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
+  node_temple_1_26.userData.actionProfile = {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "temple-1", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}};
+  (nodes["root"] ?? root).add(node_temple_1_26);
+  nodes["temple-1"] = node_temple_1_26;
+  const mesh_temple_1_26Geometry = endpoint_temple_1_26
+    ? new THREE.CylinderGeometry(endpoint_temple_1_26.endRadius, endpoint_temple_1_26.baseRadius, endpoint_temple_1_26.length, 16, 6)
     : buildTubeGeometry({"points": [[0.088, 1.715, 0.088], [0.105, 1.711, 0.03], [0.099, 1.69, -0.012]], "radius": 0.004, "closed": false});
-  if (!endpoint_temple_1_28) {
-    mesh_temple_1_28Geometry.scale(1.0, 1.0, 1.0);
+  if (!endpoint_temple_1_26) {
+    mesh_temple_1_26Geometry.scale(1.0, 1.0, 1.0);
   }
-  const mesh_temple_1_28 = new THREE.Mesh(
-    mesh_temple_1_28Geometry,
+  const mesh_temple_1_26 = new THREE.Mesh(
+    mesh_temple_1_26Geometry,
     materialMap["glasses-frame"] ?? new THREE.MeshStandardMaterial({ color: 0x888888 })
   );
-  mesh_temple_1_28.name = "temple-1";
-  if (endpoint_temple_1_28) {
-    mesh_temple_1_28.position.copy(endpoint_temple_1_28.midpoint);
-    mesh_temple_1_28.quaternion.copy(endpoint_temple_1_28.quaternion);
+  mesh_temple_1_26.name = "temple-1";
+  if (endpoint_temple_1_26) {
+    mesh_temple_1_26.position.copy(endpoint_temple_1_26.midpoint);
+    mesh_temple_1_26.quaternion.copy(endpoint_temple_1_26.quaternion);
   }
-  mesh_temple_1_28.castShadow = options.castShadow ?? true;
-  mesh_temple_1_28.receiveShadow = options.receiveShadow ?? true;
-  mesh_temple_1_28.userData.sculptComponent = {"id": "temple-1", "name": "temple-1", "level": "micro", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "tube", "topologyClass": "assembled-solid", "topologyRationale": "Contour follows the reference silhouette; depth is inferred and tested in orbit.", "geometryDescriptor": {"tubePath": {"points": [[0.088, 1.715, 0.088], [0.105, 1.711, 0.03], [0.099, 1.69, -0.012]], "radius": 0.004, "closed": false}, "attachmentGeometry": "authored-path"}, "parent": "root", "attachment": {"parentSocket": "head", "localStart": [0.088, 1.715, 0.088], "localEnd": [0.099, 1.69, -0.012], "contactType": "surface-embed", "embedDepth": 0.002, "gapTolerance": 0.003}, "dimensions": {"width": 1, "height": 1, "depth": 1, "units": "meters", "confidence": 0.78}, "transform": {"position": [0, 0, 0], "rotation": [0, 0, 0], "scale": [1, 1, 1]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "temple-1", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "glasses-frame", "materialLayers": ["glasses-frame"], "deformations": [], "joints": [], "seams": [], "localFeatures": [], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(25, 30, 37, 1)", "secondaryAlbedo": "rgba(25, 30, 37, 1)", "materialClass": "plastic", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
-  node_temple_1_28.add(mesh_temple_1_28);
-  meshes["temple-1"] = mesh_temple_1_28;
+  mesh_temple_1_26.castShadow = options.castShadow ?? true;
+  mesh_temple_1_26.receiveShadow = options.receiveShadow ?? true;
+  mesh_temple_1_26.userData.sculptComponent = {"id": "temple-1", "name": "temple-1", "level": "micro", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "tube", "topologyClass": "assembled-solid", "topologyRationale": "Contour follows the reference silhouette; depth is inferred and tested in orbit.", "geometryDescriptor": {"tubePath": {"points": [[0.088, 1.715, 0.088], [0.105, 1.711, 0.03], [0.099, 1.69, -0.012]], "radius": 0.004, "closed": false}, "attachmentGeometry": "authored-path"}, "parent": "root", "attachment": {"parentSocket": "head", "localStart": [0.088, 1.715, 0.088], "localEnd": [0.099, 1.69, -0.012], "contactType": "surface-embed", "embedDepth": 0.002, "gapTolerance": 0.003}, "dimensions": {"width": 1, "height": 1, "depth": 1, "units": "meters", "confidence": 0.78}, "transform": {"position": [0, 0, 0], "rotation": [0, 0, 0], "scale": [1, 1, 1]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "temple-1", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "glasses-frame", "materialLayers": ["glasses-frame"], "deformations": [], "joints": [], "seams": [], "localFeatures": [], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(25, 30, 37, 1)", "secondaryAlbedo": "rgba(25, 30, 37, 1)", "materialClass": "plastic", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
+  node_temple_1_26.add(mesh_temple_1_26);
+  meshes["temple-1"] = mesh_temple_1_26;
   colliders["temple-1"] = {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"};
   destructionGroups["temple-1"] ??= [];
-  destructionGroups["temple-1"].push(node_temple_1_28);
+  destructionGroups["temple-1"].push(node_temple_1_26);
 
-  const attachment_glasses_bridge_29 = {"parentSocket": "head", "localStart": [-0.012, 1.716, 0.097], "localEnd": [0.012, 1.716, 0.097], "contactType": "surface-embed", "embedDepth": 0.002, "gapTolerance": 0.003};
-  const endpoint_glasses_bridge_29 = null; // authored tubePath already in model coordinates
-  const node_glasses_bridge_29 = new THREE.Group();
-  node_glasses_bridge_29.name = "glasses-bridge__pivot";
-  node_glasses_bridge_29.scale.set(1, 1, 1);
-  if (endpoint_glasses_bridge_29) {
-    node_glasses_bridge_29.position.copy(endpoint_glasses_bridge_29.start);
-    node_glasses_bridge_29.rotation.set(0.0, 0.0, 0.0);
+  const attachment_glasses_bridge_27 = {"parentSocket": "head", "localStart": [-0.012, 1.716, 0.097], "localEnd": [0.012, 1.716, 0.097], "contactType": "surface-embed", "embedDepth": 0.002, "gapTolerance": 0.003};
+  const endpoint_glasses_bridge_27 = null; // authored tubePath already in model coordinates
+  const node_glasses_bridge_27 = new THREE.Group();
+  node_glasses_bridge_27.name = "glasses-bridge__pivot";
+  node_glasses_bridge_27.scale.set(1, 1, 1);
+  if (endpoint_glasses_bridge_27) {
+    node_glasses_bridge_27.position.copy(endpoint_glasses_bridge_27.start);
+    node_glasses_bridge_27.rotation.set(0.0, 0.0, 0.0);
   } else {
-    node_glasses_bridge_29.position.set(0.0, 0.0, 0.0);
-    node_glasses_bridge_29.rotation.set(0.0, 0.0, 0.0);
+    node_glasses_bridge_27.position.set(0.0, 0.0, 0.0);
+    node_glasses_bridge_27.rotation.set(0.0, 0.0, 0.0);
   }
-  node_glasses_bridge_29.userData.sculptComponent = {"id": "glasses-bridge", "name": "glasses-bridge", "level": "micro", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "tube", "topologyClass": "assembled-solid", "topologyRationale": "Contour follows the reference silhouette; depth is inferred and tested in orbit.", "geometryDescriptor": {"tubePath": {"points": [[-0.012, 1.716, 0.097], [0, 1.722, 0.103], [0.012, 1.716, 0.097]], "radius": 0.004, "closed": false}, "attachmentGeometry": "authored-path"}, "parent": "root", "attachment": {"parentSocket": "head", "localStart": [-0.012, 1.716, 0.097], "localEnd": [0.012, 1.716, 0.097], "contactType": "surface-embed", "embedDepth": 0.002, "gapTolerance": 0.003}, "dimensions": {"width": 1, "height": 1, "depth": 1, "units": "meters", "confidence": 0.78}, "transform": {"position": [0, 0, 0], "rotation": [0, 0, 0], "scale": [1, 1, 1]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "glasses-bridge", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "glasses-frame", "materialLayers": ["glasses-frame"], "deformations": [], "joints": [], "seams": [], "localFeatures": [{"id": "eyewear-bridge", "kind": "contour", "description": "eyewear-bridge", "evidenceRefs": ["full-object"]}], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(25, 30, 37, 1)", "secondaryAlbedo": "rgba(25, 30, 37, 1)", "materialClass": "plastic", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
-  node_glasses_bridge_29.userData.actionProfile = {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "glasses-bridge", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}};
-  (nodes["root"] ?? root).add(node_glasses_bridge_29);
-  nodes["glasses-bridge"] = node_glasses_bridge_29;
-  const mesh_glasses_bridge_29Geometry = endpoint_glasses_bridge_29
-    ? new THREE.CylinderGeometry(endpoint_glasses_bridge_29.endRadius, endpoint_glasses_bridge_29.baseRadius, endpoint_glasses_bridge_29.length, 16, 6)
+  node_glasses_bridge_27.userData.sculptComponent = {"id": "glasses-bridge", "name": "glasses-bridge", "level": "micro", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "tube", "topologyClass": "assembled-solid", "topologyRationale": "Contour follows the reference silhouette; depth is inferred and tested in orbit.", "geometryDescriptor": {"tubePath": {"points": [[-0.012, 1.716, 0.097], [0, 1.722, 0.103], [0.012, 1.716, 0.097]], "radius": 0.004, "closed": false}, "attachmentGeometry": "authored-path"}, "parent": "root", "attachment": {"parentSocket": "head", "localStart": [-0.012, 1.716, 0.097], "localEnd": [0.012, 1.716, 0.097], "contactType": "surface-embed", "embedDepth": 0.002, "gapTolerance": 0.003}, "dimensions": {"width": 1, "height": 1, "depth": 1, "units": "meters", "confidence": 0.78}, "transform": {"position": [0, 0, 0], "rotation": [0, 0, 0], "scale": [1, 1, 1]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "glasses-bridge", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "glasses-frame", "materialLayers": ["glasses-frame"], "deformations": [], "joints": [], "seams": [], "localFeatures": [{"id": "eyewear-bridge", "kind": "contour", "description": "eyewear-bridge", "evidenceRefs": ["full-object"]}], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(25, 30, 37, 1)", "secondaryAlbedo": "rgba(25, 30, 37, 1)", "materialClass": "plastic", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
+  node_glasses_bridge_27.userData.actionProfile = {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "glasses-bridge", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}};
+  (nodes["root"] ?? root).add(node_glasses_bridge_27);
+  nodes["glasses-bridge"] = node_glasses_bridge_27;
+  const mesh_glasses_bridge_27Geometry = endpoint_glasses_bridge_27
+    ? new THREE.CylinderGeometry(endpoint_glasses_bridge_27.endRadius, endpoint_glasses_bridge_27.baseRadius, endpoint_glasses_bridge_27.length, 16, 6)
     : buildTubeGeometry({"points": [[-0.012, 1.716, 0.097], [0, 1.722, 0.103], [0.012, 1.716, 0.097]], "radius": 0.004, "closed": false});
-  if (!endpoint_glasses_bridge_29) {
-    mesh_glasses_bridge_29Geometry.scale(1.0, 1.0, 1.0);
+  if (!endpoint_glasses_bridge_27) {
+    mesh_glasses_bridge_27Geometry.scale(1.0, 1.0, 1.0);
   }
-  const mesh_glasses_bridge_29 = new THREE.Mesh(
-    mesh_glasses_bridge_29Geometry,
+  const mesh_glasses_bridge_27 = new THREE.Mesh(
+    mesh_glasses_bridge_27Geometry,
     materialMap["glasses-frame"] ?? new THREE.MeshStandardMaterial({ color: 0x888888 })
   );
-  mesh_glasses_bridge_29.name = "glasses-bridge";
-  if (endpoint_glasses_bridge_29) {
-    mesh_glasses_bridge_29.position.copy(endpoint_glasses_bridge_29.midpoint);
-    mesh_glasses_bridge_29.quaternion.copy(endpoint_glasses_bridge_29.quaternion);
+  mesh_glasses_bridge_27.name = "glasses-bridge";
+  if (endpoint_glasses_bridge_27) {
+    mesh_glasses_bridge_27.position.copy(endpoint_glasses_bridge_27.midpoint);
+    mesh_glasses_bridge_27.quaternion.copy(endpoint_glasses_bridge_27.quaternion);
   }
-  mesh_glasses_bridge_29.castShadow = options.castShadow ?? true;
-  mesh_glasses_bridge_29.receiveShadow = options.receiveShadow ?? true;
-  mesh_glasses_bridge_29.userData.sculptComponent = {"id": "glasses-bridge", "name": "glasses-bridge", "level": "micro", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "tube", "topologyClass": "assembled-solid", "topologyRationale": "Contour follows the reference silhouette; depth is inferred and tested in orbit.", "geometryDescriptor": {"tubePath": {"points": [[-0.012, 1.716, 0.097], [0, 1.722, 0.103], [0.012, 1.716, 0.097]], "radius": 0.004, "closed": false}, "attachmentGeometry": "authored-path"}, "parent": "root", "attachment": {"parentSocket": "head", "localStart": [-0.012, 1.716, 0.097], "localEnd": [0.012, 1.716, 0.097], "contactType": "surface-embed", "embedDepth": 0.002, "gapTolerance": 0.003}, "dimensions": {"width": 1, "height": 1, "depth": 1, "units": "meters", "confidence": 0.78}, "transform": {"position": [0, 0, 0], "rotation": [0, 0, 0], "scale": [1, 1, 1]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "glasses-bridge", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "glasses-frame", "materialLayers": ["glasses-frame"], "deformations": [], "joints": [], "seams": [], "localFeatures": [{"id": "eyewear-bridge", "kind": "contour", "description": "eyewear-bridge", "evidenceRefs": ["full-object"]}], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(25, 30, 37, 1)", "secondaryAlbedo": "rgba(25, 30, 37, 1)", "materialClass": "plastic", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
-  node_glasses_bridge_29.add(mesh_glasses_bridge_29);
-  meshes["glasses-bridge"] = mesh_glasses_bridge_29;
+  mesh_glasses_bridge_27.castShadow = options.castShadow ?? true;
+  mesh_glasses_bridge_27.receiveShadow = options.receiveShadow ?? true;
+  mesh_glasses_bridge_27.userData.sculptComponent = {"id": "glasses-bridge", "name": "glasses-bridge", "level": "micro", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "tube", "topologyClass": "assembled-solid", "topologyRationale": "Contour follows the reference silhouette; depth is inferred and tested in orbit.", "geometryDescriptor": {"tubePath": {"points": [[-0.012, 1.716, 0.097], [0, 1.722, 0.103], [0.012, 1.716, 0.097]], "radius": 0.004, "closed": false}, "attachmentGeometry": "authored-path"}, "parent": "root", "attachment": {"parentSocket": "head", "localStart": [-0.012, 1.716, 0.097], "localEnd": [0.012, 1.716, 0.097], "contactType": "surface-embed", "embedDepth": 0.002, "gapTolerance": 0.003}, "dimensions": {"width": 1, "height": 1, "depth": 1, "units": "meters", "confidence": 0.78}, "transform": {"position": [0, 0, 0], "rotation": [0, 0, 0], "scale": [1, 1, 1]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "glasses-bridge", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "glasses-frame", "materialLayers": ["glasses-frame"], "deformations": [], "joints": [], "seams": [], "localFeatures": [{"id": "eyewear-bridge", "kind": "contour", "description": "eyewear-bridge", "evidenceRefs": ["full-object"]}], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(25, 30, 37, 1)", "secondaryAlbedo": "rgba(25, 30, 37, 1)", "materialClass": "plastic", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
+  node_glasses_bridge_27.add(mesh_glasses_bridge_27);
+  meshes["glasses-bridge"] = mesh_glasses_bridge_27;
   colliders["glasses-bridge"] = {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"};
   destructionGroups["glasses-bridge"] ??= [];
-  destructionGroups["glasses-bridge"].push(node_glasses_bridge_29);
+  destructionGroups["glasses-bridge"].push(node_glasses_bridge_27);
 
-  const attachment_mouth_30 = {"parentSocket": "head", "localStart": [-0.03, 1.627, 0.069], "localEnd": [0.029, 1.63, 0.069], "contactType": "surface-embed", "embedDepth": 0.002, "gapTolerance": 0.003};
-  const endpoint_mouth_30 = null; // authored tubePath already in model coordinates
-  const node_mouth_30 = new THREE.Group();
-  node_mouth_30.name = "mouth__pivot";
-  node_mouth_30.scale.set(1, 1, 1);
-  if (endpoint_mouth_30) {
-    node_mouth_30.position.copy(endpoint_mouth_30.start);
-    node_mouth_30.rotation.set(0.0, 0.0, 0.0);
+  const attachment_mouth_28 = {"parentSocket": "head", "localStart": [-0.03, 1.627, 0.069], "localEnd": [0.029, 1.63, 0.069], "contactType": "surface-embed", "embedDepth": 0.002, "gapTolerance": 0.003};
+  const endpoint_mouth_28 = null; // authored tubePath already in model coordinates
+  const node_mouth_28 = new THREE.Group();
+  node_mouth_28.name = "mouth__pivot";
+  node_mouth_28.scale.set(1, 1, 1);
+  if (endpoint_mouth_28) {
+    node_mouth_28.position.copy(endpoint_mouth_28.start);
+    node_mouth_28.rotation.set(0.0, 0.0, 0.0);
   } else {
-    node_mouth_30.position.set(0.0, 0.0, 0.0);
-    node_mouth_30.rotation.set(0.0, 0.0, 0.0);
+    node_mouth_28.position.set(0.0, 0.0, 0.0);
+    node_mouth_28.rotation.set(0.0, 0.0, 0.0);
   }
-  node_mouth_30.userData.sculptComponent = {"id": "mouth", "name": "mouth", "level": "micro", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "tube", "topologyClass": "assembled-solid", "topologyRationale": "Contour follows the reference silhouette; depth is inferred and tested in orbit.", "geometryDescriptor": {"tubePath": {"points": [[-0.027, 1.635, 0.068], [-0.01, 1.631, 0.073], [0.01, 1.632, 0.073], [0.027, 1.638, 0.067]], "radius": 0.001, "closed": false}, "attachmentGeometry": "authored-path"}, "parent": "root", "attachment": {"parentSocket": "head", "localStart": [-0.03, 1.627, 0.069], "localEnd": [0.029, 1.63, 0.069], "contactType": "surface-embed", "embedDepth": 0.002, "gapTolerance": 0.003}, "dimensions": {"width": 1, "height": 1, "depth": 1, "units": "meters", "confidence": 0.78}, "transform": {"position": [0, 0, 0], "rotation": [0, 0, 0], "scale": [1, 1, 1]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "mouth", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "lips", "materialLayers": ["lips"], "deformations": [], "joints": [], "seams": [], "localFeatures": [], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(161, 106, 89, 1)", "secondaryAlbedo": "rgba(161, 106, 89, 1)", "materialClass": "plastic", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
-  node_mouth_30.userData.actionProfile = {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "mouth", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}};
-  (nodes["root"] ?? root).add(node_mouth_30);
-  nodes["mouth"] = node_mouth_30;
-  const mesh_mouth_30Geometry = endpoint_mouth_30
-    ? new THREE.CylinderGeometry(endpoint_mouth_30.endRadius, endpoint_mouth_30.baseRadius, endpoint_mouth_30.length, 16, 6)
+  node_mouth_28.userData.sculptComponent = {"id": "mouth", "name": "mouth", "level": "micro", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "tube", "topologyClass": "assembled-solid", "topologyRationale": "Contour follows the reference silhouette; depth is inferred and tested in orbit.", "geometryDescriptor": {"tubePath": {"points": [[-0.027, 1.635, 0.068], [-0.01, 1.631, 0.073], [0.01, 1.632, 0.073], [0.027, 1.638, 0.067]], "radius": 0.001, "closed": false}, "attachmentGeometry": "authored-path"}, "parent": "root", "attachment": {"parentSocket": "head", "localStart": [-0.03, 1.627, 0.069], "localEnd": [0.029, 1.63, 0.069], "contactType": "surface-embed", "embedDepth": 0.002, "gapTolerance": 0.003}, "dimensions": {"width": 1, "height": 1, "depth": 1, "units": "meters", "confidence": 0.78}, "transform": {"position": [0, 0, 0], "rotation": [0, 0, 0], "scale": [1, 1, 1]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "mouth", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "lips", "materialLayers": ["lips"], "deformations": [], "joints": [], "seams": [], "localFeatures": [], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(161, 106, 89, 1)", "secondaryAlbedo": "rgba(161, 106, 89, 1)", "materialClass": "plastic", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
+  node_mouth_28.userData.actionProfile = {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "mouth", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}};
+  (nodes["root"] ?? root).add(node_mouth_28);
+  nodes["mouth"] = node_mouth_28;
+  const mesh_mouth_28Geometry = endpoint_mouth_28
+    ? new THREE.CylinderGeometry(endpoint_mouth_28.endRadius, endpoint_mouth_28.baseRadius, endpoint_mouth_28.length, 16, 6)
     : buildTubeGeometry({"points": [[-0.027, 1.635, 0.068], [-0.01, 1.631, 0.073], [0.01, 1.632, 0.073], [0.027, 1.638, 0.067]], "radius": 0.001, "closed": false});
-  if (!endpoint_mouth_30) {
-    mesh_mouth_30Geometry.scale(1.0, 1.0, 1.0);
+  if (!endpoint_mouth_28) {
+    mesh_mouth_28Geometry.scale(1.0, 1.0, 1.0);
   }
-  const mesh_mouth_30 = new THREE.Mesh(
-    mesh_mouth_30Geometry,
+  const mesh_mouth_28 = new THREE.Mesh(
+    mesh_mouth_28Geometry,
     materialMap["lips"] ?? new THREE.MeshStandardMaterial({ color: 0x888888 })
   );
-  mesh_mouth_30.name = "mouth";
-  if (endpoint_mouth_30) {
-    mesh_mouth_30.position.copy(endpoint_mouth_30.midpoint);
-    mesh_mouth_30.quaternion.copy(endpoint_mouth_30.quaternion);
+  mesh_mouth_28.name = "mouth";
+  if (endpoint_mouth_28) {
+    mesh_mouth_28.position.copy(endpoint_mouth_28.midpoint);
+    mesh_mouth_28.quaternion.copy(endpoint_mouth_28.quaternion);
   }
-  mesh_mouth_30.castShadow = options.castShadow ?? true;
-  mesh_mouth_30.receiveShadow = options.receiveShadow ?? true;
-  mesh_mouth_30.userData.sculptComponent = {"id": "mouth", "name": "mouth", "level": "micro", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "tube", "topologyClass": "assembled-solid", "topologyRationale": "Contour follows the reference silhouette; depth is inferred and tested in orbit.", "geometryDescriptor": {"tubePath": {"points": [[-0.027, 1.635, 0.068], [-0.01, 1.631, 0.073], [0.01, 1.632, 0.073], [0.027, 1.638, 0.067]], "radius": 0.001, "closed": false}, "attachmentGeometry": "authored-path"}, "parent": "root", "attachment": {"parentSocket": "head", "localStart": [-0.03, 1.627, 0.069], "localEnd": [0.029, 1.63, 0.069], "contactType": "surface-embed", "embedDepth": 0.002, "gapTolerance": 0.003}, "dimensions": {"width": 1, "height": 1, "depth": 1, "units": "meters", "confidence": 0.78}, "transform": {"position": [0, 0, 0], "rotation": [0, 0, 0], "scale": [1, 1, 1]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "mouth", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "lips", "materialLayers": ["lips"], "deformations": [], "joints": [], "seams": [], "localFeatures": [], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(161, 106, 89, 1)", "secondaryAlbedo": "rgba(161, 106, 89, 1)", "materialClass": "plastic", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
-  node_mouth_30.add(mesh_mouth_30);
-  meshes["mouth"] = mesh_mouth_30;
+  mesh_mouth_28.castShadow = options.castShadow ?? true;
+  mesh_mouth_28.receiveShadow = options.receiveShadow ?? true;
+  mesh_mouth_28.userData.sculptComponent = {"id": "mouth", "name": "mouth", "level": "micro", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "tube", "topologyClass": "assembled-solid", "topologyRationale": "Contour follows the reference silhouette; depth is inferred and tested in orbit.", "geometryDescriptor": {"tubePath": {"points": [[-0.027, 1.635, 0.068], [-0.01, 1.631, 0.073], [0.01, 1.632, 0.073], [0.027, 1.638, 0.067]], "radius": 0.001, "closed": false}, "attachmentGeometry": "authored-path"}, "parent": "root", "attachment": {"parentSocket": "head", "localStart": [-0.03, 1.627, 0.069], "localEnd": [0.029, 1.63, 0.069], "contactType": "surface-embed", "embedDepth": 0.002, "gapTolerance": 0.003}, "dimensions": {"width": 1, "height": 1, "depth": 1, "units": "meters", "confidence": 0.78}, "transform": {"position": [0, 0, 0], "rotation": [0, 0, 0], "scale": [1, 1, 1]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "mouth", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "lips", "materialLayers": ["lips"], "deformations": [], "joints": [], "seams": [], "localFeatures": [], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(161, 106, 89, 1)", "secondaryAlbedo": "rgba(161, 106, 89, 1)", "materialClass": "plastic", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
+  node_mouth_28.add(mesh_mouth_28);
+  meshes["mouth"] = mesh_mouth_28;
   colliders["mouth"] = {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"};
   destructionGroups["mouth"] ??= [];
-  destructionGroups["mouth"].push(node_mouth_30);
+  destructionGroups["mouth"].push(node_mouth_28);
 
-  const endpoint_cap_31 = makeAttachmentEndpoint(null);
-  const node_cap_31 = new THREE.Group();
-  node_cap_31.name = "cap__pivot";
-  node_cap_31.scale.set(1, 1, 1);
-  if (endpoint_cap_31) {
-    node_cap_31.position.copy(endpoint_cap_31.start);
-    node_cap_31.rotation.set(0.0, 0.0, 0.0);
+  const endpoint_cap_29 = makeAttachmentEndpoint(null);
+  const node_cap_29 = new THREE.Group();
+  node_cap_29.name = "cap__pivot";
+  node_cap_29.scale.set(1, 1, 1);
+  if (endpoint_cap_29) {
+    node_cap_29.position.copy(endpoint_cap_29.start);
+    node_cap_29.rotation.set(0.0, 0.0, 0.0);
   } else {
-    node_cap_31.position.set(0.0, 0.0, 0.0);
-    node_cap_31.rotation.set(0.0, 0.0, 0.0);
+    node_cap_29.position.set(0.0, 0.0, 0.0);
+    node_cap_29.rotation.set(0.0, 0.0, 0.0);
   }
-  node_cap_31.userData.sculptComponent = {"id": "cap", "name": "cap", "level": "meso", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "tapered-sweep", "topologyClass": "continuous-sculpt", "topologyRationale": "Contour follows the reference silhouette; depth is inferred and tested in orbit.", "geometryDescriptor": {"taperedSweep": {"stations": [{"position": [0, 1.745, -0.017], "rx": 0.091, "rz": 0.101, "twist": 0}, {"position": [0, 1.775, -0.019], "rx": 0.089, "rz": 0.098, "twist": 0}, {"position": [0, 1.81, -0.019], "rx": 0.078, "rz": 0.083, "twist": 0}, {"position": [0, 1.837, -0.019], "rx": 0.05, "rz": 0.052, "twist": 0}, {"position": [0, 1.846, -0.019], "rx": 0.003, "rz": 0.003, "twist": 0}], "radialSegments": 24, "capEnds": true}, "normalStrategy": "smooth vertex normals"}, "parent": "root", "attachment": null, "dimensions": {"width": 1, "height": 1, "depth": 1, "units": "meters", "confidence": 0.78}, "transform": {"position": [0, 0, 0], "rotation": [0, 0, 0], "scale": [1, 1, 1]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "cap", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "cap", "materialLayers": ["cap"], "deformations": [], "joints": [], "seams": [], "localFeatures": [{"id": "cap-seam", "kind": "seam", "description": "cap-seam", "evidenceRefs": ["full-object"]}], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(36, 35, 44, 1)", "secondaryAlbedo": "rgba(36, 35, 44, 1)", "materialClass": "fabric", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
-  node_cap_31.userData.actionProfile = {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "cap", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}};
-  (nodes["root"] ?? root).add(node_cap_31);
-  nodes["cap"] = node_cap_31;
-  const mesh_cap_31Geometry = endpoint_cap_31
-    ? new THREE.CylinderGeometry(endpoint_cap_31.endRadius, endpoint_cap_31.baseRadius, endpoint_cap_31.length, 16, 6)
+  node_cap_29.userData.sculptComponent = {"id": "cap", "name": "cap", "level": "meso", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "tapered-sweep", "topologyClass": "continuous-sculpt", "topologyRationale": "Contour follows the reference silhouette; depth is inferred and tested in orbit.", "geometryDescriptor": {"taperedSweep": {"stations": [{"position": [0, 1.745, -0.017], "rx": 0.091, "rz": 0.101, "twist": 0}, {"position": [0, 1.775, -0.019], "rx": 0.089, "rz": 0.098, "twist": 0}, {"position": [0, 1.81, -0.019], "rx": 0.078, "rz": 0.083, "twist": 0}, {"position": [0, 1.837, -0.019], "rx": 0.05, "rz": 0.052, "twist": 0}, {"position": [0, 1.846, -0.019], "rx": 0.003, "rz": 0.003, "twist": 0}], "radialSegments": 24, "capEnds": true}, "normalStrategy": "smooth vertex normals"}, "parent": "root", "attachment": null, "dimensions": {"width": 1, "height": 1, "depth": 1, "units": "meters", "confidence": 0.78}, "transform": {"position": [0, 0, 0], "rotation": [0, 0, 0], "scale": [1, 1, 1]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "cap", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "cap", "materialLayers": ["cap"], "deformations": [], "joints": [], "seams": [], "localFeatures": [{"id": "cap-seam", "kind": "seam", "description": "cap-seam", "evidenceRefs": ["full-object"]}], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(36, 35, 44, 1)", "secondaryAlbedo": "rgba(36, 35, 44, 1)", "materialClass": "fabric", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
+  node_cap_29.userData.actionProfile = {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "cap", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}};
+  (nodes["root"] ?? root).add(node_cap_29);
+  nodes["cap"] = node_cap_29;
+  const mesh_cap_29Geometry = endpoint_cap_29
+    ? new THREE.CylinderGeometry(endpoint_cap_29.endRadius, endpoint_cap_29.baseRadius, endpoint_cap_29.length, 16, 6)
     : buildTaperedSweepGeometry({"stations": [{"position": [0, 1.745, -0.017], "rx": 0.091, "rz": 0.101, "twist": 0}, {"position": [0, 1.775, -0.019], "rx": 0.089, "rz": 0.098, "twist": 0}, {"position": [0, 1.81, -0.019], "rx": 0.078, "rz": 0.083, "twist": 0}, {"position": [0, 1.837, -0.019], "rx": 0.05, "rz": 0.052, "twist": 0}, {"position": [0, 1.846, -0.019], "rx": 0.003, "rz": 0.003, "twist": 0}], "radialSegments": 24, "capEnds": true});
-  if (!endpoint_cap_31) {
-    mesh_cap_31Geometry.scale(1.0, 1.0, 1.0);
+  if (!endpoint_cap_29) {
+    mesh_cap_29Geometry.scale(1.0, 1.0, 1.0);
   }
-  const mesh_cap_31 = new THREE.Mesh(
-    mesh_cap_31Geometry,
+  const mesh_cap_29 = new THREE.Mesh(
+    mesh_cap_29Geometry,
     materialMap["cap"] ?? new THREE.MeshStandardMaterial({ color: 0x888888 })
   );
-  mesh_cap_31.name = "cap";
-  if (endpoint_cap_31) {
-    mesh_cap_31.position.copy(endpoint_cap_31.midpoint);
-    mesh_cap_31.quaternion.copy(endpoint_cap_31.quaternion);
+  mesh_cap_29.name = "cap";
+  if (endpoint_cap_29) {
+    mesh_cap_29.position.copy(endpoint_cap_29.midpoint);
+    mesh_cap_29.quaternion.copy(endpoint_cap_29.quaternion);
   }
-  mesh_cap_31.castShadow = options.castShadow ?? true;
-  mesh_cap_31.receiveShadow = options.receiveShadow ?? true;
-  mesh_cap_31.userData.sculptComponent = {"id": "cap", "name": "cap", "level": "meso", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "tapered-sweep", "topologyClass": "continuous-sculpt", "topologyRationale": "Contour follows the reference silhouette; depth is inferred and tested in orbit.", "geometryDescriptor": {"taperedSweep": {"stations": [{"position": [0, 1.745, -0.017], "rx": 0.091, "rz": 0.101, "twist": 0}, {"position": [0, 1.775, -0.019], "rx": 0.089, "rz": 0.098, "twist": 0}, {"position": [0, 1.81, -0.019], "rx": 0.078, "rz": 0.083, "twist": 0}, {"position": [0, 1.837, -0.019], "rx": 0.05, "rz": 0.052, "twist": 0}, {"position": [0, 1.846, -0.019], "rx": 0.003, "rz": 0.003, "twist": 0}], "radialSegments": 24, "capEnds": true}, "normalStrategy": "smooth vertex normals"}, "parent": "root", "attachment": null, "dimensions": {"width": 1, "height": 1, "depth": 1, "units": "meters", "confidence": 0.78}, "transform": {"position": [0, 0, 0], "rotation": [0, 0, 0], "scale": [1, 1, 1]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "cap", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "cap", "materialLayers": ["cap"], "deformations": [], "joints": [], "seams": [], "localFeatures": [{"id": "cap-seam", "kind": "seam", "description": "cap-seam", "evidenceRefs": ["full-object"]}], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(36, 35, 44, 1)", "secondaryAlbedo": "rgba(36, 35, 44, 1)", "materialClass": "fabric", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
-  node_cap_31.add(mesh_cap_31);
-  meshes["cap"] = mesh_cap_31;
+  mesh_cap_29.castShadow = options.castShadow ?? true;
+  mesh_cap_29.receiveShadow = options.receiveShadow ?? true;
+  mesh_cap_29.userData.sculptComponent = {"id": "cap", "name": "cap", "level": "meso", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "tapered-sweep", "topologyClass": "continuous-sculpt", "topologyRationale": "Contour follows the reference silhouette; depth is inferred and tested in orbit.", "geometryDescriptor": {"taperedSweep": {"stations": [{"position": [0, 1.745, -0.017], "rx": 0.091, "rz": 0.101, "twist": 0}, {"position": [0, 1.775, -0.019], "rx": 0.089, "rz": 0.098, "twist": 0}, {"position": [0, 1.81, -0.019], "rx": 0.078, "rz": 0.083, "twist": 0}, {"position": [0, 1.837, -0.019], "rx": 0.05, "rz": 0.052, "twist": 0}, {"position": [0, 1.846, -0.019], "rx": 0.003, "rz": 0.003, "twist": 0}], "radialSegments": 24, "capEnds": true}, "normalStrategy": "smooth vertex normals"}, "parent": "root", "attachment": null, "dimensions": {"width": 1, "height": 1, "depth": 1, "units": "meters", "confidence": 0.78}, "transform": {"position": [0, 0, 0], "rotation": [0, 0, 0], "scale": [1, 1, 1]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "cap", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "cap", "materialLayers": ["cap"], "deformations": [], "joints": [], "seams": [], "localFeatures": [{"id": "cap-seam", "kind": "seam", "description": "cap-seam", "evidenceRefs": ["full-object"]}], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(36, 35, 44, 1)", "secondaryAlbedo": "rgba(36, 35, 44, 1)", "materialClass": "fabric", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
+  node_cap_29.add(mesh_cap_29);
+  meshes["cap"] = mesh_cap_29;
   colliders["cap"] = {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"};
   destructionGroups["cap"] ??= [];
-  destructionGroups["cap"].push(node_cap_31);
+  destructionGroups["cap"].push(node_cap_29);
 
-  const endpoint_cap_brim_32 = makeAttachmentEndpoint(null);
-  const node_cap_brim_32 = new THREE.Group();
-  node_cap_brim_32.name = "cap-brim__pivot";
-  node_cap_brim_32.scale.set(1, 1, 1);
-  if (endpoint_cap_brim_32) {
-    node_cap_brim_32.position.copy(endpoint_cap_brim_32.start);
-    node_cap_brim_32.rotation.set(1.5707963267948966, 0.0, -0.45);
+  const endpoint_cap_brim_30 = makeAttachmentEndpoint(null);
+  const node_cap_brim_30 = new THREE.Group();
+  node_cap_brim_30.name = "cap-brim__pivot";
+  node_cap_brim_30.scale.set(1, 1, 1);
+  if (endpoint_cap_brim_30) {
+    node_cap_brim_30.position.copy(endpoint_cap_brim_30.start);
+    node_cap_brim_30.rotation.set(1.5707963267948966, 0.0, -0.45);
   } else {
-    node_cap_brim_32.position.set(0.0, 1.751, -0.067);
-    node_cap_brim_32.rotation.set(1.5707963267948966, 0.0, -0.45);
+    node_cap_brim_30.position.set(0.0, 1.751, -0.067);
+    node_cap_brim_30.rotation.set(1.5707963267948966, 0.0, -0.45);
   }
-  node_cap_brim_32.userData.sculptComponent = {"id": "cap-brim", "name": "cap-brim", "level": "meso", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "extrude", "topologyClass": "assembled-solid", "topologyRationale": "Contour follows the reference silhouette; depth is inferred and tested in orbit.", "geometryDescriptor": {"profile2D": {"points": [[-0.45, 0], [-0.55, -0.4], [-0.48, -0.75], [-0.2, -0.95], [0.2, -0.95], [0.48, -0.75], [0.55, -0.4], [0.45, 0]], "depth": 1, "bevelEnabled": true, "bevelSize": 0.035, "bevelThickness": 0.03, "bevelSegments": 2}}, "parent": "root", "attachment": null, "dimensions": {"width": 0.18, "height": 0.18, "depth": 0.008, "units": "meters", "confidence": 0.78}, "transform": {"position": [0, 1.751, -0.067], "rotation": [1.5707963267948966, 0, -0.45], "scale": [0.18, 0.18, 0.008]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "cap-brim", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "cap", "materialLayers": ["cap"], "deformations": [], "joints": [], "seams": [], "localFeatures": [{"id": "cap-brim", "kind": "contour", "description": "cap-brim", "evidenceRefs": ["full-object"]}], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(36, 35, 44, 1)", "secondaryAlbedo": "rgba(36, 35, 44, 1)", "materialClass": "fabric", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
-  node_cap_brim_32.userData.actionProfile = {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "cap-brim", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}};
-  (nodes["root"] ?? root).add(node_cap_brim_32);
-  nodes["cap-brim"] = node_cap_brim_32;
-  const mesh_cap_brim_32Geometry = endpoint_cap_brim_32
-    ? new THREE.CylinderGeometry(endpoint_cap_brim_32.endRadius, endpoint_cap_brim_32.baseRadius, endpoint_cap_brim_32.length, 16, 6)
+  node_cap_brim_30.userData.sculptComponent = {"id": "cap-brim", "name": "cap-brim", "level": "meso", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "extrude", "topologyClass": "assembled-solid", "topologyRationale": "Contour follows the reference silhouette; depth is inferred and tested in orbit.", "geometryDescriptor": {"profile2D": {"points": [[-0.45, 0], [-0.55, -0.4], [-0.48, -0.75], [-0.2, -0.95], [0.2, -0.95], [0.48, -0.75], [0.55, -0.4], [0.45, 0]], "depth": 1, "bevelEnabled": true, "bevelSize": 0.035, "bevelThickness": 0.03, "bevelSegments": 2}}, "parent": "root", "attachment": null, "dimensions": {"width": 0.18, "height": 0.18, "depth": 0.008, "units": "meters", "confidence": 0.78}, "transform": {"position": [0, 1.751, -0.067], "rotation": [1.5707963267948966, 0, -0.45], "scale": [0.18, 0.18, 0.008]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "cap-brim", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "cap", "materialLayers": ["cap"], "deformations": [], "joints": [], "seams": [], "localFeatures": [{"id": "cap-brim", "kind": "contour", "description": "cap-brim", "evidenceRefs": ["full-object"]}], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(36, 35, 44, 1)", "secondaryAlbedo": "rgba(36, 35, 44, 1)", "materialClass": "fabric", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
+  node_cap_brim_30.userData.actionProfile = {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "cap-brim", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}};
+  (nodes["root"] ?? root).add(node_cap_brim_30);
+  nodes["cap-brim"] = node_cap_brim_30;
+  const mesh_cap_brim_30Geometry = endpoint_cap_brim_30
+    ? new THREE.CylinderGeometry(endpoint_cap_brim_30.endRadius, endpoint_cap_brim_30.baseRadius, endpoint_cap_brim_30.length, 16, 6)
     : buildExtrudeGeometry({"points": [[-0.45, 0], [-0.55, -0.4], [-0.48, -0.75], [-0.2, -0.95], [0.2, -0.95], [0.48, -0.75], [0.55, -0.4], [0.45, 0]], "depth": 1, "bevelEnabled": true, "bevelSize": 0.035, "bevelThickness": 0.03, "bevelSegments": 2});
-  if (!endpoint_cap_brim_32) {
-    mesh_cap_brim_32Geometry.scale(0.18, 0.18, 0.008);
+  if (!endpoint_cap_brim_30) {
+    mesh_cap_brim_30Geometry.scale(0.18, 0.18, 0.008);
   }
-  const mesh_cap_brim_32 = new THREE.Mesh(
-    mesh_cap_brim_32Geometry,
+  const mesh_cap_brim_30 = new THREE.Mesh(
+    mesh_cap_brim_30Geometry,
     materialMap["cap"] ?? new THREE.MeshStandardMaterial({ color: 0x888888 })
   );
-  mesh_cap_brim_32.name = "cap-brim";
-  if (endpoint_cap_brim_32) {
-    mesh_cap_brim_32.position.copy(endpoint_cap_brim_32.midpoint);
-    mesh_cap_brim_32.quaternion.copy(endpoint_cap_brim_32.quaternion);
+  mesh_cap_brim_30.name = "cap-brim";
+  if (endpoint_cap_brim_30) {
+    mesh_cap_brim_30.position.copy(endpoint_cap_brim_30.midpoint);
+    mesh_cap_brim_30.quaternion.copy(endpoint_cap_brim_30.quaternion);
   }
-  mesh_cap_brim_32.castShadow = options.castShadow ?? true;
-  mesh_cap_brim_32.receiveShadow = options.receiveShadow ?? true;
-  mesh_cap_brim_32.userData.sculptComponent = {"id": "cap-brim", "name": "cap-brim", "level": "meso", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "extrude", "topologyClass": "assembled-solid", "topologyRationale": "Contour follows the reference silhouette; depth is inferred and tested in orbit.", "geometryDescriptor": {"profile2D": {"points": [[-0.45, 0], [-0.55, -0.4], [-0.48, -0.75], [-0.2, -0.95], [0.2, -0.95], [0.48, -0.75], [0.55, -0.4], [0.45, 0]], "depth": 1, "bevelEnabled": true, "bevelSize": 0.035, "bevelThickness": 0.03, "bevelSegments": 2}}, "parent": "root", "attachment": null, "dimensions": {"width": 0.18, "height": 0.18, "depth": 0.008, "units": "meters", "confidence": 0.78}, "transform": {"position": [0, 1.751, -0.067], "rotation": [1.5707963267948966, 0, -0.45], "scale": [0.18, 0.18, 0.008]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "cap-brim", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "cap", "materialLayers": ["cap"], "deformations": [], "joints": [], "seams": [], "localFeatures": [{"id": "cap-brim", "kind": "contour", "description": "cap-brim", "evidenceRefs": ["full-object"]}], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(36, 35, 44, 1)", "secondaryAlbedo": "rgba(36, 35, 44, 1)", "materialClass": "fabric", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
-  node_cap_brim_32.add(mesh_cap_brim_32);
-  meshes["cap-brim"] = mesh_cap_brim_32;
+  mesh_cap_brim_30.castShadow = options.castShadow ?? true;
+  mesh_cap_brim_30.receiveShadow = options.receiveShadow ?? true;
+  mesh_cap_brim_30.userData.sculptComponent = {"id": "cap-brim", "name": "cap-brim", "level": "meso", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "extrude", "topologyClass": "assembled-solid", "topologyRationale": "Contour follows the reference silhouette; depth is inferred and tested in orbit.", "geometryDescriptor": {"profile2D": {"points": [[-0.45, 0], [-0.55, -0.4], [-0.48, -0.75], [-0.2, -0.95], [0.2, -0.95], [0.48, -0.75], [0.55, -0.4], [0.45, 0]], "depth": 1, "bevelEnabled": true, "bevelSize": 0.035, "bevelThickness": 0.03, "bevelSegments": 2}}, "parent": "root", "attachment": null, "dimensions": {"width": 0.18, "height": 0.18, "depth": 0.008, "units": "meters", "confidence": 0.78}, "transform": {"position": [0, 1.751, -0.067], "rotation": [1.5707963267948966, 0, -0.45], "scale": [0.18, 0.18, 0.008]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "cap-brim", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "cap", "materialLayers": ["cap"], "deformations": [], "joints": [], "seams": [], "localFeatures": [{"id": "cap-brim", "kind": "contour", "description": "cap-brim", "evidenceRefs": ["full-object"]}], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(36, 35, 44, 1)", "secondaryAlbedo": "rgba(36, 35, 44, 1)", "materialClass": "fabric", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
+  node_cap_brim_30.add(mesh_cap_brim_30);
+  meshes["cap-brim"] = mesh_cap_brim_30;
   colliders["cap-brim"] = {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"};
   destructionGroups["cap-brim"] ??= [];
-  destructionGroups["cap-brim"].push(node_cap_brim_32);
+  destructionGroups["cap-brim"].push(node_cap_brim_30);
 
-  const endpoint_fringe_0_33 = makeAttachmentEndpoint(null);
-  const node_fringe_0_33 = new THREE.Group();
-  node_fringe_0_33.name = "fringe-0__pivot";
-  node_fringe_0_33.scale.set(1, 1, 1);
-  if (endpoint_fringe_0_33) {
-    node_fringe_0_33.position.copy(endpoint_fringe_0_33.start);
-    node_fringe_0_33.rotation.set(0.0, 0.0, 0.0);
+  const endpoint_fringe_0_31 = makeAttachmentEndpoint(null);
+  const node_fringe_0_31 = new THREE.Group();
+  node_fringe_0_31.name = "fringe-0__pivot";
+  node_fringe_0_31.scale.set(1, 1, 1);
+  if (endpoint_fringe_0_31) {
+    node_fringe_0_31.position.copy(endpoint_fringe_0_31.start);
+    node_fringe_0_31.rotation.set(0.0, 0.0, 0.0);
   } else {
-    node_fringe_0_33.position.set(0.0, 0.0, 0.0);
-    node_fringe_0_33.rotation.set(0.0, 0.0, 0.0);
+    node_fringe_0_31.position.set(0.0, 0.0, 0.0);
+    node_fringe_0_31.rotation.set(0.0, 0.0, 0.0);
   }
-  node_fringe_0_33.userData.sculptComponent = {"id": "fringe-0", "name": "fringe-0", "level": "micro", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "tapered-sweep", "topologyClass": "continuous-sculpt", "topologyRationale": "Contour follows the reference silhouette; depth is inferred and tested in orbit.", "geometryDescriptor": {"taperedSweep": {"stations": [{"position": [-0.065, 1.775, 0.035], "rx": 0.032, "rz": 0.025, "twist": 0}, {"position": [-0.04, 1.788, 0.072], "rx": 0.028, "rz": 0.021, "twist": 0}, {"position": [-0.017, 1.774, 0.098], "rx": 0.018, "rz": 0.012, "twist": 0}, {"position": [0.0, 1.753, 0.105], "rx": 0, "rz": 0, "twist": 0}], "radialSegments": 12, "capEnds": true}, "normalStrategy": "smooth vertex normals"}, "parent": "root", "attachment": null, "dimensions": {"width": 1, "height": 1, "depth": 1, "units": "meters", "confidence": 0.78}, "transform": {"position": [0, 0, 0], "rotation": [0, 0, 0], "scale": [1, 1, 1]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "fringe-0", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "hair", "materialLayers": ["hair"], "deformations": [], "joints": [], "seams": [], "localFeatures": [{"id": "swept-fringe", "kind": "contour", "description": "swept-fringe", "evidenceRefs": ["full-object"]}], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(52, 40, 43, 1)", "secondaryAlbedo": "rgba(52, 40, 43, 1)", "materialClass": "plastic", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
-  node_fringe_0_33.userData.actionProfile = {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "fringe-0", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}};
-  (nodes["root"] ?? root).add(node_fringe_0_33);
-  nodes["fringe-0"] = node_fringe_0_33;
-  const mesh_fringe_0_33Geometry = endpoint_fringe_0_33
-    ? new THREE.CylinderGeometry(endpoint_fringe_0_33.endRadius, endpoint_fringe_0_33.baseRadius, endpoint_fringe_0_33.length, 16, 6)
+  node_fringe_0_31.userData.sculptComponent = {"id": "fringe-0", "name": "fringe-0", "level": "micro", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "tapered-sweep", "topologyClass": "continuous-sculpt", "topologyRationale": "Contour follows the reference silhouette; depth is inferred and tested in orbit.", "geometryDescriptor": {"taperedSweep": {"stations": [{"position": [-0.065, 1.775, 0.035], "rx": 0.032, "rz": 0.025, "twist": 0}, {"position": [-0.04, 1.788, 0.072], "rx": 0.028, "rz": 0.021, "twist": 0}, {"position": [-0.017, 1.774, 0.098], "rx": 0.018, "rz": 0.012, "twist": 0}, {"position": [0.0, 1.753, 0.105], "rx": 0, "rz": 0, "twist": 0}], "radialSegments": 12, "capEnds": true}, "normalStrategy": "smooth vertex normals"}, "parent": "root", "attachment": null, "dimensions": {"width": 1, "height": 1, "depth": 1, "units": "meters", "confidence": 0.78}, "transform": {"position": [0, 0, 0], "rotation": [0, 0, 0], "scale": [1, 1, 1]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "fringe-0", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "hair", "materialLayers": ["hair"], "deformations": [], "joints": [], "seams": [], "localFeatures": [{"id": "swept-fringe", "kind": "contour", "description": "swept-fringe", "evidenceRefs": ["full-object"]}], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(52, 40, 43, 1)", "secondaryAlbedo": "rgba(52, 40, 43, 1)", "materialClass": "plastic", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
+  node_fringe_0_31.userData.actionProfile = {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "fringe-0", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}};
+  (nodes["root"] ?? root).add(node_fringe_0_31);
+  nodes["fringe-0"] = node_fringe_0_31;
+  const mesh_fringe_0_31Geometry = endpoint_fringe_0_31
+    ? new THREE.CylinderGeometry(endpoint_fringe_0_31.endRadius, endpoint_fringe_0_31.baseRadius, endpoint_fringe_0_31.length, 16, 6)
     : buildTaperedSweepGeometry({"stations": [{"position": [-0.065, 1.775, 0.035], "rx": 0.032, "rz": 0.025, "twist": 0}, {"position": [-0.04, 1.788, 0.072], "rx": 0.028, "rz": 0.021, "twist": 0}, {"position": [-0.017, 1.774, 0.098], "rx": 0.018, "rz": 0.012, "twist": 0}, {"position": [0.0, 1.753, 0.105], "rx": 0, "rz": 0, "twist": 0}], "radialSegments": 12, "capEnds": true});
-  if (!endpoint_fringe_0_33) {
-    mesh_fringe_0_33Geometry.scale(1.0, 1.0, 1.0);
+  if (!endpoint_fringe_0_31) {
+    mesh_fringe_0_31Geometry.scale(1.0, 1.0, 1.0);
   }
-  const mesh_fringe_0_33 = new THREE.Mesh(
-    mesh_fringe_0_33Geometry,
+  const mesh_fringe_0_31 = new THREE.Mesh(
+    mesh_fringe_0_31Geometry,
     materialMap["hair"] ?? new THREE.MeshStandardMaterial({ color: 0x888888 })
   );
-  mesh_fringe_0_33.name = "fringe-0";
-  if (endpoint_fringe_0_33) {
-    mesh_fringe_0_33.position.copy(endpoint_fringe_0_33.midpoint);
-    mesh_fringe_0_33.quaternion.copy(endpoint_fringe_0_33.quaternion);
+  mesh_fringe_0_31.name = "fringe-0";
+  if (endpoint_fringe_0_31) {
+    mesh_fringe_0_31.position.copy(endpoint_fringe_0_31.midpoint);
+    mesh_fringe_0_31.quaternion.copy(endpoint_fringe_0_31.quaternion);
   }
-  mesh_fringe_0_33.castShadow = options.castShadow ?? true;
-  mesh_fringe_0_33.receiveShadow = options.receiveShadow ?? true;
-  mesh_fringe_0_33.userData.sculptComponent = {"id": "fringe-0", "name": "fringe-0", "level": "micro", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "tapered-sweep", "topologyClass": "continuous-sculpt", "topologyRationale": "Contour follows the reference silhouette; depth is inferred and tested in orbit.", "geometryDescriptor": {"taperedSweep": {"stations": [{"position": [-0.065, 1.775, 0.035], "rx": 0.032, "rz": 0.025, "twist": 0}, {"position": [-0.04, 1.788, 0.072], "rx": 0.028, "rz": 0.021, "twist": 0}, {"position": [-0.017, 1.774, 0.098], "rx": 0.018, "rz": 0.012, "twist": 0}, {"position": [0.0, 1.753, 0.105], "rx": 0, "rz": 0, "twist": 0}], "radialSegments": 12, "capEnds": true}, "normalStrategy": "smooth vertex normals"}, "parent": "root", "attachment": null, "dimensions": {"width": 1, "height": 1, "depth": 1, "units": "meters", "confidence": 0.78}, "transform": {"position": [0, 0, 0], "rotation": [0, 0, 0], "scale": [1, 1, 1]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "fringe-0", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "hair", "materialLayers": ["hair"], "deformations": [], "joints": [], "seams": [], "localFeatures": [{"id": "swept-fringe", "kind": "contour", "description": "swept-fringe", "evidenceRefs": ["full-object"]}], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(52, 40, 43, 1)", "secondaryAlbedo": "rgba(52, 40, 43, 1)", "materialClass": "plastic", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
-  node_fringe_0_33.add(mesh_fringe_0_33);
-  meshes["fringe-0"] = mesh_fringe_0_33;
+  mesh_fringe_0_31.castShadow = options.castShadow ?? true;
+  mesh_fringe_0_31.receiveShadow = options.receiveShadow ?? true;
+  mesh_fringe_0_31.userData.sculptComponent = {"id": "fringe-0", "name": "fringe-0", "level": "micro", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "tapered-sweep", "topologyClass": "continuous-sculpt", "topologyRationale": "Contour follows the reference silhouette; depth is inferred and tested in orbit.", "geometryDescriptor": {"taperedSweep": {"stations": [{"position": [-0.065, 1.775, 0.035], "rx": 0.032, "rz": 0.025, "twist": 0}, {"position": [-0.04, 1.788, 0.072], "rx": 0.028, "rz": 0.021, "twist": 0}, {"position": [-0.017, 1.774, 0.098], "rx": 0.018, "rz": 0.012, "twist": 0}, {"position": [0.0, 1.753, 0.105], "rx": 0, "rz": 0, "twist": 0}], "radialSegments": 12, "capEnds": true}, "normalStrategy": "smooth vertex normals"}, "parent": "root", "attachment": null, "dimensions": {"width": 1, "height": 1, "depth": 1, "units": "meters", "confidence": 0.78}, "transform": {"position": [0, 0, 0], "rotation": [0, 0, 0], "scale": [1, 1, 1]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "fringe-0", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "hair", "materialLayers": ["hair"], "deformations": [], "joints": [], "seams": [], "localFeatures": [{"id": "swept-fringe", "kind": "contour", "description": "swept-fringe", "evidenceRefs": ["full-object"]}], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(52, 40, 43, 1)", "secondaryAlbedo": "rgba(52, 40, 43, 1)", "materialClass": "plastic", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
+  node_fringe_0_31.add(mesh_fringe_0_31);
+  meshes["fringe-0"] = mesh_fringe_0_31;
   colliders["fringe-0"] = {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"};
   destructionGroups["fringe-0"] ??= [];
-  destructionGroups["fringe-0"].push(node_fringe_0_33);
+  destructionGroups["fringe-0"].push(node_fringe_0_31);
 
-  const endpoint_fringe_1_34 = makeAttachmentEndpoint(null);
-  const node_fringe_1_34 = new THREE.Group();
-  node_fringe_1_34.name = "fringe-1__pivot";
-  node_fringe_1_34.scale.set(1, 1, 1);
-  if (endpoint_fringe_1_34) {
-    node_fringe_1_34.position.copy(endpoint_fringe_1_34.start);
-    node_fringe_1_34.rotation.set(0.0, 0.0, 0.0);
+  const endpoint_fringe_1_32 = makeAttachmentEndpoint(null);
+  const node_fringe_1_32 = new THREE.Group();
+  node_fringe_1_32.name = "fringe-1__pivot";
+  node_fringe_1_32.scale.set(1, 1, 1);
+  if (endpoint_fringe_1_32) {
+    node_fringe_1_32.position.copy(endpoint_fringe_1_32.start);
+    node_fringe_1_32.rotation.set(0.0, 0.0, 0.0);
   } else {
-    node_fringe_1_34.position.set(0.0, 0.0, 0.0);
-    node_fringe_1_34.rotation.set(0.0, 0.0, 0.0);
+    node_fringe_1_32.position.set(0.0, 0.0, 0.0);
+    node_fringe_1_32.rotation.set(0.0, 0.0, 0.0);
   }
-  node_fringe_1_34.userData.sculptComponent = {"id": "fringe-1", "name": "fringe-1", "level": "micro", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "tapered-sweep", "topologyClass": "continuous-sculpt", "topologyRationale": "Contour follows the reference silhouette; depth is inferred and tested in orbit.", "geometryDescriptor": {"taperedSweep": {"stations": [{"position": [-0.038000000000000006, 1.775, 0.035], "rx": 0.032, "rz": 0.025, "twist": 0}, {"position": [-0.013000000000000005, 1.788, 0.072], "rx": 0.028, "rz": 0.021, "twist": 0}, {"position": [0.009999999999999995, 1.774, 0.098], "rx": 0.018, "rz": 0.012, "twist": 0}, {"position": [0.026999999999999996, 1.753, 0.105], "rx": 0, "rz": 0, "twist": 0}], "radialSegments": 12, "capEnds": true}, "normalStrategy": "smooth vertex normals"}, "parent": "root", "attachment": null, "dimensions": {"width": 1, "height": 1, "depth": 1, "units": "meters", "confidence": 0.78}, "transform": {"position": [0, 0, 0], "rotation": [0, 0, 0], "scale": [1, 1, 1]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "fringe-1", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "hair", "materialLayers": ["hair"], "deformations": [], "joints": [], "seams": [], "localFeatures": [], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(52, 40, 43, 1)", "secondaryAlbedo": "rgba(52, 40, 43, 1)", "materialClass": "plastic", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
-  node_fringe_1_34.userData.actionProfile = {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "fringe-1", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}};
-  (nodes["root"] ?? root).add(node_fringe_1_34);
-  nodes["fringe-1"] = node_fringe_1_34;
-  const mesh_fringe_1_34Geometry = endpoint_fringe_1_34
-    ? new THREE.CylinderGeometry(endpoint_fringe_1_34.endRadius, endpoint_fringe_1_34.baseRadius, endpoint_fringe_1_34.length, 16, 6)
+  node_fringe_1_32.userData.sculptComponent = {"id": "fringe-1", "name": "fringe-1", "level": "micro", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "tapered-sweep", "topologyClass": "continuous-sculpt", "topologyRationale": "Contour follows the reference silhouette; depth is inferred and tested in orbit.", "geometryDescriptor": {"taperedSweep": {"stations": [{"position": [-0.038000000000000006, 1.775, 0.035], "rx": 0.032, "rz": 0.025, "twist": 0}, {"position": [-0.013000000000000005, 1.788, 0.072], "rx": 0.028, "rz": 0.021, "twist": 0}, {"position": [0.009999999999999995, 1.774, 0.098], "rx": 0.018, "rz": 0.012, "twist": 0}, {"position": [0.026999999999999996, 1.753, 0.105], "rx": 0, "rz": 0, "twist": 0}], "radialSegments": 12, "capEnds": true}, "normalStrategy": "smooth vertex normals"}, "parent": "root", "attachment": null, "dimensions": {"width": 1, "height": 1, "depth": 1, "units": "meters", "confidence": 0.78}, "transform": {"position": [0, 0, 0], "rotation": [0, 0, 0], "scale": [1, 1, 1]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "fringe-1", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "hair", "materialLayers": ["hair"], "deformations": [], "joints": [], "seams": [], "localFeatures": [], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(52, 40, 43, 1)", "secondaryAlbedo": "rgba(52, 40, 43, 1)", "materialClass": "plastic", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
+  node_fringe_1_32.userData.actionProfile = {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "fringe-1", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}};
+  (nodes["root"] ?? root).add(node_fringe_1_32);
+  nodes["fringe-1"] = node_fringe_1_32;
+  const mesh_fringe_1_32Geometry = endpoint_fringe_1_32
+    ? new THREE.CylinderGeometry(endpoint_fringe_1_32.endRadius, endpoint_fringe_1_32.baseRadius, endpoint_fringe_1_32.length, 16, 6)
     : buildTaperedSweepGeometry({"stations": [{"position": [-0.038000000000000006, 1.775, 0.035], "rx": 0.032, "rz": 0.025, "twist": 0}, {"position": [-0.013000000000000005, 1.788, 0.072], "rx": 0.028, "rz": 0.021, "twist": 0}, {"position": [0.009999999999999995, 1.774, 0.098], "rx": 0.018, "rz": 0.012, "twist": 0}, {"position": [0.026999999999999996, 1.753, 0.105], "rx": 0, "rz": 0, "twist": 0}], "radialSegments": 12, "capEnds": true});
-  if (!endpoint_fringe_1_34) {
-    mesh_fringe_1_34Geometry.scale(1.0, 1.0, 1.0);
+  if (!endpoint_fringe_1_32) {
+    mesh_fringe_1_32Geometry.scale(1.0, 1.0, 1.0);
   }
-  const mesh_fringe_1_34 = new THREE.Mesh(
-    mesh_fringe_1_34Geometry,
+  const mesh_fringe_1_32 = new THREE.Mesh(
+    mesh_fringe_1_32Geometry,
     materialMap["hair"] ?? new THREE.MeshStandardMaterial({ color: 0x888888 })
   );
-  mesh_fringe_1_34.name = "fringe-1";
-  if (endpoint_fringe_1_34) {
-    mesh_fringe_1_34.position.copy(endpoint_fringe_1_34.midpoint);
-    mesh_fringe_1_34.quaternion.copy(endpoint_fringe_1_34.quaternion);
+  mesh_fringe_1_32.name = "fringe-1";
+  if (endpoint_fringe_1_32) {
+    mesh_fringe_1_32.position.copy(endpoint_fringe_1_32.midpoint);
+    mesh_fringe_1_32.quaternion.copy(endpoint_fringe_1_32.quaternion);
   }
-  mesh_fringe_1_34.castShadow = options.castShadow ?? true;
-  mesh_fringe_1_34.receiveShadow = options.receiveShadow ?? true;
-  mesh_fringe_1_34.userData.sculptComponent = {"id": "fringe-1", "name": "fringe-1", "level": "micro", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "tapered-sweep", "topologyClass": "continuous-sculpt", "topologyRationale": "Contour follows the reference silhouette; depth is inferred and tested in orbit.", "geometryDescriptor": {"taperedSweep": {"stations": [{"position": [-0.038000000000000006, 1.775, 0.035], "rx": 0.032, "rz": 0.025, "twist": 0}, {"position": [-0.013000000000000005, 1.788, 0.072], "rx": 0.028, "rz": 0.021, "twist": 0}, {"position": [0.009999999999999995, 1.774, 0.098], "rx": 0.018, "rz": 0.012, "twist": 0}, {"position": [0.026999999999999996, 1.753, 0.105], "rx": 0, "rz": 0, "twist": 0}], "radialSegments": 12, "capEnds": true}, "normalStrategy": "smooth vertex normals"}, "parent": "root", "attachment": null, "dimensions": {"width": 1, "height": 1, "depth": 1, "units": "meters", "confidence": 0.78}, "transform": {"position": [0, 0, 0], "rotation": [0, 0, 0], "scale": [1, 1, 1]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "fringe-1", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "hair", "materialLayers": ["hair"], "deformations": [], "joints": [], "seams": [], "localFeatures": [], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(52, 40, 43, 1)", "secondaryAlbedo": "rgba(52, 40, 43, 1)", "materialClass": "plastic", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
-  node_fringe_1_34.add(mesh_fringe_1_34);
-  meshes["fringe-1"] = mesh_fringe_1_34;
+  mesh_fringe_1_32.castShadow = options.castShadow ?? true;
+  mesh_fringe_1_32.receiveShadow = options.receiveShadow ?? true;
+  mesh_fringe_1_32.userData.sculptComponent = {"id": "fringe-1", "name": "fringe-1", "level": "micro", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "tapered-sweep", "topologyClass": "continuous-sculpt", "topologyRationale": "Contour follows the reference silhouette; depth is inferred and tested in orbit.", "geometryDescriptor": {"taperedSweep": {"stations": [{"position": [-0.038000000000000006, 1.775, 0.035], "rx": 0.032, "rz": 0.025, "twist": 0}, {"position": [-0.013000000000000005, 1.788, 0.072], "rx": 0.028, "rz": 0.021, "twist": 0}, {"position": [0.009999999999999995, 1.774, 0.098], "rx": 0.018, "rz": 0.012, "twist": 0}, {"position": [0.026999999999999996, 1.753, 0.105], "rx": 0, "rz": 0, "twist": 0}], "radialSegments": 12, "capEnds": true}, "normalStrategy": "smooth vertex normals"}, "parent": "root", "attachment": null, "dimensions": {"width": 1, "height": 1, "depth": 1, "units": "meters", "confidence": 0.78}, "transform": {"position": [0, 0, 0], "rotation": [0, 0, 0], "scale": [1, 1, 1]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "fringe-1", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "hair", "materialLayers": ["hair"], "deformations": [], "joints": [], "seams": [], "localFeatures": [], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(52, 40, 43, 1)", "secondaryAlbedo": "rgba(52, 40, 43, 1)", "materialClass": "plastic", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
+  node_fringe_1_32.add(mesh_fringe_1_32);
+  meshes["fringe-1"] = mesh_fringe_1_32;
   colliders["fringe-1"] = {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"};
   destructionGroups["fringe-1"] ??= [];
-  destructionGroups["fringe-1"].push(node_fringe_1_34);
+  destructionGroups["fringe-1"].push(node_fringe_1_32);
 
-  const endpoint_fringe_2_35 = makeAttachmentEndpoint(null);
-  const node_fringe_2_35 = new THREE.Group();
-  node_fringe_2_35.name = "fringe-2__pivot";
-  node_fringe_2_35.scale.set(1, 1, 1);
-  if (endpoint_fringe_2_35) {
-    node_fringe_2_35.position.copy(endpoint_fringe_2_35.start);
-    node_fringe_2_35.rotation.set(0.0, 0.0, 0.0);
+  const endpoint_fringe_2_33 = makeAttachmentEndpoint(null);
+  const node_fringe_2_33 = new THREE.Group();
+  node_fringe_2_33.name = "fringe-2__pivot";
+  node_fringe_2_33.scale.set(1, 1, 1);
+  if (endpoint_fringe_2_33) {
+    node_fringe_2_33.position.copy(endpoint_fringe_2_33.start);
+    node_fringe_2_33.rotation.set(0.0, 0.0, 0.0);
   } else {
-    node_fringe_2_35.position.set(0.0, 0.0, 0.0);
-    node_fringe_2_35.rotation.set(0.0, 0.0, 0.0);
+    node_fringe_2_33.position.set(0.0, 0.0, 0.0);
+    node_fringe_2_33.rotation.set(0.0, 0.0, 0.0);
   }
-  node_fringe_2_35.userData.sculptComponent = {"id": "fringe-2", "name": "fringe-2", "level": "micro", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "tapered-sweep", "topologyClass": "continuous-sculpt", "topologyRationale": "Contour follows the reference silhouette; depth is inferred and tested in orbit.", "geometryDescriptor": {"taperedSweep": {"stations": [{"position": [-0.011000000000000003, 1.775, 0.035], "rx": 0.032, "rz": 0.025, "twist": 0}, {"position": [0.013999999999999999, 1.788, 0.072], "rx": 0.028, "rz": 0.021, "twist": 0}, {"position": [0.037, 1.774, 0.098], "rx": 0.018, "rz": 0.012, "twist": 0}, {"position": [0.054, 1.753, 0.105], "rx": 0, "rz": 0, "twist": 0}], "radialSegments": 12, "capEnds": true}, "normalStrategy": "smooth vertex normals"}, "parent": "root", "attachment": null, "dimensions": {"width": 1, "height": 1, "depth": 1, "units": "meters", "confidence": 0.78}, "transform": {"position": [0, 0, 0], "rotation": [0, 0, 0], "scale": [1, 1, 1]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "fringe-2", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "hair", "materialLayers": ["hair"], "deformations": [], "joints": [], "seams": [], "localFeatures": [], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(52, 40, 43, 1)", "secondaryAlbedo": "rgba(52, 40, 43, 1)", "materialClass": "plastic", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
-  node_fringe_2_35.userData.actionProfile = {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "fringe-2", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}};
-  (nodes["root"] ?? root).add(node_fringe_2_35);
-  nodes["fringe-2"] = node_fringe_2_35;
-  const mesh_fringe_2_35Geometry = endpoint_fringe_2_35
-    ? new THREE.CylinderGeometry(endpoint_fringe_2_35.endRadius, endpoint_fringe_2_35.baseRadius, endpoint_fringe_2_35.length, 16, 6)
+  node_fringe_2_33.userData.sculptComponent = {"id": "fringe-2", "name": "fringe-2", "level": "micro", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "tapered-sweep", "topologyClass": "continuous-sculpt", "topologyRationale": "Contour follows the reference silhouette; depth is inferred and tested in orbit.", "geometryDescriptor": {"taperedSweep": {"stations": [{"position": [-0.011000000000000003, 1.775, 0.035], "rx": 0.032, "rz": 0.025, "twist": 0}, {"position": [0.013999999999999999, 1.788, 0.072], "rx": 0.028, "rz": 0.021, "twist": 0}, {"position": [0.037, 1.774, 0.098], "rx": 0.018, "rz": 0.012, "twist": 0}, {"position": [0.054, 1.753, 0.105], "rx": 0, "rz": 0, "twist": 0}], "radialSegments": 12, "capEnds": true}, "normalStrategy": "smooth vertex normals"}, "parent": "root", "attachment": null, "dimensions": {"width": 1, "height": 1, "depth": 1, "units": "meters", "confidence": 0.78}, "transform": {"position": [0, 0, 0], "rotation": [0, 0, 0], "scale": [1, 1, 1]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "fringe-2", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "hair", "materialLayers": ["hair"], "deformations": [], "joints": [], "seams": [], "localFeatures": [], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(52, 40, 43, 1)", "secondaryAlbedo": "rgba(52, 40, 43, 1)", "materialClass": "plastic", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
+  node_fringe_2_33.userData.actionProfile = {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "fringe-2", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}};
+  (nodes["root"] ?? root).add(node_fringe_2_33);
+  nodes["fringe-2"] = node_fringe_2_33;
+  const mesh_fringe_2_33Geometry = endpoint_fringe_2_33
+    ? new THREE.CylinderGeometry(endpoint_fringe_2_33.endRadius, endpoint_fringe_2_33.baseRadius, endpoint_fringe_2_33.length, 16, 6)
     : buildTaperedSweepGeometry({"stations": [{"position": [-0.011000000000000003, 1.775, 0.035], "rx": 0.032, "rz": 0.025, "twist": 0}, {"position": [0.013999999999999999, 1.788, 0.072], "rx": 0.028, "rz": 0.021, "twist": 0}, {"position": [0.037, 1.774, 0.098], "rx": 0.018, "rz": 0.012, "twist": 0}, {"position": [0.054, 1.753, 0.105], "rx": 0, "rz": 0, "twist": 0}], "radialSegments": 12, "capEnds": true});
-  if (!endpoint_fringe_2_35) {
-    mesh_fringe_2_35Geometry.scale(1.0, 1.0, 1.0);
+  if (!endpoint_fringe_2_33) {
+    mesh_fringe_2_33Geometry.scale(1.0, 1.0, 1.0);
   }
-  const mesh_fringe_2_35 = new THREE.Mesh(
-    mesh_fringe_2_35Geometry,
+  const mesh_fringe_2_33 = new THREE.Mesh(
+    mesh_fringe_2_33Geometry,
     materialMap["hair"] ?? new THREE.MeshStandardMaterial({ color: 0x888888 })
   );
-  mesh_fringe_2_35.name = "fringe-2";
-  if (endpoint_fringe_2_35) {
-    mesh_fringe_2_35.position.copy(endpoint_fringe_2_35.midpoint);
-    mesh_fringe_2_35.quaternion.copy(endpoint_fringe_2_35.quaternion);
+  mesh_fringe_2_33.name = "fringe-2";
+  if (endpoint_fringe_2_33) {
+    mesh_fringe_2_33.position.copy(endpoint_fringe_2_33.midpoint);
+    mesh_fringe_2_33.quaternion.copy(endpoint_fringe_2_33.quaternion);
   }
-  mesh_fringe_2_35.castShadow = options.castShadow ?? true;
-  mesh_fringe_2_35.receiveShadow = options.receiveShadow ?? true;
-  mesh_fringe_2_35.userData.sculptComponent = {"id": "fringe-2", "name": "fringe-2", "level": "micro", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "tapered-sweep", "topologyClass": "continuous-sculpt", "topologyRationale": "Contour follows the reference silhouette; depth is inferred and tested in orbit.", "geometryDescriptor": {"taperedSweep": {"stations": [{"position": [-0.011000000000000003, 1.775, 0.035], "rx": 0.032, "rz": 0.025, "twist": 0}, {"position": [0.013999999999999999, 1.788, 0.072], "rx": 0.028, "rz": 0.021, "twist": 0}, {"position": [0.037, 1.774, 0.098], "rx": 0.018, "rz": 0.012, "twist": 0}, {"position": [0.054, 1.753, 0.105], "rx": 0, "rz": 0, "twist": 0}], "radialSegments": 12, "capEnds": true}, "normalStrategy": "smooth vertex normals"}, "parent": "root", "attachment": null, "dimensions": {"width": 1, "height": 1, "depth": 1, "units": "meters", "confidence": 0.78}, "transform": {"position": [0, 0, 0], "rotation": [0, 0, 0], "scale": [1, 1, 1]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "fringe-2", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "hair", "materialLayers": ["hair"], "deformations": [], "joints": [], "seams": [], "localFeatures": [], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(52, 40, 43, 1)", "secondaryAlbedo": "rgba(52, 40, 43, 1)", "materialClass": "plastic", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
-  node_fringe_2_35.add(mesh_fringe_2_35);
-  meshes["fringe-2"] = mesh_fringe_2_35;
+  mesh_fringe_2_33.castShadow = options.castShadow ?? true;
+  mesh_fringe_2_33.receiveShadow = options.receiveShadow ?? true;
+  mesh_fringe_2_33.userData.sculptComponent = {"id": "fringe-2", "name": "fringe-2", "level": "micro", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "tapered-sweep", "topologyClass": "continuous-sculpt", "topologyRationale": "Contour follows the reference silhouette; depth is inferred and tested in orbit.", "geometryDescriptor": {"taperedSweep": {"stations": [{"position": [-0.011000000000000003, 1.775, 0.035], "rx": 0.032, "rz": 0.025, "twist": 0}, {"position": [0.013999999999999999, 1.788, 0.072], "rx": 0.028, "rz": 0.021, "twist": 0}, {"position": [0.037, 1.774, 0.098], "rx": 0.018, "rz": 0.012, "twist": 0}, {"position": [0.054, 1.753, 0.105], "rx": 0, "rz": 0, "twist": 0}], "radialSegments": 12, "capEnds": true}, "normalStrategy": "smooth vertex normals"}, "parent": "root", "attachment": null, "dimensions": {"width": 1, "height": 1, "depth": 1, "units": "meters", "confidence": 0.78}, "transform": {"position": [0, 0, 0], "rotation": [0, 0, 0], "scale": [1, 1, 1]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "fringe-2", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "hair", "materialLayers": ["hair"], "deformations": [], "joints": [], "seams": [], "localFeatures": [], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(52, 40, 43, 1)", "secondaryAlbedo": "rgba(52, 40, 43, 1)", "materialClass": "plastic", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
+  node_fringe_2_33.add(mesh_fringe_2_33);
+  meshes["fringe-2"] = mesh_fringe_2_33;
   colliders["fringe-2"] = {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"};
   destructionGroups["fringe-2"] ??= [];
-  destructionGroups["fringe-2"].push(node_fringe_2_35);
+  destructionGroups["fringe-2"].push(node_fringe_2_33);
 
-  const endpoint_fringe_3_36 = makeAttachmentEndpoint(null);
-  const node_fringe_3_36 = new THREE.Group();
-  node_fringe_3_36.name = "fringe-3__pivot";
-  node_fringe_3_36.scale.set(1, 1, 1);
-  if (endpoint_fringe_3_36) {
-    node_fringe_3_36.position.copy(endpoint_fringe_3_36.start);
-    node_fringe_3_36.rotation.set(0.0, 0.0, 0.0);
+  const endpoint_fringe_3_34 = makeAttachmentEndpoint(null);
+  const node_fringe_3_34 = new THREE.Group();
+  node_fringe_3_34.name = "fringe-3__pivot";
+  node_fringe_3_34.scale.set(1, 1, 1);
+  if (endpoint_fringe_3_34) {
+    node_fringe_3_34.position.copy(endpoint_fringe_3_34.start);
+    node_fringe_3_34.rotation.set(0.0, 0.0, 0.0);
   } else {
-    node_fringe_3_36.position.set(0.0, 0.0, 0.0);
-    node_fringe_3_36.rotation.set(0.0, 0.0, 0.0);
+    node_fringe_3_34.position.set(0.0, 0.0, 0.0);
+    node_fringe_3_34.rotation.set(0.0, 0.0, 0.0);
   }
-  node_fringe_3_36.userData.sculptComponent = {"id": "fringe-3", "name": "fringe-3", "level": "micro", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "tapered-sweep", "topologyClass": "continuous-sculpt", "topologyRationale": "Contour follows the reference silhouette; depth is inferred and tested in orbit.", "geometryDescriptor": {"taperedSweep": {"stations": [{"position": [0.016, 1.775, 0.035], "rx": 0.032, "rz": 0.025, "twist": 0}, {"position": [0.041, 1.788, 0.072], "rx": 0.028, "rz": 0.021, "twist": 0}, {"position": [0.064, 1.774, 0.098], "rx": 0.018, "rz": 0.012, "twist": 0}, {"position": [0.081, 1.753, 0.105], "rx": 0, "rz": 0, "twist": 0}], "radialSegments": 12, "capEnds": true}, "normalStrategy": "smooth vertex normals"}, "parent": "root", "attachment": null, "dimensions": {"width": 1, "height": 1, "depth": 1, "units": "meters", "confidence": 0.78}, "transform": {"position": [0, 0, 0], "rotation": [0, 0, 0], "scale": [1, 1, 1]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "fringe-3", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "hair", "materialLayers": ["hair"], "deformations": [], "joints": [], "seams": [], "localFeatures": [], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(52, 40, 43, 1)", "secondaryAlbedo": "rgba(52, 40, 43, 1)", "materialClass": "plastic", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
-  node_fringe_3_36.userData.actionProfile = {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "fringe-3", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}};
-  (nodes["root"] ?? root).add(node_fringe_3_36);
-  nodes["fringe-3"] = node_fringe_3_36;
-  const mesh_fringe_3_36Geometry = endpoint_fringe_3_36
-    ? new THREE.CylinderGeometry(endpoint_fringe_3_36.endRadius, endpoint_fringe_3_36.baseRadius, endpoint_fringe_3_36.length, 16, 6)
+  node_fringe_3_34.userData.sculptComponent = {"id": "fringe-3", "name": "fringe-3", "level": "micro", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "tapered-sweep", "topologyClass": "continuous-sculpt", "topologyRationale": "Contour follows the reference silhouette; depth is inferred and tested in orbit.", "geometryDescriptor": {"taperedSweep": {"stations": [{"position": [0.016, 1.775, 0.035], "rx": 0.032, "rz": 0.025, "twist": 0}, {"position": [0.041, 1.788, 0.072], "rx": 0.028, "rz": 0.021, "twist": 0}, {"position": [0.064, 1.774, 0.098], "rx": 0.018, "rz": 0.012, "twist": 0}, {"position": [0.081, 1.753, 0.105], "rx": 0, "rz": 0, "twist": 0}], "radialSegments": 12, "capEnds": true}, "normalStrategy": "smooth vertex normals"}, "parent": "root", "attachment": null, "dimensions": {"width": 1, "height": 1, "depth": 1, "units": "meters", "confidence": 0.78}, "transform": {"position": [0, 0, 0], "rotation": [0, 0, 0], "scale": [1, 1, 1]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "fringe-3", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "hair", "materialLayers": ["hair"], "deformations": [], "joints": [], "seams": [], "localFeatures": [], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(52, 40, 43, 1)", "secondaryAlbedo": "rgba(52, 40, 43, 1)", "materialClass": "plastic", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
+  node_fringe_3_34.userData.actionProfile = {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "fringe-3", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}};
+  (nodes["root"] ?? root).add(node_fringe_3_34);
+  nodes["fringe-3"] = node_fringe_3_34;
+  const mesh_fringe_3_34Geometry = endpoint_fringe_3_34
+    ? new THREE.CylinderGeometry(endpoint_fringe_3_34.endRadius, endpoint_fringe_3_34.baseRadius, endpoint_fringe_3_34.length, 16, 6)
     : buildTaperedSweepGeometry({"stations": [{"position": [0.016, 1.775, 0.035], "rx": 0.032, "rz": 0.025, "twist": 0}, {"position": [0.041, 1.788, 0.072], "rx": 0.028, "rz": 0.021, "twist": 0}, {"position": [0.064, 1.774, 0.098], "rx": 0.018, "rz": 0.012, "twist": 0}, {"position": [0.081, 1.753, 0.105], "rx": 0, "rz": 0, "twist": 0}], "radialSegments": 12, "capEnds": true});
-  if (!endpoint_fringe_3_36) {
-    mesh_fringe_3_36Geometry.scale(1.0, 1.0, 1.0);
+  if (!endpoint_fringe_3_34) {
+    mesh_fringe_3_34Geometry.scale(1.0, 1.0, 1.0);
   }
-  const mesh_fringe_3_36 = new THREE.Mesh(
-    mesh_fringe_3_36Geometry,
+  const mesh_fringe_3_34 = new THREE.Mesh(
+    mesh_fringe_3_34Geometry,
     materialMap["hair"] ?? new THREE.MeshStandardMaterial({ color: 0x888888 })
   );
-  mesh_fringe_3_36.name = "fringe-3";
-  if (endpoint_fringe_3_36) {
-    mesh_fringe_3_36.position.copy(endpoint_fringe_3_36.midpoint);
-    mesh_fringe_3_36.quaternion.copy(endpoint_fringe_3_36.quaternion);
+  mesh_fringe_3_34.name = "fringe-3";
+  if (endpoint_fringe_3_34) {
+    mesh_fringe_3_34.position.copy(endpoint_fringe_3_34.midpoint);
+    mesh_fringe_3_34.quaternion.copy(endpoint_fringe_3_34.quaternion);
   }
-  mesh_fringe_3_36.castShadow = options.castShadow ?? true;
-  mesh_fringe_3_36.receiveShadow = options.receiveShadow ?? true;
-  mesh_fringe_3_36.userData.sculptComponent = {"id": "fringe-3", "name": "fringe-3", "level": "micro", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "tapered-sweep", "topologyClass": "continuous-sculpt", "topologyRationale": "Contour follows the reference silhouette; depth is inferred and tested in orbit.", "geometryDescriptor": {"taperedSweep": {"stations": [{"position": [0.016, 1.775, 0.035], "rx": 0.032, "rz": 0.025, "twist": 0}, {"position": [0.041, 1.788, 0.072], "rx": 0.028, "rz": 0.021, "twist": 0}, {"position": [0.064, 1.774, 0.098], "rx": 0.018, "rz": 0.012, "twist": 0}, {"position": [0.081, 1.753, 0.105], "rx": 0, "rz": 0, "twist": 0}], "radialSegments": 12, "capEnds": true}, "normalStrategy": "smooth vertex normals"}, "parent": "root", "attachment": null, "dimensions": {"width": 1, "height": 1, "depth": 1, "units": "meters", "confidence": 0.78}, "transform": {"position": [0, 0, 0], "rotation": [0, 0, 0], "scale": [1, 1, 1]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "fringe-3", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "hair", "materialLayers": ["hair"], "deformations": [], "joints": [], "seams": [], "localFeatures": [], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(52, 40, 43, 1)", "secondaryAlbedo": "rgba(52, 40, 43, 1)", "materialClass": "plastic", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
-  node_fringe_3_36.add(mesh_fringe_3_36);
-  meshes["fringe-3"] = mesh_fringe_3_36;
+  mesh_fringe_3_34.castShadow = options.castShadow ?? true;
+  mesh_fringe_3_34.receiveShadow = options.receiveShadow ?? true;
+  mesh_fringe_3_34.userData.sculptComponent = {"id": "fringe-3", "name": "fringe-3", "level": "micro", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "tapered-sweep", "topologyClass": "continuous-sculpt", "topologyRationale": "Contour follows the reference silhouette; depth is inferred and tested in orbit.", "geometryDescriptor": {"taperedSweep": {"stations": [{"position": [0.016, 1.775, 0.035], "rx": 0.032, "rz": 0.025, "twist": 0}, {"position": [0.041, 1.788, 0.072], "rx": 0.028, "rz": 0.021, "twist": 0}, {"position": [0.064, 1.774, 0.098], "rx": 0.018, "rz": 0.012, "twist": 0}, {"position": [0.081, 1.753, 0.105], "rx": 0, "rz": 0, "twist": 0}], "radialSegments": 12, "capEnds": true}, "normalStrategy": "smooth vertex normals"}, "parent": "root", "attachment": null, "dimensions": {"width": 1, "height": 1, "depth": 1, "units": "meters", "confidence": 0.78}, "transform": {"position": [0, 0, 0], "rotation": [0, 0, 0], "scale": [1, 1, 1]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "fringe-3", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "hair", "materialLayers": ["hair"], "deformations": [], "joints": [], "seams": [], "localFeatures": [], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(52, 40, 43, 1)", "secondaryAlbedo": "rgba(52, 40, 43, 1)", "materialClass": "plastic", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
+  node_fringe_3_34.add(mesh_fringe_3_34);
+  meshes["fringe-3"] = mesh_fringe_3_34;
   colliders["fringe-3"] = {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"};
   destructionGroups["fringe-3"] ??= [];
-  destructionGroups["fringe-3"].push(node_fringe_3_36);
+  destructionGroups["fringe-3"].push(node_fringe_3_34);
 
-  const endpoint_fringe_4_37 = makeAttachmentEndpoint(null);
-  const node_fringe_4_37 = new THREE.Group();
-  node_fringe_4_37.name = "fringe-4__pivot";
-  node_fringe_4_37.scale.set(1, 1, 1);
-  if (endpoint_fringe_4_37) {
-    node_fringe_4_37.position.copy(endpoint_fringe_4_37.start);
-    node_fringe_4_37.rotation.set(0.0, 0.0, 0.0);
+  const endpoint_fringe_4_35 = makeAttachmentEndpoint(null);
+  const node_fringe_4_35 = new THREE.Group();
+  node_fringe_4_35.name = "fringe-4__pivot";
+  node_fringe_4_35.scale.set(1, 1, 1);
+  if (endpoint_fringe_4_35) {
+    node_fringe_4_35.position.copy(endpoint_fringe_4_35.start);
+    node_fringe_4_35.rotation.set(0.0, 0.0, 0.0);
   } else {
-    node_fringe_4_37.position.set(0.0, 0.0, 0.0);
-    node_fringe_4_37.rotation.set(0.0, 0.0, 0.0);
+    node_fringe_4_35.position.set(0.0, 0.0, 0.0);
+    node_fringe_4_35.rotation.set(0.0, 0.0, 0.0);
   }
-  node_fringe_4_37.userData.sculptComponent = {"id": "fringe-4", "name": "fringe-4", "level": "micro", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "tapered-sweep", "topologyClass": "continuous-sculpt", "topologyRationale": "Contour follows the reference silhouette; depth is inferred and tested in orbit.", "geometryDescriptor": {"taperedSweep": {"stations": [{"position": [0.043, 1.775, 0.035], "rx": 0.032, "rz": 0.025, "twist": 0}, {"position": [0.068, 1.788, 0.072], "rx": 0.028, "rz": 0.021, "twist": 0}, {"position": [0.091, 1.774, 0.098], "rx": 0.018, "rz": 0.012, "twist": 0}, {"position": [0.108, 1.753, 0.105], "rx": 0, "rz": 0, "twist": 0}], "radialSegments": 12, "capEnds": true}, "normalStrategy": "smooth vertex normals"}, "parent": "root", "attachment": null, "dimensions": {"width": 1, "height": 1, "depth": 1, "units": "meters", "confidence": 0.78}, "transform": {"position": [0, 0, 0], "rotation": [0, 0, 0], "scale": [1, 1, 1]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "fringe-4", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "hair", "materialLayers": ["hair"], "deformations": [], "joints": [], "seams": [], "localFeatures": [], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(52, 40, 43, 1)", "secondaryAlbedo": "rgba(52, 40, 43, 1)", "materialClass": "plastic", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
-  node_fringe_4_37.userData.actionProfile = {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "fringe-4", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}};
-  (nodes["root"] ?? root).add(node_fringe_4_37);
-  nodes["fringe-4"] = node_fringe_4_37;
-  const mesh_fringe_4_37Geometry = endpoint_fringe_4_37
-    ? new THREE.CylinderGeometry(endpoint_fringe_4_37.endRadius, endpoint_fringe_4_37.baseRadius, endpoint_fringe_4_37.length, 16, 6)
+  node_fringe_4_35.userData.sculptComponent = {"id": "fringe-4", "name": "fringe-4", "level": "micro", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "tapered-sweep", "topologyClass": "continuous-sculpt", "topologyRationale": "Contour follows the reference silhouette; depth is inferred and tested in orbit.", "geometryDescriptor": {"taperedSweep": {"stations": [{"position": [0.043, 1.775, 0.035], "rx": 0.032, "rz": 0.025, "twist": 0}, {"position": [0.068, 1.788, 0.072], "rx": 0.028, "rz": 0.021, "twist": 0}, {"position": [0.091, 1.774, 0.098], "rx": 0.018, "rz": 0.012, "twist": 0}, {"position": [0.108, 1.753, 0.105], "rx": 0, "rz": 0, "twist": 0}], "radialSegments": 12, "capEnds": true}, "normalStrategy": "smooth vertex normals"}, "parent": "root", "attachment": null, "dimensions": {"width": 1, "height": 1, "depth": 1, "units": "meters", "confidence": 0.78}, "transform": {"position": [0, 0, 0], "rotation": [0, 0, 0], "scale": [1, 1, 1]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "fringe-4", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "hair", "materialLayers": ["hair"], "deformations": [], "joints": [], "seams": [], "localFeatures": [], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(52, 40, 43, 1)", "secondaryAlbedo": "rgba(52, 40, 43, 1)", "materialClass": "plastic", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
+  node_fringe_4_35.userData.actionProfile = {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "fringe-4", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}};
+  (nodes["root"] ?? root).add(node_fringe_4_35);
+  nodes["fringe-4"] = node_fringe_4_35;
+  const mesh_fringe_4_35Geometry = endpoint_fringe_4_35
+    ? new THREE.CylinderGeometry(endpoint_fringe_4_35.endRadius, endpoint_fringe_4_35.baseRadius, endpoint_fringe_4_35.length, 16, 6)
     : buildTaperedSweepGeometry({"stations": [{"position": [0.043, 1.775, 0.035], "rx": 0.032, "rz": 0.025, "twist": 0}, {"position": [0.068, 1.788, 0.072], "rx": 0.028, "rz": 0.021, "twist": 0}, {"position": [0.091, 1.774, 0.098], "rx": 0.018, "rz": 0.012, "twist": 0}, {"position": [0.108, 1.753, 0.105], "rx": 0, "rz": 0, "twist": 0}], "radialSegments": 12, "capEnds": true});
-  if (!endpoint_fringe_4_37) {
-    mesh_fringe_4_37Geometry.scale(1.0, 1.0, 1.0);
+  if (!endpoint_fringe_4_35) {
+    mesh_fringe_4_35Geometry.scale(1.0, 1.0, 1.0);
   }
-  const mesh_fringe_4_37 = new THREE.Mesh(
-    mesh_fringe_4_37Geometry,
+  const mesh_fringe_4_35 = new THREE.Mesh(
+    mesh_fringe_4_35Geometry,
     materialMap["hair"] ?? new THREE.MeshStandardMaterial({ color: 0x888888 })
   );
-  mesh_fringe_4_37.name = "fringe-4";
-  if (endpoint_fringe_4_37) {
-    mesh_fringe_4_37.position.copy(endpoint_fringe_4_37.midpoint);
-    mesh_fringe_4_37.quaternion.copy(endpoint_fringe_4_37.quaternion);
+  mesh_fringe_4_35.name = "fringe-4";
+  if (endpoint_fringe_4_35) {
+    mesh_fringe_4_35.position.copy(endpoint_fringe_4_35.midpoint);
+    mesh_fringe_4_35.quaternion.copy(endpoint_fringe_4_35.quaternion);
   }
-  mesh_fringe_4_37.castShadow = options.castShadow ?? true;
-  mesh_fringe_4_37.receiveShadow = options.receiveShadow ?? true;
-  mesh_fringe_4_37.userData.sculptComponent = {"id": "fringe-4", "name": "fringe-4", "level": "micro", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "tapered-sweep", "topologyClass": "continuous-sculpt", "topologyRationale": "Contour follows the reference silhouette; depth is inferred and tested in orbit.", "geometryDescriptor": {"taperedSweep": {"stations": [{"position": [0.043, 1.775, 0.035], "rx": 0.032, "rz": 0.025, "twist": 0}, {"position": [0.068, 1.788, 0.072], "rx": 0.028, "rz": 0.021, "twist": 0}, {"position": [0.091, 1.774, 0.098], "rx": 0.018, "rz": 0.012, "twist": 0}, {"position": [0.108, 1.753, 0.105], "rx": 0, "rz": 0, "twist": 0}], "radialSegments": 12, "capEnds": true}, "normalStrategy": "smooth vertex normals"}, "parent": "root", "attachment": null, "dimensions": {"width": 1, "height": 1, "depth": 1, "units": "meters", "confidence": 0.78}, "transform": {"position": [0, 0, 0], "rotation": [0, 0, 0], "scale": [1, 1, 1]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "fringe-4", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "hair", "materialLayers": ["hair"], "deformations": [], "joints": [], "seams": [], "localFeatures": [], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(52, 40, 43, 1)", "secondaryAlbedo": "rgba(52, 40, 43, 1)", "materialClass": "plastic", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
-  node_fringe_4_37.add(mesh_fringe_4_37);
-  meshes["fringe-4"] = mesh_fringe_4_37;
+  mesh_fringe_4_35.castShadow = options.castShadow ?? true;
+  mesh_fringe_4_35.receiveShadow = options.receiveShadow ?? true;
+  mesh_fringe_4_35.userData.sculptComponent = {"id": "fringe-4", "name": "fringe-4", "level": "micro", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "tapered-sweep", "topologyClass": "continuous-sculpt", "topologyRationale": "Contour follows the reference silhouette; depth is inferred and tested in orbit.", "geometryDescriptor": {"taperedSweep": {"stations": [{"position": [0.043, 1.775, 0.035], "rx": 0.032, "rz": 0.025, "twist": 0}, {"position": [0.068, 1.788, 0.072], "rx": 0.028, "rz": 0.021, "twist": 0}, {"position": [0.091, 1.774, 0.098], "rx": 0.018, "rz": 0.012, "twist": 0}, {"position": [0.108, 1.753, 0.105], "rx": 0, "rz": 0, "twist": 0}], "radialSegments": 12, "capEnds": true}, "normalStrategy": "smooth vertex normals"}, "parent": "root", "attachment": null, "dimensions": {"width": 1, "height": 1, "depth": 1, "units": "meters", "confidence": 0.78}, "transform": {"position": [0, 0, 0], "rotation": [0, 0, 0], "scale": [1, 1, 1]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "fringe-4", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "hair", "materialLayers": ["hair"], "deformations": [], "joints": [], "seams": [], "localFeatures": [], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(52, 40, 43, 1)", "secondaryAlbedo": "rgba(52, 40, 43, 1)", "materialClass": "plastic", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
+  node_fringe_4_35.add(mesh_fringe_4_35);
+  meshes["fringe-4"] = mesh_fringe_4_35;
   colliders["fringe-4"] = {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"};
   destructionGroups["fringe-4"] ??= [];
-  destructionGroups["fringe-4"].push(node_fringe_4_37);
+  destructionGroups["fringe-4"].push(node_fringe_4_35);
 
-  const attachment_necklace_38 = {"parentSocket": "shirt", "localStart": [-0.057, 1.485, 0.044], "localEnd": [0.057, 1.485, 0.044], "contactType": "surface-embed", "embedDepth": 0.002, "gapTolerance": 0.003};
-  const endpoint_necklace_38 = null; // authored tubePath already in model coordinates
-  const node_necklace_38 = new THREE.Group();
-  node_necklace_38.name = "necklace__pivot";
-  node_necklace_38.scale.set(1, 1, 1);
-  if (endpoint_necklace_38) {
-    node_necklace_38.position.copy(endpoint_necklace_38.start);
-    node_necklace_38.rotation.set(0.0, 0.0, 0.0);
+  const attachment_necklace_36 = {"parentSocket": "shirt", "localStart": [-0.057, 1.485, 0.044], "localEnd": [0.057, 1.485, 0.044], "contactType": "surface-embed", "embedDepth": 0.002, "gapTolerance": 0.003};
+  const endpoint_necklace_36 = null; // authored tubePath already in model coordinates
+  const node_necklace_36 = new THREE.Group();
+  node_necklace_36.name = "necklace__pivot";
+  node_necklace_36.scale.set(1, 1, 1);
+  if (endpoint_necklace_36) {
+    node_necklace_36.position.copy(endpoint_necklace_36.start);
+    node_necklace_36.rotation.set(0.0, 0.0, 0.0);
   } else {
-    node_necklace_38.position.set(0.0, 0.0, 0.0);
-    node_necklace_38.rotation.set(0.0, 0.0, 0.0);
+    node_necklace_36.position.set(0.0, 0.0, 0.0);
+    node_necklace_36.rotation.set(0.0, 0.0, 0.0);
   }
-  node_necklace_38.userData.sculptComponent = {"id": "necklace", "name": "necklace", "level": "micro", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "tube", "topologyClass": "assembled-solid", "topologyRationale": "Contour follows the reference silhouette; depth is inferred and tested in orbit.", "geometryDescriptor": {"tubePath": {"points": [[-0.057, 1.485, 0.044], [-0.044, 1.417, 0.099], [0, 1.355, 0.123], [0.044, 1.417, 0.099], [0.057, 1.485, 0.044]], "radius": 0.0021, "closed": false}, "attachmentGeometry": "authored-path"}, "parent": "root", "attachment": {"parentSocket": "shirt", "localStart": [-0.057, 1.485, 0.044], "localEnd": [0.057, 1.485, 0.044], "contactType": "surface-embed", "embedDepth": 0.002, "gapTolerance": 0.003}, "dimensions": {"width": 1, "height": 1, "depth": 1, "units": "meters", "confidence": 0.78}, "transform": {"position": [0, 0, 0], "rotation": [0, 0, 0], "scale": [1, 1, 1]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "necklace", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "gold", "materialLayers": ["gold"], "deformations": [], "joints": [], "seams": [], "localFeatures": [{"id": "gold-chain", "kind": "linework", "description": "gold-chain", "evidenceRefs": ["full-object"]}], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(207, 172, 92, 1)", "secondaryAlbedo": "rgba(207, 172, 92, 1)", "materialClass": "metal", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
-  node_necklace_38.userData.actionProfile = {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "necklace", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}};
-  (nodes["root"] ?? root).add(node_necklace_38);
-  nodes["necklace"] = node_necklace_38;
-  const mesh_necklace_38Geometry = endpoint_necklace_38
-    ? new THREE.CylinderGeometry(endpoint_necklace_38.endRadius, endpoint_necklace_38.baseRadius, endpoint_necklace_38.length, 16, 6)
+  node_necklace_36.userData.sculptComponent = {"id": "necklace", "name": "necklace", "level": "micro", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "tube", "topologyClass": "assembled-solid", "topologyRationale": "Contour follows the reference silhouette; depth is inferred and tested in orbit.", "geometryDescriptor": {"tubePath": {"points": [[-0.057, 1.485, 0.044], [-0.044, 1.417, 0.099], [0, 1.355, 0.123], [0.044, 1.417, 0.099], [0.057, 1.485, 0.044]], "radius": 0.0021, "closed": false}, "attachmentGeometry": "authored-path"}, "parent": "root", "attachment": {"parentSocket": "shirt", "localStart": [-0.057, 1.485, 0.044], "localEnd": [0.057, 1.485, 0.044], "contactType": "surface-embed", "embedDepth": 0.002, "gapTolerance": 0.003}, "dimensions": {"width": 1, "height": 1, "depth": 1, "units": "meters", "confidence": 0.78}, "transform": {"position": [0, 0, 0], "rotation": [0, 0, 0], "scale": [1, 1, 1]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "necklace", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "gold", "materialLayers": ["gold"], "deformations": [], "joints": [], "seams": [], "localFeatures": [{"id": "gold-chain", "kind": "linework", "description": "gold-chain", "evidenceRefs": ["full-object"]}], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(207, 172, 92, 1)", "secondaryAlbedo": "rgba(207, 172, 92, 1)", "materialClass": "metal", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
+  node_necklace_36.userData.actionProfile = {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "necklace", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}};
+  (nodes["root"] ?? root).add(node_necklace_36);
+  nodes["necklace"] = node_necklace_36;
+  const mesh_necklace_36Geometry = endpoint_necklace_36
+    ? new THREE.CylinderGeometry(endpoint_necklace_36.endRadius, endpoint_necklace_36.baseRadius, endpoint_necklace_36.length, 16, 6)
     : buildTubeGeometry({"points": [[-0.057, 1.485, 0.044], [-0.044, 1.417, 0.099], [0, 1.355, 0.123], [0.044, 1.417, 0.099], [0.057, 1.485, 0.044]], "radius": 0.0021, "closed": false});
-  if (!endpoint_necklace_38) {
-    mesh_necklace_38Geometry.scale(1.0, 1.0, 1.0);
+  if (!endpoint_necklace_36) {
+    mesh_necklace_36Geometry.scale(1.0, 1.0, 1.0);
   }
-  const mesh_necklace_38 = new THREE.Mesh(
-    mesh_necklace_38Geometry,
+  const mesh_necklace_36 = new THREE.Mesh(
+    mesh_necklace_36Geometry,
     materialMap["gold"] ?? new THREE.MeshStandardMaterial({ color: 0x888888 })
   );
-  mesh_necklace_38.name = "necklace";
-  if (endpoint_necklace_38) {
-    mesh_necklace_38.position.copy(endpoint_necklace_38.midpoint);
-    mesh_necklace_38.quaternion.copy(endpoint_necklace_38.quaternion);
+  mesh_necklace_36.name = "necklace";
+  if (endpoint_necklace_36) {
+    mesh_necklace_36.position.copy(endpoint_necklace_36.midpoint);
+    mesh_necklace_36.quaternion.copy(endpoint_necklace_36.quaternion);
   }
-  mesh_necklace_38.castShadow = options.castShadow ?? true;
-  mesh_necklace_38.receiveShadow = options.receiveShadow ?? true;
-  mesh_necklace_38.userData.sculptComponent = {"id": "necklace", "name": "necklace", "level": "micro", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "tube", "topologyClass": "assembled-solid", "topologyRationale": "Contour follows the reference silhouette; depth is inferred and tested in orbit.", "geometryDescriptor": {"tubePath": {"points": [[-0.057, 1.485, 0.044], [-0.044, 1.417, 0.099], [0, 1.355, 0.123], [0.044, 1.417, 0.099], [0.057, 1.485, 0.044]], "radius": 0.0021, "closed": false}, "attachmentGeometry": "authored-path"}, "parent": "root", "attachment": {"parentSocket": "shirt", "localStart": [-0.057, 1.485, 0.044], "localEnd": [0.057, 1.485, 0.044], "contactType": "surface-embed", "embedDepth": 0.002, "gapTolerance": 0.003}, "dimensions": {"width": 1, "height": 1, "depth": 1, "units": "meters", "confidence": 0.78}, "transform": {"position": [0, 0, 0], "rotation": [0, 0, 0], "scale": [1, 1, 1]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "necklace", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "gold", "materialLayers": ["gold"], "deformations": [], "joints": [], "seams": [], "localFeatures": [{"id": "gold-chain", "kind": "linework", "description": "gold-chain", "evidenceRefs": ["full-object"]}], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(207, 172, 92, 1)", "secondaryAlbedo": "rgba(207, 172, 92, 1)", "materialClass": "metal", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
-  node_necklace_38.add(mesh_necklace_38);
-  meshes["necklace"] = mesh_necklace_38;
+  mesh_necklace_36.castShadow = options.castShadow ?? true;
+  mesh_necklace_36.receiveShadow = options.receiveShadow ?? true;
+  mesh_necklace_36.userData.sculptComponent = {"id": "necklace", "name": "necklace", "level": "micro", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "tube", "topologyClass": "assembled-solid", "topologyRationale": "Contour follows the reference silhouette; depth is inferred and tested in orbit.", "geometryDescriptor": {"tubePath": {"points": [[-0.057, 1.485, 0.044], [-0.044, 1.417, 0.099], [0, 1.355, 0.123], [0.044, 1.417, 0.099], [0.057, 1.485, 0.044]], "radius": 0.0021, "closed": false}, "attachmentGeometry": "authored-path"}, "parent": "root", "attachment": {"parentSocket": "shirt", "localStart": [-0.057, 1.485, 0.044], "localEnd": [0.057, 1.485, 0.044], "contactType": "surface-embed", "embedDepth": 0.002, "gapTolerance": 0.003}, "dimensions": {"width": 1, "height": 1, "depth": 1, "units": "meters", "confidence": 0.78}, "transform": {"position": [0, 0, 0], "rotation": [0, 0, 0], "scale": [1, 1, 1]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "necklace", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "gold", "materialLayers": ["gold"], "deformations": [], "joints": [], "seams": [], "localFeatures": [{"id": "gold-chain", "kind": "linework", "description": "gold-chain", "evidenceRefs": ["full-object"]}], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(207, 172, 92, 1)", "secondaryAlbedo": "rgba(207, 172, 92, 1)", "materialClass": "metal", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
+  node_necklace_36.add(mesh_necklace_36);
+  meshes["necklace"] = mesh_necklace_36;
   colliders["necklace"] = {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"};
   destructionGroups["necklace"] ??= [];
-  destructionGroups["necklace"].push(node_necklace_38);
+  destructionGroups["necklace"].push(node_necklace_36);
 
-  const endpoint_pendant_39 = makeAttachmentEndpoint(null);
-  const node_pendant_39 = new THREE.Group();
-  node_pendant_39.name = "pendant__pivot";
-  node_pendant_39.scale.set(1, 1, 1);
-  if (endpoint_pendant_39) {
-    node_pendant_39.position.copy(endpoint_pendant_39.start);
-    node_pendant_39.rotation.set(0.0, 0.0, 0.0);
+  const endpoint_pendant_37 = makeAttachmentEndpoint(null);
+  const node_pendant_37 = new THREE.Group();
+  node_pendant_37.name = "pendant__pivot";
+  node_pendant_37.scale.set(1, 1, 1);
+  if (endpoint_pendant_37) {
+    node_pendant_37.position.copy(endpoint_pendant_37.start);
+    node_pendant_37.rotation.set(0.0, 0.0, 0.0);
   } else {
-    node_pendant_39.position.set(0.0, 1.346, 0.124);
-    node_pendant_39.rotation.set(0.0, 0.0, 0.0);
+    node_pendant_37.position.set(0.0, 1.346, 0.124);
+    node_pendant_37.rotation.set(0.0, 0.0, 0.0);
   }
-  node_pendant_39.userData.sculptComponent = {"id": "pendant", "name": "pendant", "level": "micro", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "box", "topologyClass": "assembled-solid", "topologyRationale": "Contour follows the reference silhouette; depth is inferred and tested in orbit.", "geometryDescriptor": {"normalStrategy": "smooth vertex normals", "uvStrategy": "generated procedural coordinates", "edgeTreatment": {"type": "none", "bevelRadius": 0, "segments": 1}, "deformationStack": []}, "parent": "root", "attachment": null, "dimensions": {"width": 0.018, "height": 0.031, "depth": 0.005, "units": "meters", "confidence": 0.78}, "transform": {"position": [0, 1.346, 0.124], "rotation": [0, 0, 0], "scale": [0.018, 0.031, 0.005]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "pendant", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "gold", "materialLayers": ["gold"], "deformations": [], "joints": [], "seams": [], "localFeatures": [{"id": "rectangular-pendant", "kind": "bevel", "description": "rectangular-pendant", "evidenceRefs": ["full-object"]}], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(207, 172, 92, 1)", "secondaryAlbedo": "rgba(207, 172, 92, 1)", "materialClass": "metal", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
-  node_pendant_39.userData.actionProfile = {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "pendant", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}};
-  (nodes["root"] ?? root).add(node_pendant_39);
-  nodes["pendant"] = node_pendant_39;
-  const mesh_pendant_39Geometry = endpoint_pendant_39
-    ? new THREE.CylinderGeometry(endpoint_pendant_39.endRadius, endpoint_pendant_39.baseRadius, endpoint_pendant_39.length, 16, 6)
+  node_pendant_37.userData.sculptComponent = {"id": "pendant", "name": "pendant", "level": "micro", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "box", "topologyClass": "assembled-solid", "topologyRationale": "Contour follows the reference silhouette; depth is inferred and tested in orbit.", "geometryDescriptor": {"normalStrategy": "smooth vertex normals", "uvStrategy": "generated procedural coordinates", "edgeTreatment": {"type": "none", "bevelRadius": 0, "segments": 1}, "deformationStack": []}, "parent": "root", "attachment": null, "dimensions": {"width": 0.018, "height": 0.031, "depth": 0.005, "units": "meters", "confidence": 0.78}, "transform": {"position": [0, 1.346, 0.124], "rotation": [0, 0, 0], "scale": [0.018, 0.031, 0.005]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "pendant", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "gold", "materialLayers": ["gold"], "deformations": [], "joints": [], "seams": [], "localFeatures": [{"id": "rectangular-pendant", "kind": "bevel", "description": "rectangular-pendant", "evidenceRefs": ["full-object"]}], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(207, 172, 92, 1)", "secondaryAlbedo": "rgba(207, 172, 92, 1)", "materialClass": "metal", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
+  node_pendant_37.userData.actionProfile = {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "pendant", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}};
+  (nodes["root"] ?? root).add(node_pendant_37);
+  nodes["pendant"] = node_pendant_37;
+  const mesh_pendant_37Geometry = endpoint_pendant_37
+    ? new THREE.CylinderGeometry(endpoint_pendant_37.endRadius, endpoint_pendant_37.baseRadius, endpoint_pendant_37.length, 16, 6)
     : new THREE.BoxGeometry(1, 1, 1, 4, 4, 4);
-  if (!endpoint_pendant_39) {
-    mesh_pendant_39Geometry.scale(0.018, 0.031, 0.005);
+  if (!endpoint_pendant_37) {
+    mesh_pendant_37Geometry.scale(0.018, 0.031, 0.005);
   }
-  const mesh_pendant_39 = new THREE.Mesh(
-    mesh_pendant_39Geometry,
+  const mesh_pendant_37 = new THREE.Mesh(
+    mesh_pendant_37Geometry,
     materialMap["gold"] ?? new THREE.MeshStandardMaterial({ color: 0x888888 })
   );
-  mesh_pendant_39.name = "pendant";
-  if (endpoint_pendant_39) {
-    mesh_pendant_39.position.copy(endpoint_pendant_39.midpoint);
-    mesh_pendant_39.quaternion.copy(endpoint_pendant_39.quaternion);
+  mesh_pendant_37.name = "pendant";
+  if (endpoint_pendant_37) {
+    mesh_pendant_37.position.copy(endpoint_pendant_37.midpoint);
+    mesh_pendant_37.quaternion.copy(endpoint_pendant_37.quaternion);
   }
-  mesh_pendant_39.castShadow = options.castShadow ?? true;
-  mesh_pendant_39.receiveShadow = options.receiveShadow ?? true;
-  mesh_pendant_39.userData.sculptComponent = {"id": "pendant", "name": "pendant", "level": "micro", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "box", "topologyClass": "assembled-solid", "topologyRationale": "Contour follows the reference silhouette; depth is inferred and tested in orbit.", "geometryDescriptor": {"normalStrategy": "smooth vertex normals", "uvStrategy": "generated procedural coordinates", "edgeTreatment": {"type": "none", "bevelRadius": 0, "segments": 1}, "deformationStack": []}, "parent": "root", "attachment": null, "dimensions": {"width": 0.018, "height": 0.031, "depth": 0.005, "units": "meters", "confidence": 0.78}, "transform": {"position": [0, 1.346, 0.124], "rotation": [0, 0, 0], "scale": [0.018, 0.031, 0.005]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "pendant", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "gold", "materialLayers": ["gold"], "deformations": [], "joints": [], "seams": [], "localFeatures": [{"id": "rectangular-pendant", "kind": "bevel", "description": "rectangular-pendant", "evidenceRefs": ["full-object"]}], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(207, 172, 92, 1)", "secondaryAlbedo": "rgba(207, 172, 92, 1)", "materialClass": "metal", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
-  node_pendant_39.add(mesh_pendant_39);
-  meshes["pendant"] = mesh_pendant_39;
+  mesh_pendant_37.castShadow = options.castShadow ?? true;
+  mesh_pendant_37.receiveShadow = options.receiveShadow ?? true;
+  mesh_pendant_37.userData.sculptComponent = {"id": "pendant", "name": "pendant", "level": "micro", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "box", "topologyClass": "assembled-solid", "topologyRationale": "Contour follows the reference silhouette; depth is inferred and tested in orbit.", "geometryDescriptor": {"normalStrategy": "smooth vertex normals", "uvStrategy": "generated procedural coordinates", "edgeTreatment": {"type": "none", "bevelRadius": 0, "segments": 1}, "deformationStack": []}, "parent": "root", "attachment": null, "dimensions": {"width": 0.018, "height": 0.031, "depth": 0.005, "units": "meters", "confidence": 0.78}, "transform": {"position": [0, 1.346, 0.124], "rotation": [0, 0, 0], "scale": [0.018, 0.031, 0.005]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "pendant", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "gold", "materialLayers": ["gold"], "deformations": [], "joints": [], "seams": [], "localFeatures": [{"id": "rectangular-pendant", "kind": "bevel", "description": "rectangular-pendant", "evidenceRefs": ["full-object"]}], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(207, 172, 92, 1)", "secondaryAlbedo": "rgba(207, 172, 92, 1)", "materialClass": "metal", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
+  node_pendant_37.add(mesh_pendant_37);
+  meshes["pendant"] = mesh_pendant_37;
   colliders["pendant"] = {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"};
   destructionGroups["pendant"] ??= [];
-  destructionGroups["pendant"].push(node_pendant_39);
+  destructionGroups["pendant"].push(node_pendant_37);
 
-  const endpoint_sleeve_l_40 = makeAttachmentEndpoint(null);
-  const node_sleeve_l_40 = new THREE.Group();
-  node_sleeve_l_40.name = "sleeve-l__pivot";
-  node_sleeve_l_40.scale.set(1, 1, 1);
-  if (endpoint_sleeve_l_40) {
-    node_sleeve_l_40.position.copy(endpoint_sleeve_l_40.start);
-    node_sleeve_l_40.rotation.set(0.0, 0.0, 0.0);
+  const endpoint_sleeve_l_38 = makeAttachmentEndpoint(null);
+  const node_sleeve_l_38 = new THREE.Group();
+  node_sleeve_l_38.name = "sleeve-l__pivot";
+  node_sleeve_l_38.scale.set(1, 1, 1);
+  if (endpoint_sleeve_l_38) {
+    node_sleeve_l_38.position.copy(endpoint_sleeve_l_38.start);
+    node_sleeve_l_38.rotation.set(0.0, 0.0, 0.0);
   } else {
-    node_sleeve_l_40.position.set(0.0, 0.0, 0.0);
-    node_sleeve_l_40.rotation.set(0.0, 0.0, 0.0);
+    node_sleeve_l_38.position.set(0.0, 0.0, 0.0);
+    node_sleeve_l_38.rotation.set(0.0, 0.0, 0.0);
   }
-  node_sleeve_l_40.userData.sculptComponent = {"id": "sleeve-l", "name": "sleeve-l", "level": "meso", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "tapered-sweep", "topologyClass": "continuous-sculpt", "topologyRationale": "Contour follows the reference silhouette; depth is inferred and tested in orbit.", "geometryDescriptor": {"taperedSweep": {"stations": [{"position": [0.213, 1.405, 0], "rx": 0.028, "rz": 0.025}, {"position": [0.233, 1.38, 0], "rx": 0.085, "rz": 0.075}, {"position": [0.24800000000000003, 1.33, 0], "rx": 0.083, "rz": 0.073}, {"position": [0.256, 1.295, 0], "rx": 0.075, "rz": 0.065}], "radialSegments": 28, "capEnds": true}, "normalStrategy": "smooth shared contour"}, "parent": "root", "attachment": null, "dimensions": {"width": 1, "height": 1, "depth": 1, "units": "meters", "confidence": 0.78}, "transform": {"position": [0, 0, 0], "rotation": [0, 0, 0], "scale": [1, 1, 1]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "arm-l", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "shirt", "materialLayers": ["shirt"], "deformations": [], "joints": [], "seams": [], "localFeatures": [], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(213, 154, 115, 1)", "secondaryAlbedo": "rgba(213, 154, 115, 1)", "materialClass": "skin", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
-  node_sleeve_l_40.userData.actionProfile = {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "arm-l", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}};
-  (nodes["root"] ?? root).add(node_sleeve_l_40);
-  nodes["sleeve-l"] = node_sleeve_l_40;
-  const mesh_sleeve_l_40Geometry = endpoint_sleeve_l_40
-    ? new THREE.CylinderGeometry(endpoint_sleeve_l_40.endRadius, endpoint_sleeve_l_40.baseRadius, endpoint_sleeve_l_40.length, 16, 6)
+  node_sleeve_l_38.userData.sculptComponent = {"id": "sleeve-l", "name": "sleeve-l", "level": "meso", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "tapered-sweep", "topologyClass": "continuous-sculpt", "topologyRationale": "Contour follows the reference silhouette; depth is inferred and tested in orbit.", "geometryDescriptor": {"taperedSweep": {"stations": [{"position": [0.213, 1.405, 0], "rx": 0.028, "rz": 0.025}, {"position": [0.233, 1.38, 0], "rx": 0.085, "rz": 0.075}, {"position": [0.24800000000000003, 1.33, 0], "rx": 0.083, "rz": 0.073}, {"position": [0.256, 1.295, 0], "rx": 0.075, "rz": 0.065}], "radialSegments": 28, "capEnds": true}, "normalStrategy": "smooth shared contour"}, "parent": "root", "attachment": null, "dimensions": {"width": 1, "height": 1, "depth": 1, "units": "meters", "confidence": 0.78}, "transform": {"position": [0, 0, 0], "rotation": [0, 0, 0], "scale": [1, 1, 1]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "arm-l", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "shirt", "materialLayers": ["shirt"], "deformations": [], "joints": [], "seams": [], "localFeatures": [], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(213, 154, 115, 1)", "secondaryAlbedo": "rgba(213, 154, 115, 1)", "materialClass": "skin", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
+  node_sleeve_l_38.userData.actionProfile = {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "arm-l", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}};
+  (nodes["root"] ?? root).add(node_sleeve_l_38);
+  nodes["sleeve-l"] = node_sleeve_l_38;
+  const mesh_sleeve_l_38Geometry = endpoint_sleeve_l_38
+    ? new THREE.CylinderGeometry(endpoint_sleeve_l_38.endRadius, endpoint_sleeve_l_38.baseRadius, endpoint_sleeve_l_38.length, 16, 6)
     : buildTaperedSweepGeometry({"stations": [{"position": [0.213, 1.405, 0], "rx": 0.028, "rz": 0.025}, {"position": [0.233, 1.38, 0], "rx": 0.085, "rz": 0.075}, {"position": [0.24800000000000003, 1.33, 0], "rx": 0.083, "rz": 0.073}, {"position": [0.256, 1.295, 0], "rx": 0.075, "rz": 0.065}], "radialSegments": 28, "capEnds": true});
-  if (!endpoint_sleeve_l_40) {
-    mesh_sleeve_l_40Geometry.scale(1.0, 1.0, 1.0);
+  if (!endpoint_sleeve_l_38) {
+    mesh_sleeve_l_38Geometry.scale(1.0, 1.0, 1.0);
   }
-  const mesh_sleeve_l_40 = new THREE.Mesh(
-    mesh_sleeve_l_40Geometry,
+  const mesh_sleeve_l_38 = new THREE.Mesh(
+    mesh_sleeve_l_38Geometry,
     materialMap["shirt"] ?? new THREE.MeshStandardMaterial({ color: 0x888888 })
   );
-  mesh_sleeve_l_40.name = "sleeve-l";
-  if (endpoint_sleeve_l_40) {
-    mesh_sleeve_l_40.position.copy(endpoint_sleeve_l_40.midpoint);
-    mesh_sleeve_l_40.quaternion.copy(endpoint_sleeve_l_40.quaternion);
+  mesh_sleeve_l_38.name = "sleeve-l";
+  if (endpoint_sleeve_l_38) {
+    mesh_sleeve_l_38.position.copy(endpoint_sleeve_l_38.midpoint);
+    mesh_sleeve_l_38.quaternion.copy(endpoint_sleeve_l_38.quaternion);
   }
-  mesh_sleeve_l_40.castShadow = options.castShadow ?? true;
-  mesh_sleeve_l_40.receiveShadow = options.receiveShadow ?? true;
-  mesh_sleeve_l_40.userData.sculptComponent = {"id": "sleeve-l", "name": "sleeve-l", "level": "meso", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "tapered-sweep", "topologyClass": "continuous-sculpt", "topologyRationale": "Contour follows the reference silhouette; depth is inferred and tested in orbit.", "geometryDescriptor": {"taperedSweep": {"stations": [{"position": [0.213, 1.405, 0], "rx": 0.028, "rz": 0.025}, {"position": [0.233, 1.38, 0], "rx": 0.085, "rz": 0.075}, {"position": [0.24800000000000003, 1.33, 0], "rx": 0.083, "rz": 0.073}, {"position": [0.256, 1.295, 0], "rx": 0.075, "rz": 0.065}], "radialSegments": 28, "capEnds": true}, "normalStrategy": "smooth shared contour"}, "parent": "root", "attachment": null, "dimensions": {"width": 1, "height": 1, "depth": 1, "units": "meters", "confidence": 0.78}, "transform": {"position": [0, 0, 0], "rotation": [0, 0, 0], "scale": [1, 1, 1]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "arm-l", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "shirt", "materialLayers": ["shirt"], "deformations": [], "joints": [], "seams": [], "localFeatures": [], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(213, 154, 115, 1)", "secondaryAlbedo": "rgba(213, 154, 115, 1)", "materialClass": "skin", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
-  node_sleeve_l_40.add(mesh_sleeve_l_40);
-  meshes["sleeve-l"] = mesh_sleeve_l_40;
+  mesh_sleeve_l_38.castShadow = options.castShadow ?? true;
+  mesh_sleeve_l_38.receiveShadow = options.receiveShadow ?? true;
+  mesh_sleeve_l_38.userData.sculptComponent = {"id": "sleeve-l", "name": "sleeve-l", "level": "meso", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "tapered-sweep", "topologyClass": "continuous-sculpt", "topologyRationale": "Contour follows the reference silhouette; depth is inferred and tested in orbit.", "geometryDescriptor": {"taperedSweep": {"stations": [{"position": [0.213, 1.405, 0], "rx": 0.028, "rz": 0.025}, {"position": [0.233, 1.38, 0], "rx": 0.085, "rz": 0.075}, {"position": [0.24800000000000003, 1.33, 0], "rx": 0.083, "rz": 0.073}, {"position": [0.256, 1.295, 0], "rx": 0.075, "rz": 0.065}], "radialSegments": 28, "capEnds": true}, "normalStrategy": "smooth shared contour"}, "parent": "root", "attachment": null, "dimensions": {"width": 1, "height": 1, "depth": 1, "units": "meters", "confidence": 0.78}, "transform": {"position": [0, 0, 0], "rotation": [0, 0, 0], "scale": [1, 1, 1]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "arm-l", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "shirt", "materialLayers": ["shirt"], "deformations": [], "joints": [], "seams": [], "localFeatures": [], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(213, 154, 115, 1)", "secondaryAlbedo": "rgba(213, 154, 115, 1)", "materialClass": "skin", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
+  node_sleeve_l_38.add(mesh_sleeve_l_38);
+  meshes["sleeve-l"] = mesh_sleeve_l_38;
   colliders["sleeve-l"] = {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"};
   destructionGroups["arm-l"] ??= [];
-  destructionGroups["arm-l"].push(node_sleeve_l_40);
+  destructionGroups["arm-l"].push(node_sleeve_l_38);
 
-  const endpoint_sleeve_r_41 = makeAttachmentEndpoint(null);
-  const node_sleeve_r_41 = new THREE.Group();
-  node_sleeve_r_41.name = "sleeve-r__pivot";
-  node_sleeve_r_41.scale.set(1, 1, 1);
-  if (endpoint_sleeve_r_41) {
-    node_sleeve_r_41.position.copy(endpoint_sleeve_r_41.start);
-    node_sleeve_r_41.rotation.set(0.0, 0.0, 0.0);
+  const endpoint_sleeve_r_39 = makeAttachmentEndpoint(null);
+  const node_sleeve_r_39 = new THREE.Group();
+  node_sleeve_r_39.name = "sleeve-r__pivot";
+  node_sleeve_r_39.scale.set(1, 1, 1);
+  if (endpoint_sleeve_r_39) {
+    node_sleeve_r_39.position.copy(endpoint_sleeve_r_39.start);
+    node_sleeve_r_39.rotation.set(0.0, 0.0, 0.0);
   } else {
-    node_sleeve_r_41.position.set(0.0, 0.0, 0.0);
-    node_sleeve_r_41.rotation.set(0.0, 0.0, 0.0);
+    node_sleeve_r_39.position.set(0.0, 0.0, 0.0);
+    node_sleeve_r_39.rotation.set(0.0, 0.0, 0.0);
   }
-  node_sleeve_r_41.userData.sculptComponent = {"id": "sleeve-r", "name": "sleeve-r", "level": "meso", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "tapered-sweep", "topologyClass": "continuous-sculpt", "topologyRationale": "Contour follows the reference silhouette; depth is inferred and tested in orbit.", "geometryDescriptor": {"taperedSweep": {"stations": [{"position": [-0.213, 1.405, 0], "rx": 0.028, "rz": 0.025}, {"position": [-0.233, 1.38, 0], "rx": 0.085, "rz": 0.075}, {"position": [-0.24800000000000003, 1.33, 0], "rx": 0.083, "rz": 0.073}, {"position": [-0.256, 1.295, 0], "rx": 0.075, "rz": 0.065}], "radialSegments": 28, "capEnds": true}, "normalStrategy": "smooth shared contour"}, "parent": "root", "attachment": null, "dimensions": {"width": 1, "height": 1, "depth": 1, "units": "meters", "confidence": 0.78}, "transform": {"position": [0, 0, 0], "rotation": [0, 0, 0], "scale": [1, 1, 1]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "arm-r", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "shirt", "materialLayers": ["shirt"], "deformations": [], "joints": [], "seams": [], "localFeatures": [], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(213, 154, 115, 1)", "secondaryAlbedo": "rgba(213, 154, 115, 1)", "materialClass": "skin", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
-  node_sleeve_r_41.userData.actionProfile = {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "arm-r", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}};
-  (nodes["root"] ?? root).add(node_sleeve_r_41);
-  nodes["sleeve-r"] = node_sleeve_r_41;
-  const mesh_sleeve_r_41Geometry = endpoint_sleeve_r_41
-    ? new THREE.CylinderGeometry(endpoint_sleeve_r_41.endRadius, endpoint_sleeve_r_41.baseRadius, endpoint_sleeve_r_41.length, 16, 6)
+  node_sleeve_r_39.userData.sculptComponent = {"id": "sleeve-r", "name": "sleeve-r", "level": "meso", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "tapered-sweep", "topologyClass": "continuous-sculpt", "topologyRationale": "Contour follows the reference silhouette; depth is inferred and tested in orbit.", "geometryDescriptor": {"taperedSweep": {"stations": [{"position": [-0.213, 1.405, 0], "rx": 0.028, "rz": 0.025}, {"position": [-0.233, 1.38, 0], "rx": 0.085, "rz": 0.075}, {"position": [-0.24800000000000003, 1.33, 0], "rx": 0.083, "rz": 0.073}, {"position": [-0.256, 1.295, 0], "rx": 0.075, "rz": 0.065}], "radialSegments": 28, "capEnds": true}, "normalStrategy": "smooth shared contour"}, "parent": "root", "attachment": null, "dimensions": {"width": 1, "height": 1, "depth": 1, "units": "meters", "confidence": 0.78}, "transform": {"position": [0, 0, 0], "rotation": [0, 0, 0], "scale": [1, 1, 1]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "arm-r", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "shirt", "materialLayers": ["shirt"], "deformations": [], "joints": [], "seams": [], "localFeatures": [], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(213, 154, 115, 1)", "secondaryAlbedo": "rgba(213, 154, 115, 1)", "materialClass": "skin", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
+  node_sleeve_r_39.userData.actionProfile = {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "arm-r", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}};
+  (nodes["root"] ?? root).add(node_sleeve_r_39);
+  nodes["sleeve-r"] = node_sleeve_r_39;
+  const mesh_sleeve_r_39Geometry = endpoint_sleeve_r_39
+    ? new THREE.CylinderGeometry(endpoint_sleeve_r_39.endRadius, endpoint_sleeve_r_39.baseRadius, endpoint_sleeve_r_39.length, 16, 6)
     : buildTaperedSweepGeometry({"stations": [{"position": [-0.213, 1.405, 0], "rx": 0.028, "rz": 0.025}, {"position": [-0.233, 1.38, 0], "rx": 0.085, "rz": 0.075}, {"position": [-0.24800000000000003, 1.33, 0], "rx": 0.083, "rz": 0.073}, {"position": [-0.256, 1.295, 0], "rx": 0.075, "rz": 0.065}], "radialSegments": 28, "capEnds": true});
-  if (!endpoint_sleeve_r_41) {
-    mesh_sleeve_r_41Geometry.scale(1.0, 1.0, 1.0);
+  if (!endpoint_sleeve_r_39) {
+    mesh_sleeve_r_39Geometry.scale(1.0, 1.0, 1.0);
   }
-  const mesh_sleeve_r_41 = new THREE.Mesh(
-    mesh_sleeve_r_41Geometry,
+  const mesh_sleeve_r_39 = new THREE.Mesh(
+    mesh_sleeve_r_39Geometry,
     materialMap["shirt"] ?? new THREE.MeshStandardMaterial({ color: 0x888888 })
   );
-  mesh_sleeve_r_41.name = "sleeve-r";
-  if (endpoint_sleeve_r_41) {
-    mesh_sleeve_r_41.position.copy(endpoint_sleeve_r_41.midpoint);
-    mesh_sleeve_r_41.quaternion.copy(endpoint_sleeve_r_41.quaternion);
+  mesh_sleeve_r_39.name = "sleeve-r";
+  if (endpoint_sleeve_r_39) {
+    mesh_sleeve_r_39.position.copy(endpoint_sleeve_r_39.midpoint);
+    mesh_sleeve_r_39.quaternion.copy(endpoint_sleeve_r_39.quaternion);
   }
-  mesh_sleeve_r_41.castShadow = options.castShadow ?? true;
-  mesh_sleeve_r_41.receiveShadow = options.receiveShadow ?? true;
-  mesh_sleeve_r_41.userData.sculptComponent = {"id": "sleeve-r", "name": "sleeve-r", "level": "meso", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "tapered-sweep", "topologyClass": "continuous-sculpt", "topologyRationale": "Contour follows the reference silhouette; depth is inferred and tested in orbit.", "geometryDescriptor": {"taperedSweep": {"stations": [{"position": [-0.213, 1.405, 0], "rx": 0.028, "rz": 0.025}, {"position": [-0.233, 1.38, 0], "rx": 0.085, "rz": 0.075}, {"position": [-0.24800000000000003, 1.33, 0], "rx": 0.083, "rz": 0.073}, {"position": [-0.256, 1.295, 0], "rx": 0.075, "rz": 0.065}], "radialSegments": 28, "capEnds": true}, "normalStrategy": "smooth shared contour"}, "parent": "root", "attachment": null, "dimensions": {"width": 1, "height": 1, "depth": 1, "units": "meters", "confidence": 0.78}, "transform": {"position": [0, 0, 0], "rotation": [0, 0, 0], "scale": [1, 1, 1]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "arm-r", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "shirt", "materialLayers": ["shirt"], "deformations": [], "joints": [], "seams": [], "localFeatures": [], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(213, 154, 115, 1)", "secondaryAlbedo": "rgba(213, 154, 115, 1)", "materialClass": "skin", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
-  node_sleeve_r_41.add(mesh_sleeve_r_41);
-  meshes["sleeve-r"] = mesh_sleeve_r_41;
+  mesh_sleeve_r_39.castShadow = options.castShadow ?? true;
+  mesh_sleeve_r_39.receiveShadow = options.receiveShadow ?? true;
+  mesh_sleeve_r_39.userData.sculptComponent = {"id": "sleeve-r", "name": "sleeve-r", "level": "meso", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "tapered-sweep", "topologyClass": "continuous-sculpt", "topologyRationale": "Contour follows the reference silhouette; depth is inferred and tested in orbit.", "geometryDescriptor": {"taperedSweep": {"stations": [{"position": [-0.213, 1.405, 0], "rx": 0.028, "rz": 0.025}, {"position": [-0.233, 1.38, 0], "rx": 0.085, "rz": 0.075}, {"position": [-0.24800000000000003, 1.33, 0], "rx": 0.083, "rz": 0.073}, {"position": [-0.256, 1.295, 0], "rx": 0.075, "rz": 0.065}], "radialSegments": 28, "capEnds": true}, "normalStrategy": "smooth shared contour"}, "parent": "root", "attachment": null, "dimensions": {"width": 1, "height": 1, "depth": 1, "units": "meters", "confidence": 0.78}, "transform": {"position": [0, 0, 0], "rotation": [0, 0, 0], "scale": [1, 1, 1]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "arm-r", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "shirt", "materialLayers": ["shirt"], "deformations": [], "joints": [], "seams": [], "localFeatures": [], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(213, 154, 115, 1)", "secondaryAlbedo": "rgba(213, 154, 115, 1)", "materialClass": "skin", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
+  node_sleeve_r_39.add(mesh_sleeve_r_39);
+  meshes["sleeve-r"] = mesh_sleeve_r_39;
   colliders["sleeve-r"] = {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"};
   destructionGroups["arm-r"] ??= [];
-  destructionGroups["arm-r"].push(node_sleeve_r_41);
+  destructionGroups["arm-r"].push(node_sleeve_r_39);
+
+  const endpoint_fringe_back_40 = makeAttachmentEndpoint(null);
+  const node_fringe_back_40 = new THREE.Group();
+  node_fringe_back_40.name = "fringe-back__pivot";
+  node_fringe_back_40.scale.set(1, 1, 1);
+  if (endpoint_fringe_back_40) {
+    node_fringe_back_40.position.copy(endpoint_fringe_back_40.start);
+    node_fringe_back_40.rotation.set(0.0, 0.0, 0.0);
+  } else {
+    node_fringe_back_40.position.set(0.0, 0.0, 0.0);
+    node_fringe_back_40.rotation.set(0.0, 0.0, 0.0);
+  }
+  node_fringe_back_40.userData.sculptComponent = {"id": "fringe-back", "name": "fringe-back", "level": "meso", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "tapered-sweep", "topologyClass": "continuous-sculpt", "topologyRationale": "Contour follows the reference silhouette; depth is inferred and tested in orbit.", "geometryDescriptor": {"taperedSweep": {"stations": [{"position": [0, 1.625, -0.012], "rx": 0.03, "rz": 0.03}, {"position": [0, 1.632, -0.012], "rx": 0.08, "rz": 0.075}, {"position": [0, 1.66, -0.015], "rx": 0.093, "rz": 0.094}, {"position": [0, 1.705, -0.017], "rx": 0.109, "rz": 0.102}, {"position": [0, 1.74, -0.018], "rx": 0.106, "rz": 0.103}, {"position": [0, 1.755, -0.018], "rx": 0.095, "rz": 0.098}], "radialSegments": 24, "capEnds": true, "fixedFrame": "horizontal"}, "rearHair": {"rings": [[1.632, 0.075, 0.08, -0.012], [1.66, 0.094, 0.093, -0.015], [1.705, 0.102, 0.109, -0.017], [1.74, 0.103, 0.106, -0.018], [1.755, 0.098, 0.095, -0.018]], "radialSegments": 32, "thickness": 0.014}, "normalStrategy": "closed rear-half scalp shell, attached under cap"}, "parent": "root", "attachment": null, "dimensions": {"width": 1, "height": 1, "depth": 1, "units": "meters", "confidence": 0.78}, "transform": {"position": [0, 0, 0], "rotation": [0, 0, 0], "scale": [1, 1, 1]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "fringe-0", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "hair", "materialLayers": ["hair"], "deformations": [], "joints": [], "seams": [], "localFeatures": [{"id": "rear-hair", "kind": "contour", "description": "continuous rear hair and nape below the cap", "evidenceRefs": ["full-object"]}], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(52, 40, 43, 1)", "secondaryAlbedo": "rgba(52, 40, 43, 1)", "materialClass": "plastic", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
+  node_fringe_back_40.userData.actionProfile = {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "fringe-0", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}};
+  (nodes["root"] ?? root).add(node_fringe_back_40);
+  nodes["fringe-back"] = node_fringe_back_40;
+  const mesh_fringe_back_40Geometry = endpoint_fringe_back_40
+    ? new THREE.CylinderGeometry(endpoint_fringe_back_40.endRadius, endpoint_fringe_back_40.baseRadius, endpoint_fringe_back_40.length, 16, 6)
+    : buildTaperedSweepGeometry({"stations": [{"position": [0, 1.625, -0.012], "rx": 0.03, "rz": 0.03}, {"position": [0, 1.632, -0.012], "rx": 0.08, "rz": 0.075}, {"position": [0, 1.66, -0.015], "rx": 0.093, "rz": 0.094}, {"position": [0, 1.705, -0.017], "rx": 0.109, "rz": 0.102}, {"position": [0, 1.74, -0.018], "rx": 0.106, "rz": 0.103}, {"position": [0, 1.755, -0.018], "rx": 0.095, "rz": 0.098}], "radialSegments": 24, "capEnds": true, "fixedFrame": "horizontal"});
+  if (!endpoint_fringe_back_40) {
+    mesh_fringe_back_40Geometry.scale(1.0, 1.0, 1.0);
+  }
+  const mesh_fringe_back_40 = new THREE.Mesh(
+    mesh_fringe_back_40Geometry,
+    materialMap["hair"] ?? new THREE.MeshStandardMaterial({ color: 0x888888 })
+  );
+  mesh_fringe_back_40.name = "fringe-back";
+  if (endpoint_fringe_back_40) {
+    mesh_fringe_back_40.position.copy(endpoint_fringe_back_40.midpoint);
+    mesh_fringe_back_40.quaternion.copy(endpoint_fringe_back_40.quaternion);
+  }
+  mesh_fringe_back_40.castShadow = options.castShadow ?? true;
+  mesh_fringe_back_40.receiveShadow = options.receiveShadow ?? true;
+  mesh_fringe_back_40.userData.sculptComponent = {"id": "fringe-back", "name": "fringe-back", "level": "meso", "role": "body", "importance": 1.0, "confidence": 0.78, "primitive": "tapered-sweep", "topologyClass": "continuous-sculpt", "topologyRationale": "Contour follows the reference silhouette; depth is inferred and tested in orbit.", "geometryDescriptor": {"taperedSweep": {"stations": [{"position": [0, 1.625, -0.012], "rx": 0.03, "rz": 0.03}, {"position": [0, 1.632, -0.012], "rx": 0.08, "rz": 0.075}, {"position": [0, 1.66, -0.015], "rx": 0.093, "rz": 0.094}, {"position": [0, 1.705, -0.017], "rx": 0.109, "rz": 0.102}, {"position": [0, 1.74, -0.018], "rx": 0.106, "rz": 0.103}, {"position": [0, 1.755, -0.018], "rx": 0.095, "rz": 0.098}], "radialSegments": 24, "capEnds": true, "fixedFrame": "horizontal"}, "rearHair": {"rings": [[1.632, 0.075, 0.08, -0.012], [1.66, 0.094, 0.093, -0.015], [1.705, 0.102, 0.109, -0.017], [1.74, 0.103, 0.106, -0.018], [1.755, 0.098, 0.095, -0.018]], "radialSegments": 32, "thickness": 0.014}, "normalStrategy": "closed rear-half scalp shell, attached under cap"}, "parent": "root", "attachment": null, "dimensions": {"width": 1, "height": 1, "depth": 1, "units": "meters", "confidence": 0.78}, "transform": {"position": [0, 0, 0], "rotation": [0, 0, 0], "scale": [1, 1, 1]}, "actionProfile": {"animationRole": "static", "pivot": {"mode": "center", "localPosition": [0, 0, 0], "axis": [0, 1, 0], "confidence": 0.7}, "transformChannels": {"translate": true, "rotate": true, "scale": true, "bend": false, "twist": false, "detach": false, "visibility": true, "materialState": false}, "sockets": [], "collider": {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"}, "constraints": [], "destruction": {"breakable": false, "fractureGroup": "fringe-0", "seamRefs": [], "detachableFragments": [], "breakImpulse": 0.0, "debrisMaterial": "hidden"}}, "material": "hair", "materialLayers": ["hair"], "deformations": [], "joints": [], "seams": [], "localFeatures": [{"id": "rear-hair", "kind": "contour", "description": "continuous rear hair and nape below the cap", "evidenceRefs": ["full-object"]}], "surfaceDetail": {"macroRoughness": 0.0, "microRoughness": 0.0, "bumpAmplitude": 0.0, "normalPattern": "", "displacementPattern": "", "occlusionPattern": "", "edgeWearPattern": "", "notes": ""}, "evidenceRefs": ["full-object"], "details": [], "fidelityTier": "blockout", "colorMaterialRecipe": {"dominantAlbedo": "rgba(52, 40, 43, 1)", "secondaryAlbedo": "rgba(52, 40, 43, 1)", "materialClass": "plastic", "materialClassConfidence": 0.8, "evidenceRefs": ["full-object"]}};
+  node_fringe_back_40.add(mesh_fringe_back_40);
+  meshes["fringe-back"] = mesh_fringe_back_40;
+  colliders["fringe-back"] = {"type": "box", "offset": [0, 0, 0], "scale": [1, 1, 1], "isTrigger": false, "notes": "box proxy"};
+  destructionGroups["fringe-0"] ??= [];
+  destructionGroups["fringe-0"].push(node_fringe_back_40);
 
 
   // Head planes are deformed on ONE surface in model coordinates.
@@ -2774,14 +2746,24 @@ export function createRiffNocturneSingleCharacterTestModel(options              
   const hp = headGeom.getAttribute('position');
   for(let i=0;i<hp.count;i++){
     let x=hp.getX(i),y=hp.getY(i),z=hp.getZ(i);
+    if(z<-.02){const round=faceSpec.backRoundness;z-=round.depth*Math.exp(-Math.pow((y-round.centreY)/round.heightRadius,2))*THREE.MathUtils.smoothstep(-z,.02,.075);hp.setXYZ(i,x,y,z);}
     if(z>-.005){const bump=(p         )=>p[4]*Math.exp(-Math.pow((x-p[0])/p[2],2)-Math.pow((y-p[1])/p[3],2));
       const gate=THREE.MathUtils.smoothstep(z,-.005,.035);
       z+=gate*(bump(faceSpec.nose)+bump(faceSpec.bridge)+bump(faceSpec.lipRidge)+faceSpec.cheeks.reduce((v       ,p         )=>v+bump(p),0));
       hp.setXYZ(i,x,y,z);
     }
   }headGeom.computeVertexNormals();
+  {
+    const spec=meshes['fringe-back'].userData.sculptComponent.geometryDescriptor.rearHair,rings=spec.rings,N=spec.radialSegments,positions         =[],indices         =[];
+    for(let layer=0;layer<2;layer++)for(let r=0;r<rings.length;r++){const [y,w,d,z]=rings[r];for(let j=0;j<=N;j++){const a=j/N*Math.PI,t=layer?spec.thickness:0;positions.push((w-t)*Math.cos(a),y+(r===0?-.003*Math.sin(a*8)**2:0),z-(d-t)*Math.sin(a));}}
+    const stride=N+1,offset=rings.length*stride;
+    for(let r=0;r<rings.length-1;r++)for(let j=0;j<N;j++){const a=r*stride+j,b=a+stride;indices.push(a,a+1,b,a+1,b+1,b);const c=a+offset,d=b+offset;indices.push(c,d,c+1,c+1,d,d+1);}
+    for(let r=0;r<rings.length-1;r++)for(const j of [0,N]){const a=r*stride+j,b=a+stride,c=a+offset,d=b+offset;indices.push(a,b,c,b,d,c);}
+    for(const r of [0,rings.length-1])for(let j=0;j<N;j++){const a=r*stride+j,b=a+offset;indices.push(a,b,a+1,a+1,b,b+1);}
+    const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(positions,3));g.setIndex(indices);g.computeVertexNormals();meshes['fringe-back'].geometry.dispose();meshes['fringe-back'].geometry=g;
+  }
   root.updateMatrixWorld(true);
-  const imageHeadIds=["head","cap","cap-brim","glasses-bridge","mouth","ear--1","eye--1","glasses--1","temple--1","ear-1","eye-1","glasses-1","temple-1","fringe-0","fringe-1","fringe-2","fringe-3","fringe-4"];
+  const imageHeadIds=["head","cap","cap-brim","glasses-bridge","mouth","ear--1","eye--1","glasses--1","temple--1","ear-1","eye-1","glasses-1","temple-1","fringe-0","fringe-1","fringe-2","fringe-3","fringe-4","fringe-back"];
   const hmat=new THREE.Matrix4().makeTranslation(0,1.7,0).multiply(new THREE.Matrix4().makeRotationY(.48)).multiply(new THREE.Matrix4().makeRotationZ(-.105)).multiply(new THREE.Matrix4().makeScale(1.18,1.07,1.1)).multiply(new THREE.Matrix4().makeTranslation(0,-1.718,0));
   for(const id of imageHeadIds){const mesh=meshes[id];if(!mesh)continue;const m=new THREE.Matrix4().copy(mesh.matrixWorld).invert().multiply(hmat).multiply(mesh.matrixWorld);mesh.geometry.applyMatrix4(m);mesh.geometry.computeVertexNormals();}
   // A conforming shader marking has no floating geometry or visible thickness.

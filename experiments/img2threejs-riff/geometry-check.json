@@ -1,19 +1,18 @@
 {
   "status": "geometry-check-only",
-  "vertices": 35450,
-  "triangles": 68216,
-  "meshes": 42,
+  "vertices": 44852,
+  "triangles": 80684,
+  "meshes": 41,
   "size": [
-    0.6396236419677734,
+    0.6392759680747986,
     1.83707670023432,
-    0.44993009327154876
+    0.4416313629631702
   ],
   "modules": [
     "root",
     "shirt",
     "pants",
     "arm-l",
-    "hand-l",
     "shoe-l",
     "sole-l",
     "lace-l-0",
@@ -21,7 +20,6 @@
     "lace-l-2",
     "lace-l-3",
     "arm-r",
-    "hand-r",
     "shoe-r",
     "sole-r",
     "lace-r-0",
@@ -50,11 +48,11 @@
     "necklace",
     "pendant",
     "sleeve-l",
-    "sleeve-r"
+    "sleeve-r",
+    "fringe-back"
   ],
   "limits": [
-    "No likeness acceptance",
-    "No rig bound",
-    "No mobile performance certification"
+    "Static factory check only; animated evidence is in animation-evidence.json",
+    "No physical Android performance certification"
   ]
 }

@@ -1,8 +1,12 @@
-# Essai visuel Riff / Tommy avec img2threejs
+# Riff / Tommy - modele image anime
 
-Prototype isolé, construit à partir du deuxième personnage de l'image de référence simplifiée. L'ancien modèle Brawl n'est pas utilisé dans ce modèle. Le modèle livré dans le jeu et l'APK 3D-0.7 ne sont pas remplacés.
+Modele original du deuxieme personnage du concept, integre au skin Riff dans le prototype 3D. La version 2D et les 31 autres skins gardent leur dessin actuel.
 
-État : **essai de sculpture, non accepté visuellement**. Le contrôle de la description passe; le contrôle de volume sur quatre angles passe. La comparaison de silhouette avec la référence échoue (IoU 0,6024 au cadrage testé). Il ne faut pas présenter ce nombre comme un score de ressemblance perceptuelle. Le cadrage et la pose diffèrent aussi. Visage, vêtements, chaussures et pose demandent encore du travail. Aucun rig n'est lié à ce prototype; pas de validation Android ou multijoueur. 68 216 triangles et 42 objets dessinés au test PC : budget mobile non atteint.
+La direction visuelle a ete acceptee par l'utilisateur : voir user-acceptance.json. Cette acceptation ne transforme pas l'ancien diagnostic de silhouette (IoU 0,6024) en controle reussi. Les captures statiques et diagnostics historiques sont conserves tels quels.
+
+L'apercu animated.html utilise le veritable moteur de personnage du jeu, le meme modele et le meme ragdoll Cannon que l'APK. Le modele contient 44 702 sommets / 80 492 triangles, regroupes en 13 lots partageant un squelette. Le test city-three-riff-image-tests.cjs mesure les poids, la liaison au repos, la geometrie preservee et les deplacements reels sur 235 poses. Les mains sont connectees aux avant-bras; les doigts ont une morphologie de prise. Le crane et les cheveux arriere sont fermes et les jambes utilisent des contours lisses. Le skate garde une posture de cote et le fusil une prise a deux mains.
+
+Les genoux physiques sont des charnieres limitees a 0-2,6 radians, avec correction apres chaque pas de simulation. city-three-physics-tests.mjs mesure les angles pendant 5 760 images sur 24 chutes. Aucun test sur telephone Android physique n'a ete effectue; les performances mobiles doivent encore etre observees en jeu.
 
 ## Ouvrir le test local
 
@@ -17,7 +21,7 @@ Puis ouvrir http://127.0.0.1:4185 . La dépendance de développement Three.js 0.
 - `sculpt-spec.json` : description actuelle et paramètres des contours, détails et modules. Source d'autorité du modèle.
 - `createRiffModel.ts` / `.js` : véritable factory Three.js procédurale; pas une image sur une carte plane.
 - `refine-emitter.cjs` : adaptations explicites du générateur (courbes d'accessoires, sections anatomiques horizontales, surface du visage, proportions, tatouage conforme). À exécuter depuis la racine du projet, après génération, une seule fois par génération.
-- `state.json` : progression locale des étapes img2threejs; aucun passage visuel déclaré accepté. Reprendre avec `forge/next.py --state ...` depuis le checkout img2threejs.
+- `state.json` : progression locale des étapes img2threejs; historique automatique distinct de user-acceptance.json. Reprendre avec `forge/next.py --state ...` depuis le checkout img2threejs.
 - `reference-isolated.png` : crop analytique de l'image de concept déjà retenue, fond isolé par masque déterministe; `segmentation.json` décrit ce traitement. Le concept original et le crop non isolé sont conservés. Aucun pixel du concept n'est projeté sur le modèle.
 - `geometry-check.mjs` : exécute la factory réelle dans Three.js, vérifie les indices et nombres finis ainsi que la présence des pièces. Ne prouve ni ressemblance, ni bonne animation.
 - `front.png`, `right.png`, `rear.png`, `left.png` : captures réelles du navigateur; `diagnostic-*.json` / `turntable.json` : résultats non modifiés des contrôles.
@@ -27,6 +31,6 @@ Module futur : corps, tête, cheveux, casquette, chandail/manches, pantalon, cha
 
 ## Outil et licences
 
-img2threejs 2.0.0, source https://github.com/img2threejs/img2threejs , commit `3e7099e1b7fe93e187e06db4bdbe1e1906c21a28`, Apache-2.0 (copie de licence jointe). Son module character 0.2.0 est installé pour la future étape d'animation; les étapes d'animation restent en attente. Three.js r160 : MIT. Le personnage de référence est le concept Brawl généré dans cette conversation, et non un asset de jeu tiers.
+img2threejs 2.0.0, source https://github.com/img2threejs/img2threejs , commit `3e7099e1b7fe93e187e06db4bdbe1e1906c21a28`, Apache-2.0 (copie de licence jointe). Son module character 0.2.0 guide la liaison et la mesure des animations; aucun controle non mesure n'est declare reussi. Three.js r160 : MIT. Le personnage de référence est le concept Brawl généré dans cette conversation, et non un asset de jeu tiers.
 
 Les fichiers `experiments/` sont exclus des prochaines APK. Aucun changement au backend ni à la base de données.

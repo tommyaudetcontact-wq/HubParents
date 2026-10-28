@@ -1,0 +1,14 @@
+{
+  "maxWeightError": 2.9802322387695312e-8,
+  "maxBindDelta": 0.000002270195883499972,
+  "maxDisplacement": 1.3495383564811465,
+  "samples": 78960,
+  "poses": 235,
+  "drawBatches": 13,
+  "frozenGeometryPreserved": true,
+  "otherSkinsUnchanged": 31,
+  "limits": [
+    "No physical Android device attached",
+    "No claim of complete visual deformation coverage"
+  ]
+}
