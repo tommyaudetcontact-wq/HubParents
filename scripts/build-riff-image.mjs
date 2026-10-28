@@ -12,7 +12,8 @@ function influence(id,x,y,z){
  if(id==='neck')return [[1,1]];
  const positive=x>=0,upper=positive?7:3,lower=positive?8:4,thigh=positive?9:5,calf=positive?10:6;
  if(id.startsWith('hand-'))return [[positive?12:11,1]];
- if(/^(shoe-|sole-|lace-)/.test(id))return [[positive?14:13,1]];
+ if(id.startsWith('sole-'))return [[positive?14:13,1]];
+ if(/^(shoe-|lace-)/.test(id)){const shaft=smooth(y,6,10);return [[calf,shaft],[positive?14:13,1-shaft]];}
  if(id.startsWith('arm-')){const f=smooth(y,65,72),hand=1-smooth(y,52.5,56.5);return [[upper,f*(1-hand)],[lower,(1-f)*(1-hand)],[positive?12:11,hand]];}
  if(id==='pants'){const knee=smooth(y,27,34),hip=smooth(y,48,61);const h=Math.max(hip,(1-smooth(Math.abs(x),1,4))*smooth(y,45,53));return [[0,h],[thigh,(1-h)*knee],[calf,(1-h)*(1-knee)]];}
  if(id.startsWith('sleeve-'))return [[upper,1]];if(id==='shirt'){const f=smooth(Math.abs(x),9,14.2)*(1-smooth(y,79,88.3));return [[0,1-f],[upper,f]];}

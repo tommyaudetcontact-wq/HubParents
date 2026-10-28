@@ -60,3 +60,7 @@ Bassin et epaules ont une petite contre-rotation; les coudes ne sont plus verrou
 L'apercu dispose d'un sol, d'un ralenti, d'un curseur de cycle et d'un enregistrement canvas WebM de trois secondes. Le sol de diagnostic et ces controles sont exclus de l'APK. La video sur le Bureau est une capture du moteur, pas une generation d'images.
 
 Le cycle de jambes est aussi utilise lors des deplacements avec une arme ordinaire, tout en conservant la visee et les mains de cette arme. Les poses speciales (masse, lancer prepare, ragdoll et conduite) gardent leur routage.
+
+Correction supplementaire avant publication 0.10 : le col des bottes et les lacets hauts sont attaches au mollet, avec transition ponderee vers le pied sur la cheville. La semelle garde son os independant. 408 poses supplementaires couvrent 17 armes et mesurent le maintien des prises a deux mains ainsi que le balancement du bras libre avec pistolet/objets a lancer. La deviation du col de botte par rapport au mollet est mesuree sur les sommets affiches; les semelles plantees restent sur le plan 0,400 unite.
+
+Dans l'apercu, Course armee et le selecteur permettent de verifier chaque arme. Les attaques preparees et les outils de travail gardent leurs poses speciales.

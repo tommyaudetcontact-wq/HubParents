@@ -1,7 +1,9 @@
 {
+  "weaponLocomotionPoses": 408,
+  "collarDeviation": 1.0805156823142815e-14,
   "contactSoleRange": [
-    0.3863600227981709,
-    0.4000000089812435
+    0.3999999429591233,
+    0.40000000931323154
   ],
   "plantedFraction": 0.8416666666666667,
   "peakKnee": 33.560613352945126,
@@ -11,7 +13,7 @@
   "walkJogBlendTested": true,
   "maxWeightError": 2.9802322387695312e-8,
   "maxBindDelta": 0.000002270195883499972,
-  "maxDisplacement": 1.5004278568951852,
+  "maxDisplacement": 1.5004278568934204,
   "samples": 96045,
   "poses": 285,
   "drawBatches": 13,
