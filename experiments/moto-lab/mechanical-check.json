@@ -1,0 +1,26 @@
+{
+  "pass": true,
+  "cases": [
+    {
+      "kind": "cross",
+      "calls": 14,
+      "triangles": 11364,
+      "maxHand": 1.507288760336424e-15,
+      "maxFoot": 1.0741085019148343e-15
+    },
+    {
+      "kind": "ninja",
+      "calls": 14,
+      "triangles": 6820,
+      "maxHand": 2.1316282072803005e-15,
+      "maxFoot": 0
+    },
+    {
+      "kind": "chopper",
+      "calls": 12,
+      "triangles": 7456,
+      "maxHand": 0.010478127306207763,
+      "maxFoot": 1.0658141036401502e-15
+    }
+  ]
+}

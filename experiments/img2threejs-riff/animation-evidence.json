@@ -13,12 +13,12 @@
   "walkJogBlendTested": true,
   "maxWeightError": 2.9802322387695312e-8,
   "maxBindDelta": 0.000002270195883499972,
-  "maxDisplacement": 1.5004278568934204,
+  "maxDisplacement": 1.5004278568940028,
   "samples": 96045,
   "poses": 285,
   "drawBatches": 13,
   "frozenGeometryPreserved": true,
-  "otherSkinsUnchanged": 31,
+  "otherSkinsUseSharedAnatomy": 31,
   "limits": [
     "No physical Android device attached",
     "No claim of complete visual deformation coverage"

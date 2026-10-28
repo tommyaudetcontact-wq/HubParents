@@ -1,0 +1,9 @@
+'use strict';
+const assert=require('node:assert/strict'),vm=require('node:vm'),fs=require('node:fs'),C=require('./domain.js'),s={BrawlCore:C,Math};s.window=s;vm.createContext(s);vm.runInContext(fs.readFileSync('city-driving.js','utf8'),s);const D=s.CityDriving,models=C.vehicles.filter(v=>['cross','ninja','chopper'].includes(v.motorcycleKind)&&!v.trail);
+const start=()=>({id:'a',x:0,y:0,z:0,angle:0,driving:true,speed:0,vx:0,vy:0});
+for(const v of models){let a=start();for(let n=0;n<180;n++)a=D.step(a,{x:0,y:-1},1/60,v);assert(a.speed>v.speed*.75);assert(Math.abs(a.wheelAngle)>.001,'Motorcycle tyres must rotate');const initial=a.angle;for(let n=0;n<90;n++)a=D.step(a,{x:1,y:-1},1/60,v);assert(a.angle>initial+.5);assert(a.bodyRoll>.2&&a.bodyRoll<.83,'Motorcycle must lean into a right turn');for(let n=0;n<180;n++)a=D.step(a,{x:0,y:0},1/60,v);assert(Math.abs(a.bodyRoll)<.01,'Bike must settle upright without wobbling after steering is released');
+ for(let n=0;n<180;n++)a=D.step(a,{x:0,y:0,brake:true},1/60,v);assert(Math.abs(a.speed)<1,'Brake must stop the bike');assert(Math.abs(a.bodyRoll)<.01);
+ const low={...start(),speed:40,vx:0,vy:-40},high={...start(),speed:v.speed,vx:0,vy:-v.speed};for(let n=0;n<60;n++){Object.assign(low,D.step(low,{x:1,y:0},1/60,v));Object.assign(high,D.step(high,{x:1,y:-1},1/60,v));}assert(low.turnRate>high.turnRate,'Steering must be less abrupt at high speed');
+ let host=start(),guest=start();for(let n=0;n<300;n++){const i={x:Math.sin(n*.025),y:-1,brake:n>280};host=D.step(host,i,1/60,v);guest=D.step(guest,i,1/60,v);assert.equal(JSON.stringify(host),JSON.stringify(guest),'Prediction and authority use the same deterministic motorcycle dynamics');}
+}
+console.log('Cross, sport and chopper: acceleration, speed-sensitive steering, turn lean, upright recovery, brake, rotating tyres and deterministic host/guest stepping passed.');
