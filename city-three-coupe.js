@@ -4,7 +4,7 @@
  const clamp=n=>Math.max(0,Math.min(100,Number(n)||0));
  const doorIds=side=>['door-','door-liner-','door-frame-','window-','b-pillar-','handle-'].map(p=>p+side);
  function region(id){if(id==='hood')return 0;if(id==='trunk')return 1;for(const [side,n]of [['left',2],['right',3]]){if(doorIds(side).includes(id))return n;if(id==='mirror-'+side||id==='mirror-stalk-'+side)return n+2;}return -1;}
- function eligible(v,a={},personal=false){return personal&&!a.loanVehicle&&!a.riding&&!v.heavy&&!v.tank&&v.body!=='motorcycle';}
+ function eligible(v,a={},personal=false){return personal&&!a.loanVehicle&&!a.riding&&!v.heavy&&!v.tank&&['sport','coupe','classic'].includes(v.body);}
  function palette(color){const out={};for(const p of root.BrawlCoupeAsset.materials){out[p.id]=new T.MeshStandardMaterial({color:p.id==='paint'?color:p.color,roughness:p.roughness,metalness:p.metalness,side:T.DoubleSide,transparent:p.opacity<1,opacity:p.opacity,depthWrite:p.opacity>=1});}return out;}
  function bucket(parent,id){const g=new T.Group();g.name=id;parent.add(g);return g;}
  function create(ctx,v,color){

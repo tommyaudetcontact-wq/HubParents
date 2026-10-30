@@ -16,7 +16,7 @@ function game(kind){const actors={a:{id:'a',x:650,y:550},b:{id:'b',x:700,y:550}}
  const actors=context.actors(),d=C.cityMap.derby;
  for(let n=0;n<4;n++){
   Object.assign(actors.a,{x:d.x+120,y:d.y+120,angle:Math.PI/2,speed:160,vx:160,vy:0});
-  Object.assign(actors.b,{x:d.x+155,y:d.y+120,angle:Math.PI/2,speed:0,vx:0,vy:0});
+  Object.assign(actors.b,{x:d.x+190,y:d.y+120,angle:Math.PI/2,speed:0,vx:0,vy:0});
   now+=34;callback(now);const state=scope.CityGames.snapshot();assert(actors.a.damage.parts.some(v=>v>0),'Derby impact must change the rendered panel condition');assert(actors.b.damage.parts.some(v=>v>0));assert.equal(state.players.b.hp,75-n*25);assert.equal(state.players.a.hp,100-(n+1)*12.5);
   if(n<3){actors.b.x=d.x+350;for(let f=0;f<28;f++){now+=34;callback(now);}}
  }

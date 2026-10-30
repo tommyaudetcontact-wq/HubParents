@@ -66,6 +66,7 @@
    const height=q.chest[2]-88.04,depth=q.chest[1]-3;
    for(const [side,target,pole]of [['r',[7,16+depth,75+height],[24,6+depth,68+height]],['l',[2,32+depth,78+height],[-22,14+depth,67+height]]]){const arm=ik(q[side+'s'],target,pole,length(side+'s',side+'e'),length(side+'e',side+'h'));q[side+'e']=arm.middle;q[side+'h']=arm.end;}
   }
+  if(['beer','dance','lease'].includes(weaponPose?.kind)&&typeof weaponPose.throwProgress==='number'&&!input.orientation&&!actor.riding){const t=weaponPose.throwProgress,e=t*t*(3-2*t),target=[12+3*e,42*(1-e)+6*e,q.chest[2]-8-18*e],arm=ik(q.rs,target,[28,10,q.chest[2]-17],length('rs','re'),length('re','rh'));q.re=arm.middle;q.rh=arm.end;}
   // The old 2D gait has poles that switch sides of a straight limb. Author a stable 3D gait instead.
   const moving=Math.hypot(actor.vx||0,actor.vy||0)>1;
   if(moving&&!actor.riding&&!input.orientation&&weaponPose?.kind!=='worker-hammer'&&!(weaponPose?.kind==='poop'&&weaponPose.poopWindup>0)&&root.CharacterRig&&root.CityThreeCharacter){
@@ -80,7 +81,7 @@
     }
     if(kind==='belch')return gait;
     for(const [side,sign]of [['l',-1],['r',1]]){if(!hands[side])continue;
-     const target=two?game(v(q[side+'h']).sub(v(q.chest)).add(v(gait.chest))):throwable?[13,gait.hip[1]+5,gait.hip[2]+7]:[10,gait.chest[1]+24,gait.chest[2]-12];
+     const target=two?game(v(q[side+'h']).sub(v(q.chest)).add(v(gait.chest))):throwable?(typeof weaponPose.throwProgress==='number'?game(v(q[side+'h']).sub(v(q.chest)).add(v(gait.chest))):[13,gait.hip[1]+5,gait.hip[2]+7]):[10,gait.chest[1]+24,gait.chest[2]-12];
      if(two)target[1]-=2; // Keep the rigid two-hand grip inside both arms' reach through shoulder sway.
      const arm=ik(gait[side+'s'],target,[sign*25,gait.chest[1]+5,gait.chest[2]-16],length(side+'s',side+'e'),length(side+'e',side+'h'));gait[side+'e']=arm.middle;gait[side+'h']=arm.end;
     }

@@ -13,7 +13,7 @@
   "walkJogBlendTested": true,
   "maxWeightError": 2.9802322387695312e-8,
   "maxBindDelta": 0.000002270195883499972,
-  "maxDisplacement": 1.5004278568940028,
+  "maxDisplacement": 1.5004278568951852,
   "samples": 96045,
   "poses": 285,
   "drawBatches": 13,

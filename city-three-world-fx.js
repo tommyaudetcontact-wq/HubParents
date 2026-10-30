@@ -1,0 +1,24 @@
+'use strict';
+// Read-only presentation of the existing job and toy state. No hits or timers live here.
+(function(root){
+ const T=root.THREE;if(!T)return;
+ const m4=new T.Matrix4(),q4=new T.Quaternion(),point=new T.Vector3(),size=new T.Vector3();
+ function cached(ctx,key,build){let e=ctx.objects.get(key);if(!e){const group=new T.Group();e={group,...build(group)};ctx.scene.add(group);ctx.objects.set(key,e);}e.seen=ctx.frame;e.group.visible=true;return e;}
+ function particles(g,count,colors,glow=true){const mat=glow?new T.MeshBasicMaterial({color:'#ffffff',transparent:true,opacity:.8,depthWrite:false}):new T.MeshStandardMaterial({color:'#ffffff',roughness:.9}),mesh=new T.InstancedMesh(new T.SphereGeometry(1,8,6),mat,count);mesh.userData.ownedGeometry=mesh.userData.ownedMaterial=true;for(let n=0;n<count;n++)mesh.setColorAt(n,new T.Color(colors[n%colors.length]));mesh.instanceColor.needsUpdate=true;g.add(mesh);return mesh;}
+ function put(mesh,n,x,y,z,r){point.set(x,y,z);size.setScalar(Math.max(.001,r));m4.compose(point,q4.identity(),size);mesh.setMatrixAt(n,m4);}
+ function done(mesh){mesh.instanceMatrix.needsUpdate=true;mesh.computeBoundingSphere();}
+ function stream(ctx,key,start,end,time,color,spread=1){const e=cached(ctx,key,g=>({pool:particles(g,36,color)})),s=ctx.S;e.group.position.set(start.x*s,start.z*s,start.y*s);for(let n=0;n<36;n++){const t=(time*1.8+n/36)%1;put(e.pool,n,(end.x-start.x)*t*s+Math.sin(n*2.4+time*8)*t*.09*spread,((end.z-start.z)*t+Math.sin(t*Math.PI)*12)*s,(end.y-start.y)*t*s+Math.cos(n*1.7)*t*.09*spread,(1.1+t*1.7)*s);}done(e.pool);}
+ function draw(ctx,list,focus){const F=root.CityThreeWeaponFX;if(!F)return;const now=(root.performance?.now?.()||0)/1000,near=a=>!focus||Math.hypot(a.x-focus.x,a.y-focus.y)<1600,all=[...new Map(list.filter(Boolean).map(a=>[a.id,a])).values()],byId=new Map(all.map(a=>[a.id,a]));
+  for(const e of ctx.objects.values())if(e.visual?.homeAppliance){const a=all.find(a=>a.homeAction?.item===e.visual.homeItem&&(a.insideHome||a.id)===e.visual.homeOwner);e.visual.updateAction(a?.homeAction);}
+  const beer=root.CityBeer?.inspect?.();for(const f of beer?.foam||[])if(near(f))F.burst(ctx,'beer-foam:'+f.id,f,'foam',Math.max(0,Math.min(1,1-(f.until-beer.clock))),155);
+  for(const a of all){if(!near(a)||root.CityVacuum?.held(a))continue;const state=beer?.states?.[a.id];if(a.poopVomit||state&&['vomit','sick'].includes(state.phase)){const target=byId.get(state?.target),dx=target?target.x-a.x:Math.sin(a.angle||0)*48,dy=target?target.y-a.y:-Math.cos(a.angle||0)*48,d=Math.hypot(dx,dy)||1,reach=Math.min(d,65);stream(ctx,'vomit:'+a.id,{x:a.x+dx/d*3,y:a.y+dy/d*3,z:(a.z||0)+30},{x:a.x+dx/d*reach,y:a.y+dy/d*reach,z:(a.z||0)+2},beer?.clock??now,['#b5b84a','#d0c25b','#8f9e40']);}
+   if(a.danceTime>0){const pos={x:a.x,y:a.y,z:(a.z||0)+35};F.burst(ctx,'dance-status:'+a.id,pos,'dance',.25+(now*.35%1)*.55,45);}
+   if(a.zeroGravity>0||a.rageTime>0){const e=cached(ctx,'toy-status:'+a.id,g=>({pool:particles(g,10,['#c29aeb','#b6f2d1'])}));e.group.position.set(a.x*ctx.S,((a.z||0)+22)*ctx.S,a.y*ctx.S);for(let n=0;n<10;n++){const t=n/10*Math.PI*2+now*2,r=(a.zeroGravity>0?20:14)*ctx.S;put(e.pool,n,Math.cos(t)*r,Math.sin(t*2)*.15,Math.sin(t)*r,.035);}done(e.pool);}
+  }
+  const poop=root.CityPoop?.snapshot?.();for(const a of poop?.critters||[])if(near(a))F.shot(ctx,'poop-critter:'+a.id,{...a,kind:'poop'},a,0);
+  const soldiers=root.CityMiniSoldiers?.snapshot?.();for(const a of soldiers?.rockets||[])if(near(a))F.shot(ctx,'soldier-rocket:'+a.id,{...a,kind:'missile'},{...a,z:(a.z||23)-6},now);
+  for(const [type,snapshot]of [['police',root.CityPolice?.snapshot?.()],['patrol',root.CityPatrol?.snapshot?.()]])for(const a of snapshot?.shots||[])if(near(a))F.shot(ctx,type+'-shot:'+a.id,{...a,kind:a.kind==='tank'?'missile':'smg'},{...a,z:a.kind==='tank'?(a.z??25):(a.z??36)-14.7},now);
+  for(const f of root.CityFire?.snapshot?.()?.fires||[]){const b=f.target;if(!b||!near(b))continue;const t=(Date.now()-f.started)/Math.max(1,f.deadline-f.started),e=cached(ctx,'job-fire:'+f.owner+':'+b.id,g=>({flames:particles(g,36,['#ffe4a0','#ffb55b','#ee713d']),smoke:particles(g,12,['#535c57','#7b8075'])}));e.group.position.set(b.x*ctx.S,0,b.y*ctx.S);for(let n=0;n<36;n++){const u=(now*1.4+n/36)%1;put(e.flames,n,(.1+(n%6)*.16)*b.w*ctx.S,(8+(n%3)*b.h*.16+u*32)*ctx.S,(n%2?.85:.2)*b.d*ctx.S,(5+Math.sin(u*Math.PI)*8+Math.min(1,t)*4)*ctx.S);}done(e.flames);for(let n=0;n<12;n++){const u=(now*.25+n/12)%1;put(e.smoke,n,(b.w*.5+Math.sin(n*3)*u*20)*ctx.S,(b.h+u*80)*ctx.S,(b.d*.5+u*16)*ctx.S,(9+u*16)*ctx.S);}done(e.smoke);e.smoke.material.opacity=.3;const a=byId.get(f.owner);if(a?.fireSpraying)stream(ctx,'fire-water:'+a.id,{x:a.x,y:a.y,z:(a.z||0)+25},{x:b.x+b.w/2,y:b.y+b.d/2,z:45},now,['#5da8d3','#b9edff','#eefaff'],1.5);}
+ }
+ root.CityThreeWorldFX={draw,stream};
+})(typeof window==='undefined'?globalThis:window);
