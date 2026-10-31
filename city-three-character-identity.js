@@ -64,12 +64,11 @@
   }
   function fitCloth(mesh,slot){if(!source.imagePilot||!config.feminine||!root.CityThreeRiffImage?.shapePoint)return;mesh.updateMatrix();mesh.geometry.applyMatrix4(mesh.matrix);mesh.position.set(0,0,0);mesh.rotation.set(0,0,0);mesh.scale.set(1,1,1);const p=mesh.geometry.attributes.position;for(let j=0;j<p.count;j++){const q=root.CityThreeRiffImage.shapePoint([p.getX(j),p.getY(j)+88.04,p.getZ(j)],slot);p.setXYZ(j,q[0],q[1]-88.04,q[2]);}mesh.geometry.computeVertexNormals();}
   function scalp(color,style){
-   const p=[],ix=[],colors=[],rows=32,cols=80,curly=[2,3,14].includes(style);
-   for(let r=0;r<=rows;r++)for(let j=0;j<=cols;j++){const a=j/cols*Math.PI*2,c=Math.cos(a),frontY=(style===16?1.2:3.1)+.72*Math.cos(a*1.9+.65)+.22*Math.sin(a*7+.4),frontEnd=Math.acos(clamp((frontY+1.5)/9.25,-1,1)),end=c>0?frontEnd+(1-c)*.44:1.63-c*.60,t=r/rows*end,groove=Math.sin(a*19-t*7),wave=curly?1+.035*Math.sin(a*15+t*5)*Math.sin(t*17+a*3):1+.012*groove*Math.sin(t),volume=style===14?1.12:1;
-    p.push(Math.sin(a)*7.65*Math.sin(t)*wave*volume,-1.5+9.25*Math.cos(t)+(curly?.3*Math.sin(a*11+t*13)**2:0)+(style===14?1.4:0),1.15-Math.cos(a)*7.75*Math.sin(t)*wave*volume);const shade=curly?.9+.08*Math.cos(a*14+t*17):.9+.07*groove+.025*Math.sin(a*5+t*3);colors.push(shade,shade,shade);
+   const p=[],ix=[],colors=[],rows=24,cols=48,curly=[2,3,14].includes(style);
+   for(let r=0;r<=rows;r++)for(let j=0;j<=cols;j++){const a=j/cols*Math.PI*2,c=Math.cos(a),frontY=(style===16?1.2:3.1)+.45*Math.cos(a*1.6+.65),frontEnd=Math.acos(clamp((frontY+1.5)/9.25,-1,1)),end=c>0?frontEnd+(1-c)*.44:1.63-c*.60,t=r/rows*end,groove=Math.sin(a*19-t*7),wave=curly?1+.035*Math.sin(a*15+t*5)*Math.sin(t*17+a*3):1+.012*groove*Math.sin(t),volume=style===14?1.12:1,sweep=[0,1,6,7,16,17].includes(style)?Math.max(0,c)*Math.sin(t*1.8)**2:0;
+    p.push(Math.sin(a)*7.65*Math.sin(t)*wave*volume,-1.5+9.25*Math.cos(t)+sweep*1.2+(curly?.3*Math.sin(a*11+t*13)**2:0)+(style===14?1.4:0),1.15-Math.cos(a)*7.75*Math.sin(t)*wave*volume-sweep*.7);const shade=curly?.94+.04*Math.cos(a*14+t*17):.96+.025*groove;colors.push(shade,shade,shade);
    }
    for(let r=0;r<rows;r++)for(let j=0;j<cols;j++){const a=r*(cols+1)+j,b=a+cols+1;ix.push(a,a+1,b,a+1,b+1,b);}const g=new T.BufferGeometry();g.setAttribute('position',new T.Float32BufferAttribute(p,3));g.setAttribute('color',new T.Float32BufferAttribute(colors,3));g.setIndex(ix);g.computeVertexNormals();const m=part(head,g,color,'hair-scalp');m.material=new T.MeshStandardMaterial({color,vertexColors:true,roughness:.94});m.userData.ownedMaterial=true;
-   if([6,7,8,9,12,13].includes(style))for(let n=0;n<4;n++){const x=-4.7+n*2.1;lock(head,[[x*.75,7,-.6],[x,6,-3.3],[x+.5,4.4,-5.1],[x+.9,3.4,-5.4]],.72,.28,new T.Color(color).multiplyScalar(.94+n*.018),'hair-sweep');}
    return m;
   }
   function armoredHelmet(color){
@@ -115,7 +114,7 @@
    if([2,3,14].includes(h)){for(let n=0;n<(h===14?4:3);n++){const x=-3.3+n*2.05;lock(head,[[x,4.4,-4.9],[x+.7,3.3,-5.5],[x+.25,2,-5.75],[x+.7,n===2?.55:1.3,-5.35]],.34,.19,hair,'hair-curl');}}
    if([10,11].includes(h))for(const side of h===11?[-1,1]:[0])ellipsoid(head,side*6,7,3,3.3,3.3,3.4,hair,'hair-bun');
    if(h===15)loft(head,[[6,1.8,6],[12,1,3.8],[14,.15,.2]],hair,'hair-mohawk');
-   if(!config.hat&&[0,1,16,17].includes(h))for(let n=0;n<4;n++)lock(head,[[-5+n*2.4,6,1],[-4+n*2.2,10+n*.25,-1.5],[-3+n*2,8.5,-5],[-4.5+n*2,h===16?1.5:4,-6.1]],1.7,1.1,hair,'hair-quiff');
+
   }
   if(config.hood){loft(head,[[-10,8.3,7.2,1],[0,9.2,8.1,1],[9,7.1,7,1],[13,.2,.2,1]],'#242b36','hood','hood');for(const side of [-1,1])tube(head,[[side*3.8,11,-3.8],[side*6.6,5,-5.4],[side*6.8,-5,-4.8],[side*4.8,-11,-3.7]],1.25,'#303945','hood-rim');}
   if(config.helmet){const color={olive:'#687953',space:'#79628a',bat:'#2c3343',claw:'#344361',cobalt:'#527b9d'}[config.helmet];if(['olive','cobalt'].includes(config.helmet)){armoredHelmet(color);}else{loft(head,[[-8,6.0,5.7],[0,7.8,7.0],[7,6.5,6.2],[10,.3,.3]],color,'helmet-shell',false);loft(head,[[5,7.4,6.7],[8.4,5.7,5],[10,.2,.2]],color,'helmet-crown');
@@ -200,7 +199,6 @@
   if(!config.skirt&&!config.cape){const belt=loft(gear,source.imagePilot?[[-25.8,11.3,7.25],[-27.4,11.45,7.3]]:[[-34,12.6,8.3],[-37,12.5,8.3]],'#344456','belt');fitCloth(belt,'pants');const buckle=plate(gear,[[-2,1],[-2,-1.5],[2,-1.5],[2,1]],.6,'#bdc7c5','belt-buckle');buckle.position.set(0,source.imagePilot?-26.6:-35,source.imagePilot?-7.35:-8.6);fitCloth(buckle,'pants');}
   if(['riff-nocturne','rockeur-fidelite','navigatrice-iles','eclat-scene'].includes(config.signature)){tube(gear,[[-5,-1,-6.9],[-3,-12,-9],[0,-16,-9.4],[3,-12,-9],[5,-1,-6.9]],.28,'#e0c787','necklace');ellipsoid(gear,0,-17,-9.5,1.4,2,.45,config.signature==='navigatrice-iles'?'#73c5c2':'#e0c787','pendant');}
   for(const side of [-1,1]){const foot=new T.Group();group.add(foot);if(config.armor){loft(foot,[[-2.6,4.5,8.6,-3.1],[.2,4.6,8.7,-3.1],[3.9,4.2,6.9,-2.4],[7,3.6,4.1,0]],config.armor,'armored-boot');const toe=plate(foot,[[-3.2,-.5],[-3.5,-2],[3.5,-2],[3.2,-.5]],.4,new T.Color(config.armor).multiplyScalar(.82),'boot-toe');toe.position.z=-11.2;}if(!source.imagePilot)loft(foot,[[-2.7,4.9,8.9,-3.5],[-1.2,5,9,-3.5]],new T.Color(look.shoeColor).lerp(new T.Color('#d4dfdd'),.28),'boot-sole');attachments.push({group:foot,from:side<0?'lf':'rf',to:side<0?'lk':'rk',axis:1,foot:config.armor?(side<0?'l':'r'):null});}
-  if(!config.armor){const item=source.topItem,d=item?.design,long=d?.sleeve==='long'||!d&&[2,3,4].includes(item?.style)||d&&[2,3,4,5,6,7,8,9,12,14,15].includes(d.index);for(const side of ['l','r']){const cuff=new T.Group();group.add(cuff);loft(cuff,[[-.7,(long?3.7:4.8)*(config.feminine?.77:1),(long?3.7:4.8)*(config.feminine?.77:1)],[.7,(long?3.7:4.8)*(config.feminine?.77:1),(long?3.7:4.8)*(config.feminine?.77:1)]],new T.Color(look.topColor).multiplyScalar(.82),'sleeve-cuff');attachments.push({group:cuff,from:side+(long?'e':'s'),to:side+(long?'h':'e'),fraction:long?.75:.53});}}
   if(config.signature==='riff-nocturne'){for(const side of ['l','r']){const ink=new T.Group();group.add(ink);for(let n=0;n<3;n++)tube(ink,[[-2,-n*3,-3],[1,-2-n*3,-3.9],[2,-n*3,-3.1]],.3,'#48565a','tattoo');attachments.push({group:ink,from:side+'e',to:side+'h',fraction:.16});}}
   if(config.claws){const g=new T.Group();group.add(g);for(const x of [-1.7,0,1.7])tube(g,[[x,0,0],[x,-6,-1],[x,-16,-2]],.38,'#c1ccd0','claw');attachments.push({group:g,from:'rh',to:'re'});}
   // Fit hair to the actual derived skull and the back of the shirt, not an unrelated sphere.
