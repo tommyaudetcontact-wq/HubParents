@@ -1,4 +1,4 @@
-window.App={profile:()=>({id:'qa'}),popup(){},toast:t=>document.querySelector('#status').textContent=t,closeModal(){}};
+window.App={apartment:()=>null,profile:()=>({id:'qa'}),popup(){},toast:t=>document.querySelector('#status').textContent=t,closeModal(){}};
 window.CityNetwork={room:()=>null,send(){}};
 for(const file of await fetch('files.json').then(r=>r.json()))await new Promise((resolve,reject)=>{const e=document.createElement('script');e.src='/runtime/'+file;e.onload=resolve;e.onerror=()=>reject(Error(file));document.head.append(e);});
 await import('/runtime/city-three-ragdoll.js');await import('/runtime/city-three-props.js');
