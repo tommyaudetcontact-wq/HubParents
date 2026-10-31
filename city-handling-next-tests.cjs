@@ -8,7 +8,8 @@ function game(kind){const actors={a:{id:'a',x:650,y:550},b:{id:'b',x:750,y:550}}
  for(let n=0;n<120;n++){const input={x:n>70?.4:0,y:-.78,brake:false};a=D.collide(D.step(a,input,1/120,car),[],C.cityMap);Combat.move(p,input,1/120,{kind:'zombie'});}
  assert(Math.hypot(a.x-p.x,a.y-p.y)<1e-8);assert(Math.abs(a.angle-p.angle)<1e-8,'Zombie bonus uses the ordinary car steering/acceleration model');
  const impact=(speed,y)=>{const {s,actors}=game('zombie'),p=s.players.a;s.buffs.vehicleUntil=30;p.riding=true;Object.assign(p,{x:650,y:550,angle:Math.PI/2,vx:speed,vy:0,speed});s.wavePause=999;s.zombies=[{id:'contact-'+speed+'-'+y,x:681,y,hp:50,dead:false,phase:0}];G.laser(s,'a',{x:0,y:-.78,ax:0,ay:0,fire:false});G.simulate(s,actors,1/120);return s.zombies[0];};
- const slow=impact(70,550),fast=impact(230,550),glance=impact(230,562);assert(slow.dead&&fast.dead&&glance.dead);assert(fast.kx>slow.kx*2);assert(Math.abs(glance.spin)>Math.abs(fast.spin));
+ // Both collision cases stay within the zombie tank's new 45 km/h ceiling.
+ const slow=impact(50,550),fast=impact(120,550),glance=impact(120,562);assert(slow.dead&&fast.dead&&glance.dead);assert(fast.kx>slow.kx*2);assert(Math.abs(glance.spin)>Math.abs(fast.spin));
 }
 {
  const initial={x:900,y:1940,angle:1.1,speed:150,vx:120,vy:-90,z:40,vz:80,driving:true,yawRate:2};let a={...initial},b={...initial};
