@@ -1,0 +1,7 @@
+{
+  "verdict": "pass",
+  "confidence": 0.9,
+  "target": "three-door red hatchback",
+  "evidence": "C:\\Users\\recto\\Documents\\Codex\\2026-10-15\\voic\\work\\BrawlAcademy3D\\experiments\\fleet-lab\\reference-compact.png",
+  "notes": "Original multi-view concept of the same vehicle; front/profile/rear visible. Hidden mechanisms approximate."
+}

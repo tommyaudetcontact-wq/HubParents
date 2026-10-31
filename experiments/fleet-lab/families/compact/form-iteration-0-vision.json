@@ -1,0 +1,39 @@
+{
+  "score": 0.72,
+  "action": "refine-code",
+  "summary": "Form still too box-like: greenhouse is too tall, pillars too thin and hood lacks the downward front slope of the concept.",
+  "notes": "Deterministic geometry checks passed, then actual comparison inspected. Circular lamps and eight spokes present, but cabin proportion is not accepted; lower the window opening by raising the belt locally, slope the bonnet down towards existing front height, thicken paint margins.",
+  "features": [
+    {
+      "id": "silhouette",
+      "score": 0.78,
+      "visibleInPair": true,
+      "notes": "Wheelbase fits but large greenhouse changes the design."
+    },
+    {
+      "id": "wheel-arch",
+      "score": 0.81,
+      "visibleInPair": true,
+      "notes": "Closed wells and fitted arches retained."
+    },
+    {
+      "id": "cabin",
+      "score": 0.68,
+      "visibleInPair": true,
+      "notes": "Too much glass height and insufficient painted margins."
+    },
+    {
+      "id": "front-rear-identity",
+      "score": 0.76,
+      "visibleInPair": true,
+      "notes": "Two round lamps present; lower openings and fascia still need shaping."
+    }
+  ],
+  "layers": {
+    "silhouetteProportion": 0.78,
+    "componentStructure": 0.81,
+    "formDetail": 0.68,
+    "materialSurface": 0.4,
+    "lightingCamera": 0.8
+  }
+}

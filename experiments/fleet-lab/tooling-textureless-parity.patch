@@ -1,0 +1,18 @@
+--- a/forge/stage3_build/orchestrate_passes.py
++++ b/forge/stage3_build/orchestrate_passes.py
+@@ -327,6 +327,15 @@
+ def quality_first_material_gaps(spec: dict[str, Any], material: dict[str, Any]) -> list[str]:
+     material_id = str(material.get("id") or "(unnamed)")
+     gaps: list[str] = []
++    # Match strict spec validation: an evidence-backed, genuinely textureless
++    # solid material has no photo maps to extract. Contradictory declarations
++    # remain errors; this does not change any visual or sequential pass gate.
++    sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "stage2_spec"))
++    from validate_sculpt_spec import is_textureless, validate_textureless
++    if is_textureless(material):
++        declaration_errors: list[str] = []
++        validate_textureless(material_id, material, declaration_errors)
++        return declaration_errors
+     targets = spec.get("lookDevTargets")
+     material_targets = targets.get("materialPass", {}) if isinstance(targets, dict) else {}
+     minimum_resolution = material_targets.get("minimumTextureResolution", 1024)

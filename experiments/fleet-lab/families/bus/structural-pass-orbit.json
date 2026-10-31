@@ -1,0 +1,14 @@
+{
+  "referenceAreaFraction": 0.493988037109375,
+  "angles": [
+    {
+      "path": "C:\\Users\\recto\\Documents\\Codex\\2026-10-15\\voic\\work\\BrawlAcademy3D\\experiments\\fleet-lab\\families\\bus\\structural-pass-side.png",
+      "areaFraction": 0.5088736979166667,
+      "ratio": 1.0301336463417146,
+      "degenerate": false
+    }
+  ],
+  "degenerate": false,
+  "collapseRatio": 0.15,
+  "note": "deterministic; zero token; a flat-plane-faking-a-volume collapses in silhouette area when orbited"
+}

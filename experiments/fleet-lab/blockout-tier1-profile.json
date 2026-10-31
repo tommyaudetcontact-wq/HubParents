@@ -1,0 +1,246 @@
+{
+  "passed": false,
+  "checks": {
+    "silhouetteIoU": 0.7118,
+    "aspectRatioDelta": 0.0765,
+    "scaleDelta": 0.0633,
+    "bilateralSymmetryError": 0.1187,
+    "colorDelta": {
+      "checked": 55,
+      "maxDeltaE": 14.47,
+      "perComponent": [
+        {
+          "componentId": null,
+          "deltaE": 14.47
+        },
+        {
+          "componentId": null,
+          "deltaE": 14.47
+        },
+        {
+          "componentId": null,
+          "deltaE": 14.47
+        },
+        {
+          "componentId": null,
+          "deltaE": 14.47
+        },
+        {
+          "componentId": null,
+          "deltaE": 14.47
+        },
+        {
+          "componentId": null,
+          "deltaE": 14.47
+        },
+        {
+          "componentId": null,
+          "deltaE": 14.47
+        },
+        {
+          "componentId": null,
+          "deltaE": 14.47
+        },
+        {
+          "componentId": null,
+          "deltaE": 14.47
+        },
+        {
+          "componentId": null,
+          "deltaE": 14.47
+        },
+        {
+          "componentId": null,
+          "deltaE": 14.47
+        },
+        {
+          "componentId": null,
+          "deltaE": 14.47
+        },
+        {
+          "componentId": null,
+          "deltaE": 14.47
+        },
+        {
+          "componentId": null,
+          "deltaE": 14.47
+        },
+        {
+          "componentId": null,
+          "deltaE": 14.47
+        },
+        {
+          "componentId": null,
+          "deltaE": 14.47
+        },
+        {
+          "componentId": null,
+          "deltaE": 14.47
+        },
+        {
+          "componentId": null,
+          "deltaE": 14.47
+        },
+        {
+          "componentId": null,
+          "deltaE": 14.47
+        },
+        {
+          "componentId": null,
+          "deltaE": 14.47
+        },
+        {
+          "componentId": null,
+          "deltaE": 14.47
+        },
+        {
+          "componentId": null,
+          "deltaE": 14.47
+        },
+        {
+          "componentId": null,
+          "deltaE": 14.47
+        },
+        {
+          "componentId": null,
+          "deltaE": 14.47
+        },
+        {
+          "componentId": null,
+          "deltaE": 14.47
+        },
+        {
+          "componentId": null,
+          "deltaE": 14.47
+        },
+        {
+          "componentId": null,
+          "deltaE": 14.47
+        },
+        {
+          "componentId": null,
+          "deltaE": 14.47
+        },
+        {
+          "componentId": null,
+          "deltaE": 14.47
+        },
+        {
+          "componentId": null,
+          "deltaE": 14.47
+        },
+        {
+          "componentId": null,
+          "deltaE": 14.47
+        },
+        {
+          "componentId": null,
+          "deltaE": 14.47
+        },
+        {
+          "componentId": null,
+          "deltaE": 14.47
+        },
+        {
+          "componentId": null,
+          "deltaE": 14.47
+        },
+        {
+          "componentId": null,
+          "deltaE": 14.47
+        },
+        {
+          "componentId": null,
+          "deltaE": 14.47
+        },
+        {
+          "componentId": null,
+          "deltaE": 14.47
+        },
+        {
+          "componentId": null,
+          "deltaE": 14.47
+        },
+        {
+          "componentId": null,
+          "deltaE": 14.47
+        },
+        {
+          "componentId": null,
+          "deltaE": 14.47
+        },
+        {
+          "componentId": null,
+          "deltaE": 14.47
+        },
+        {
+          "componentId": null,
+          "deltaE": 14.47
+        },
+        {
+          "componentId": null,
+          "deltaE": 14.47
+        },
+        {
+          "componentId": null,
+          "deltaE": 14.47
+        },
+        {
+          "componentId": null,
+          "deltaE": 14.47
+        },
+        {
+          "componentId": null,
+          "deltaE": 14.47
+        },
+        {
+          "componentId": null,
+          "deltaE": 14.47
+        },
+        {
+          "componentId": null,
+          "deltaE": 14.47
+        },
+        {
+          "componentId": null,
+          "deltaE": 14.47
+        },
+        {
+          "componentId": null,
+          "deltaE": 14.47
+        },
+        {
+          "componentId": null,
+          "deltaE": 14.47
+        },
+        {
+          "componentId": null,
+          "deltaE": 14.47
+        },
+        {
+          "componentId": null,
+          "deltaE": 14.47
+        },
+        {
+          "componentId": null,
+          "deltaE": 14.47
+        },
+        {
+          "componentId": null,
+          "deltaE": 14.47
+        }
+      ],
+      "gated": false
+    }
+  },
+  "failures": [
+    "silhouette IoU 0.712 is below threshold 0.85",
+    "aspect-ratio delta 0.076 exceeds threshold 0.05"
+  ],
+  "maskWarnings": [
+    "reference: 4.1% of foreground cells lie outside the largest connected blob and were excluded from the bounding box; if the subject really has separated parts in this projection, they are not being measured"
+  ],
+  "renderHash": "f5a109237a5ad4d0",
+  "passId": "blockout",
+  "mapStrippedRender": "experiments\\fleet-lab\\blockout-profile-04.png"
+}

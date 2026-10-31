@@ -1,0 +1,24 @@
+{
+  "front": [
+    820,
+    738
+  ],
+  "rear": [
+    203,
+    666
+  ],
+  "radii": [
+    150,
+    113
+  ],
+  "width": 1536,
+  "height": 1024,
+  "bbox": [
+    59,
+    173,
+    1498,
+    893
+  ],
+  "confidence": 0.7,
+  "note": "Wheel landmarks estimated visually, +/- 15 pixels; alpha bbox measured from generated isolated reference. No claim of calibrated real camera."
+}

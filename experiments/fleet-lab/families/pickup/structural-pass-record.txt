@@ -1,0 +1,2 @@
+STATUS pass=structural-pass completed=1 blocked=none next=forge/stage4_review/append_review.py C:\Users\recto\Documents\Codex\2026-10-15\voic\work\BrawlAcademy3D\experiments\fleet-lab\families\pickup\sculpt-spec.json --pass-id structural-pass
+C:\Users\recto\Documents\Codex\2026-10-15\voic\work\BrawlAcademy3D\experiments\fleet-lab\families\pickup\sculpt-spec.json

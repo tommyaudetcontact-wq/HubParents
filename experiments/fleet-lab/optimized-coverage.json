@@ -1,0 +1,9 @@
+{
+  "model": "reference-sedan-optimized",
+  "specifiedComponents": 54,
+  "builtParts": 54,
+  "errors": 0,
+  "warnings": 0,
+  "result": "pass",
+  "findings": []
+}

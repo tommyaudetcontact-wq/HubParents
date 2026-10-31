@@ -1,0 +1,33 @@
+{
+  "score": 0.81,
+  "action": "continue",
+  "summary": "Structural scope: Five fixed passenger panes per side, ten passenger seats, separate cab door assemblies and a lower glazed entry with a fold line.",
+  "notes": "Actual same-aspect comparison and side evidence checked. Four-wheel pivots and native assembly tests passed. Placeholder fascias, tire pattern, native lighting and body transitions remain form work; not final appearance approval.",
+  "features": [
+    {
+      "id": "silhouette",
+      "score": 0.8,
+      "visibleInPair": true,
+      "notes": "Macro vehicle identity retained."
+    },
+    {
+      "id": "wheel-arch",
+      "score": 0.81,
+      "visibleInPair": true,
+      "notes": "Axles and closed well structures present; tire style pending."
+    },
+    {
+      "id": "cabin",
+      "score": 0.81,
+      "visibleInPair": true,
+      "notes": "Five fixed passenger panes per side, ten passenger seats, separate cab door assemblies and a lower glazed entry with a fold line."
+    }
+  ],
+  "layers": {
+    "silhouetteProportion": 0.8,
+    "componentStructure": 0.83,
+    "formDetail": 0.4,
+    "materialSurface": 0.35,
+    "lightingCamera": 0.8
+  }
+}

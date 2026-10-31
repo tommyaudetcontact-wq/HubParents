@@ -1,0 +1,27 @@
+{
+  "score": 0.81,
+  "action": "continue",
+  "summary": "Blockout scope: raised crew-cab pickup, two axles and open bed. Corrected belt and ground clearance now fit the wheel-centre proportions.",
+  "notes": "Actual browser render passes silhouette, aspect and scale gates after camera-only raster fitting; comparison and profile checked. No source pixels used as geometry. Native doors, tailgate, well liners and cabin still required.",
+  "features": [
+    {
+      "id": "silhouette",
+      "score": 0.81,
+      "visibleInPair": true,
+      "notes": "Pickup body mass, crew cab and separate bed match at macro level."
+    },
+    {
+      "id": "wheel-arch",
+      "score": 0.8,
+      "visibleInPair": true,
+      "notes": "Raised body, four tire volumes and both axles present; tread and lips remain later."
+    }
+  ],
+  "layers": {
+    "silhouetteProportion": 0.81,
+    "componentStructure": 0.6,
+    "formDetail": 0.3,
+    "materialSurface": 0.3,
+    "lightingCamera": 0.8
+  }
+}

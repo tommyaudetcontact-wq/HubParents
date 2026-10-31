@@ -1,0 +1,147 @@
+{
+  "scanMethod": "component-zones",
+  "targetMinDetails": 10,
+  "note": "Enumerate every identity-defining small detail before authoring the spec. Each detail must map to a component.localFeatures entry or material.localOverrides entry, never prose only. Use forge/stage1_intake/build_detail_inventory.py to scan zones.",
+  "details": [
+    {
+      "id": "crowned-hood",
+      "kind": "contour",
+      "mapsTo": {
+        "ref": "crowned-hood"
+      },
+      "evidenceRefs": [
+        "canonical"
+      ]
+    },
+    {
+      "id": "four-door-proportion",
+      "kind": "contour",
+      "mapsTo": {
+        "ref": "four-door-proportion"
+      },
+      "evidenceRefs": [
+        "canonical"
+      ]
+    },
+    {
+      "id": "door-seams",
+      "kind": "linework",
+      "mapsTo": {
+        "ref": "door-seams"
+      },
+      "evidenceRefs": [
+        "canonical"
+      ]
+    },
+    {
+      "id": "continuous-arches",
+      "kind": "hole",
+      "mapsTo": {
+        "ref": "continuous-arches"
+      },
+      "evidenceRefs": [
+        "canonical"
+      ]
+    },
+    {
+      "id": "closed-wells",
+      "kind": "groove",
+      "mapsTo": {
+        "ref": "closed-wells"
+      },
+      "evidenceRefs": [
+        "canonical"
+      ]
+    },
+    {
+      "id": "recessed-rims",
+      "kind": "ridge",
+      "mapsTo": {
+        "ref": "recessed-rims"
+      },
+      "evidenceRefs": [
+        "canonical"
+      ]
+    },
+    {
+      "id": "five-spokes",
+      "kind": "contour",
+      "mapsTo": {
+        "ref": "five-spokes"
+      },
+      "evidenceRefs": [
+        "canonical"
+      ]
+    },
+    {
+      "id": "roof-camber",
+      "kind": "contour",
+      "mapsTo": {
+        "ref": "roof-camber"
+      },
+      "evidenceRefs": [
+        "canonical"
+      ]
+    },
+    {
+      "id": "fitted-panes",
+      "kind": "contour",
+      "mapsTo": {
+        "ref": "fitted-panes"
+      },
+      "evidenceRefs": [
+        "canonical"
+      ]
+    },
+    {
+      "id": "paired-square-lamps",
+      "kind": "contour",
+      "mapsTo": {
+        "ref": "paired-square-lamps"
+      },
+      "evidenceRefs": [
+        "canonical"
+      ]
+    },
+    {
+      "id": "inset-grille",
+      "kind": "groove",
+      "mapsTo": {
+        "ref": "inset-grille"
+      },
+      "evidenceRefs": [
+        "canonical"
+      ]
+    },
+    {
+      "id": "rear-lenses",
+      "kind": "gloss",
+      "mapsTo": {
+        "ref": "rear-lenses"
+      },
+      "evidenceRefs": [
+        "canonical"
+      ]
+    },
+    {
+      "id": "integrated-trim",
+      "kind": "bevel",
+      "mapsTo": {
+        "ref": "integrated-trim"
+      },
+      "evidenceRefs": [
+        "canonical"
+      ]
+    },
+    {
+      "id": "padded-seats",
+      "kind": "contour",
+      "mapsTo": {
+        "ref": "padded-seats"
+      },
+      "evidenceRefs": [
+        "canonical"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "sedan": {
+    "stage": 7,
+    "label": "Berline — prototype 3D à examiner avant intégration"
+  },
+  "compact": {
+    "stage": 3,
+    "label": "Compacte — peinture et vitrages en cours de réglage"
+  },
+  "suv": {
+    "stage": 2,
+    "label": "SUV — phares ronds, protections et rails de toit en finition"
+  },
+  "pickup": {
+    "stage": 2,
+    "label": "Pickup — phares, pneus tout-terrain et caisse en finition"
+  },
+  "van": {
+    "stage": 2,
+    "label": "Fourgon — jantes acier et portes de chargement en finition"
+  },
+  "bus": {
+    "stage": 2,
+    "label": "Autobus — phares, entrée et carrosserie en finition"
+  }
+}

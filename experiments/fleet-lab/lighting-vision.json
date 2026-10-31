@@ -1,0 +1,39 @@
+{
+  "score": 0.81,
+  "action": "continue",
+  "summary": "Lighting scope: warm key, cool fill, lower hemisphere and procedural studio reflections reveal hood crown and side curvature; neutral and grazing controls verified.",
+  "notes": "Three-quarter, side, rear and neutral/grazing views inspected. Curvature glints move with illumination; no baked highlight. Ground contact shadow and darker neutral background separate tires. Broad concept reflections remain approximate; not an exact studio-photo match.",
+  "features": [
+    {
+      "id": "silhouette",
+      "score": 0.8,
+      "visibleInPair": true,
+      "notes": "Retained geometry identity, no material-induced loss."
+    },
+    {
+      "id": "wheel-arch",
+      "score": 0.8,
+      "visibleInPair": true,
+      "notes": "Retained geometry identity, no material-induced loss."
+    },
+    {
+      "id": "cabin",
+      "score": 0.8,
+      "visibleInPair": true,
+      "notes": "Retained geometry identity, no material-induced loss."
+    },
+    {
+      "id": "front-rear-identity",
+      "score": 0.8,
+      "visibleInPair": true,
+      "notes": "Retained geometry identity, no material-induced loss."
+    }
+  ],
+  "layers": {
+    "silhouetteProportion": 0.8,
+    "componentStructure": 0.83,
+    "formDetail": 0.81,
+    "materialSurface": 0.79,
+    "lightingCamera": 0.81
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "score": 0.81,
+  "action": "continue",
+  "summary": "Blockout scope: long two-axle shuttle silhouette, tall cabin and short bonnet. Passenger glazing and entrance are still required next.",
+  "notes": "Actual same-aspect three-quarter capture and profile checked; corrected roof height passes deterministic scale, aspect and silhouette gates. Broad unsegmented glass is intentionally not final.",
+  "features": [
+    {
+      "id": "silhouette",
+      "score": 0.81,
+      "visibleInPair": true,
+      "notes": "Long shuttle body, two axles and high roof."
+    },
+    {
+      "id": "wheel-arch",
+      "score": 0.81,
+      "visibleInPair": true,
+      "notes": "Correct two-axle layout, open arch cutouts."
+    }
+  ],
+  "layers": {
+    "silhouetteProportion": 0.81,
+    "componentStructure": 0.6,
+    "formDetail": 0.3,
+    "materialSurface": 0.3,
+    "lightingCamera": 0.8
+  }
+}

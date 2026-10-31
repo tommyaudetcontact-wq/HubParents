@@ -1,0 +1,14 @@
+{
+  "admitted": true,
+  "reasons": [],
+  "provenance": {
+    "viewpoint": "reference",
+    "sourcePath": "C:\\Users\\recto\\Documents\\Codex\\2026-10-15\\voic\\work\\BrawlAcademy3D\\experiments\\fleet-lab\\families\\bus\\reference-regions\\canonical.png",
+    "width": 1536,
+    "height": 655,
+    "foregroundCoverage": 0.7354,
+    "largestComponentFraction": 0.9885,
+    "pHash": 18132203121174702166,
+    "duplicateOfHash": null
+  }
+}

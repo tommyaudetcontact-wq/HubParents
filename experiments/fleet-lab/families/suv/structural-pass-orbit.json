@@ -1,0 +1,14 @@
+{
+  "referenceAreaFraction": 0.4822063446044922,
+  "angles": [
+    {
+      "path": "C:\\Users\\recto\\Documents\\Codex\\2026-10-15\\voic\\work\\BrawlAcademy3D\\experiments\\fleet-lab\\families\\suv\\blockout-side.png",
+      "areaFraction": 0.5526766666666667,
+      "ratio": 1.146141424414427,
+      "degenerate": false
+    }
+  ],
+  "degenerate": false,
+  "collapseRatio": 0.15,
+  "note": "deterministic; zero token; a flat-plane-faking-a-volume collapses in silhouette area when orbited"
+}

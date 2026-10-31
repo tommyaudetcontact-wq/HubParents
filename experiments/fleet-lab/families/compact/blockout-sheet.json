@@ -1,0 +1,9 @@
+{
+  "comparisonImage": "C:\\Users\\recto\\Documents\\Codex\\2026-10-15\\voic\\work\\BrawlAcademy3D\\experiments\\fleet-lab\\families\\compact\\blockout-comparison.png",
+  "referenceImage": "C:\\Users\\recto\\Documents\\Codex\\2026-10-15\\voic\\work\\BrawlAcademy3D\\experiments\\fleet-lab\\reference-compact-isolated.png",
+  "renderScreenshot": "C:\\Users\\recto\\Documents\\Codex\\2026-10-15\\voic\\work\\BrawlAcademy3D\\experiments\\fleet-lab\\families\\compact\\blockout-match.png",
+  "layout": "left=reference,right=render",
+  "panelWidth": 720,
+  "panelHeight": 480,
+  "note": "Send this image to AI vision for global, layer, and semantic feature scores; this script does not score."
+}

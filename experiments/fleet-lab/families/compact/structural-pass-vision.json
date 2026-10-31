@@ -1,0 +1,33 @@
+{
+  "score": 0.81,
+  "action": "continue",
+  "summary": "Structural scope: two long side doors with their own glazing, fixed rear quarter panes, a rear-glazed hatch assembly, enclosed wells and a seated cabin.",
+  "notes": "Three-quarter and new profile checked. Macro form remains stable. Mirror and bumper are still structural blocks; rounded housings, short circular headlamps, hatch corner lamps and eight-spoke rims remain form work. No final appearance claim.",
+  "features": [
+    {
+      "id": "silhouette",
+      "score": 0.81,
+      "visibleInPair": true,
+      "notes": "Hatch roof and short rear overhang maintained."
+    },
+    {
+      "id": "wheel-arch",
+      "score": 0.82,
+      "visibleInPair": true,
+      "notes": "Four wheels with closed wells and real arch cutouts."
+    },
+    {
+      "id": "cabin",
+      "score": 0.81,
+      "visibleInPair": true,
+      "notes": "Two side doors, fixed quarter panes and seated cabin; rear glass and gaskets attached to hatch."
+    }
+  ],
+  "layers": {
+    "silhouetteProportion": 0.81,
+    "componentStructure": 0.81,
+    "formDetail": 0.45,
+    "materialSurface": 0.45,
+    "lightingCamera": 0.8
+  }
+}

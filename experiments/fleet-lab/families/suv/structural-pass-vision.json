@@ -1,0 +1,33 @@
+{
+  "score": 0.81,
+  "action": "continue",
+  "summary": "Structural scope: Four complete side-door assemblies, fixed quarter panes, glazed hatch and enclosed wheel wells.",
+  "notes": "Actual three-quarter comparison and side profile checked. Rounded body transitions, native lamps, trim and family wheel style remain form work; current bumpers and mirrors are structural placeholders. Independent assembly tests passed.",
+  "features": [
+    {
+      "id": "silhouette",
+      "score": 0.8,
+      "visibleInPair": true,
+      "notes": "Macro body identity retained through panel separation."
+    },
+    {
+      "id": "wheel-arch",
+      "score": 0.82,
+      "visibleInPair": true,
+      "notes": "Wheel wells closed; tire pivots independent."
+    },
+    {
+      "id": "cabin",
+      "score": 0.81,
+      "visibleInPair": true,
+      "notes": "Four complete side-door assemblies, fixed quarter panes, glazed hatch and enclosed wheel wells."
+    }
+  ],
+  "layers": {
+    "silhouetteProportion": 0.8,
+    "componentStructure": 0.83,
+    "formDetail": 0.4,
+    "materialSurface": 0.35,
+    "lightingCamera": 0.8
+  }
+}

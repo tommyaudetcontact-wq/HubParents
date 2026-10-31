@@ -1,0 +1,39 @@
+{
+  "score": 0.81,
+  "action": "continue",
+  "summary": "Form scope: lower greenhouse, sloping crowned bonnet, modest fender swell, round lamp pair, body-colour bumpers and eight-spoke wheels.",
+  "notes": "Actual three-quarter comparison and current profile checked after geometry Tier1 passed. Simple stylized reconstruction, not an exact copy; cabin margins remain angular but connected. Material sheen, pale window reflections and wheel tonal finish are deferred to material stage. Rear hatch and trim anchoring remain interaction checks before release.",
+  "features": [
+    {
+      "id": "silhouette",
+      "score": 0.82,
+      "visibleInPair": true,
+      "notes": "Hatch silhouette and short nose retained; lower greenhouse fits better."
+    },
+    {
+      "id": "wheel-arch",
+      "score": 0.82,
+      "visibleInPair": true,
+      "notes": "Flares and closed liners meet true wheel openings."
+    },
+    {
+      "id": "cabin",
+      "score": 0.8,
+      "visibleInPair": true,
+      "notes": "Two doors, fixed quarter panes, painted window margins and seated cabin."
+    },
+    {
+      "id": "front-rear-identity",
+      "score": 0.8,
+      "visibleInPair": true,
+      "notes": "Two circular front lamps, horizontal grille, fixed rear corner lamps and body-colour bumpers."
+    }
+  ],
+  "layers": {
+    "silhouetteProportion": 0.82,
+    "componentStructure": 0.83,
+    "formDetail": 0.8,
+    "materialSurface": 0.4,
+    "lightingCamera": 0.8
+  }
+}

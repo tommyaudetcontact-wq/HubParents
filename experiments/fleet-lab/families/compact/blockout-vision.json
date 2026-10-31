@@ -1,0 +1,27 @@
+{
+  "score": 0.82,
+  "action": "continue",
+  "summary": "Blockout only: compact hatch roof, short nose and rear overhang, wheelbase and four wheel volumes match the isolated concept.",
+  "notes": "Compared actual transparent three-quarter render against the reference at the same aspect ratio, plus profile. Silhouette IoU .9259. Round lamps, two door seams, hatch glazing, rounded shoulder and cabin remain required next stages. This is not final appearance approval.",
+  "features": [
+    {
+      "id": "silhouette",
+      "score": 0.82,
+      "visibleInPair": true,
+      "notes": "Short hatch roof and overall mass fit, nose needs later sculpted shoulder."
+    },
+    {
+      "id": "wheel-arch",
+      "score": 0.83,
+      "visibleInPair": true,
+      "notes": "Axle centres, wheel radius and real arch openings align; closed wells come next."
+    }
+  ],
+  "layers": {
+    "silhouetteProportion": 0.82,
+    "componentStructure": 0.65,
+    "formDetail": 0.3,
+    "materialSurface": 0.3,
+    "lightingCamera": 0.8
+  }
+}

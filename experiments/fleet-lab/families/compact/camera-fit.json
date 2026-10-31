@@ -1,0 +1,59 @@
+{
+  "family": "compact",
+  "yaw": 0.6828857891257099,
+  "pitch": 0.07000642677462818,
+  "fov": 16.07998047882544,
+  "distance": 9.020113390761207,
+  "lookY": 0.7105511585438615,
+  "offsetX": 65.99570797268944,
+  "width": 1536,
+  "height": 1024,
+  "normalizedRms": 0.4094845782441069,
+  "projected": {
+    "box": [
+      36.660324783626294,
+      200.02911957767856,
+      1530.2416211654345,
+      896.7076714671173
+    ],
+    "centers": [
+      [
+        737.1042300595349,
+        738.9649504177273
+      ],
+      [
+        154.96186853902694,
+        645.4365163835412
+      ]
+    ],
+    "radii": [
+      160.62055875124787,
+      129.59082789366278
+    ]
+  },
+  "reference": {
+    "front": [
+      740,
+      737
+    ],
+    "rear": [
+      158,
+      653
+    ],
+    "radii": [
+      165,
+      131
+    ],
+    "width": 1536,
+    "height": 1024,
+    "bbox": [
+      38,
+      183,
+      1519,
+      902
+    ],
+    "confidence": 0.7,
+    "note": "Wheel landmarks estimated visually, +/- 15 pixels; alpha bbox measured from generated isolated reference. No claim of calibrated real camera."
+  },
+  "note": "Camera-only least-squares fit, not geometry deformation. Visually estimated wheel landmarks; requires browser comparison before acceptance. Form-pass framing pulled back 3 percent to retain the now-built circular lamp and mirror extents, with no geometry scaling."
+}

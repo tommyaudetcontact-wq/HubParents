@@ -1,0 +1,7 @@
+{
+  "verdict": "pass",
+  "confidence": 0.9,
+  "target": "ivory panel delivery van",
+  "evidence": "C:\\Users\\recto\\Documents\\Codex\\2026-10-15\\voic\\work\\BrawlAcademy3D\\experiments\\fleet-lab\\reference-van.png",
+  "notes": "Original multi-view concept of the same vehicle; front/profile/rear visible. Hidden mechanisms approximate."
+}

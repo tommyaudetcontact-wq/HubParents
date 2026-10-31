@@ -1,0 +1,39 @@
+{
+  "score": 0.82,
+  "action": "continue",
+  "summary": "Interaction scope: 54 named parts, stable pivots/sockets, clickable selection, assembly-scaled explode, progressive regional damage, door frames travel with doors, glass shards and Cannon panel debris, exact repair.",
+  "notes": "Browser verified hood selection, whole-front damage, 75% hinged doors, 100% door detachment with frame on ground, broken glazing, repair and exploded assembly. CPU tests cover six panel detachments and immutable rest restoration. Cannon test verifies 30 actual panel/shard bodies fall and settle. Isolated workshop only: no city/network integration is claimed.",
+  "features": [
+    {
+      "id": "silhouette",
+      "score": 0.8,
+      "visibleInPair": true,
+      "notes": "Retained geometry identity, no material-induced loss."
+    },
+    {
+      "id": "wheel-arch",
+      "score": 0.8,
+      "visibleInPair": true,
+      "notes": "Retained geometry identity, no material-induced loss."
+    },
+    {
+      "id": "cabin",
+      "score": 0.8,
+      "visibleInPair": true,
+      "notes": "Retained geometry identity, no material-induced loss."
+    },
+    {
+      "id": "front-rear-identity",
+      "score": 0.8,
+      "visibleInPair": true,
+      "notes": "Retained geometry identity, no material-induced loss."
+    }
+  ],
+  "layers": {
+    "silhouetteProportion": 0.8,
+    "componentStructure": 0.87,
+    "formDetail": 0.81,
+    "materialSurface": 0.79,
+    "lightingCamera": 0.81
+  }
+}

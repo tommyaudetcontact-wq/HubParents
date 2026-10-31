@@ -1,0 +1,276 @@
+{
+  "model": "reference-sedan",
+  "parts": [
+    {
+      "name": "chassis",
+      "kind": "part",
+      "triangles": 48
+    },
+    {
+      "name": "front-fascia",
+      "kind": "part",
+      "triangles": 480
+    },
+    {
+      "name": "rear-fascia",
+      "kind": "part",
+      "triangles": 480
+    },
+    {
+      "name": "windshield",
+      "kind": "part",
+      "triangles": 480
+    },
+    {
+      "name": "rear-window",
+      "kind": "part",
+      "triangles": 480
+    },
+    {
+      "name": "dashboard",
+      "kind": "part",
+      "triangles": 192
+    },
+    {
+      "name": "seat-rear",
+      "kind": "part",
+      "triangles": 192
+    },
+    {
+      "name": "roof",
+      "kind": "part",
+      "triangles": 1360
+    },
+    {
+      "name": "door-left-0",
+      "kind": "part",
+      "triangles": 1556
+    },
+    {
+      "name": "door-left-1",
+      "kind": "part",
+      "triangles": 1556
+    },
+    {
+      "name": "door-right-0",
+      "kind": "part",
+      "triangles": 1556
+    },
+    {
+      "name": "door-right-1",
+      "kind": "part",
+      "triangles": 1556
+    },
+    {
+      "name": "hood",
+      "kind": "part",
+      "triangles": 1280
+    },
+    {
+      "name": "trunk",
+      "kind": "part",
+      "triangles": 1280
+    },
+    {
+      "name": "mirror-left",
+      "kind": "part",
+      "triangles": 384
+    },
+    {
+      "name": "mirror-right",
+      "kind": "part",
+      "triangles": 384
+    },
+    {
+      "name": "fender-left",
+      "kind": "part",
+      "triangles": 3176
+    },
+    {
+      "name": "wheel-well-left",
+      "kind": "part",
+      "triangles": 1232
+    },
+    {
+      "name": "quarter-left",
+      "kind": "part",
+      "triangles": 192
+    },
+    {
+      "name": "glass-left-0",
+      "kind": "part",
+      "triangles": 192
+    },
+    {
+      "name": "handle-left-0",
+      "kind": "part",
+      "triangles": 12
+    },
+    {
+      "name": "frame-left-0",
+      "kind": "part",
+      "triangles": 576
+    },
+    {
+      "name": "glass-left-1",
+      "kind": "part",
+      "triangles": 192
+    },
+    {
+      "name": "handle-left-1",
+      "kind": "part",
+      "triangles": 12
+    },
+    {
+      "name": "frame-left-1",
+      "kind": "part",
+      "triangles": 576
+    },
+    {
+      "name": "seat-front-left",
+      "kind": "part",
+      "triangles": 768
+    },
+    {
+      "name": "fender-right",
+      "kind": "part",
+      "triangles": 3176
+    },
+    {
+      "name": "wheel-well-right",
+      "kind": "part",
+      "triangles": 1232
+    },
+    {
+      "name": "quarter-right",
+      "kind": "part",
+      "triangles": 192
+    },
+    {
+      "name": "glass-right-0",
+      "kind": "part",
+      "triangles": 192
+    },
+    {
+      "name": "handle-right-0",
+      "kind": "part",
+      "triangles": 12
+    },
+    {
+      "name": "frame-right-0",
+      "kind": "part",
+      "triangles": 576
+    },
+    {
+      "name": "glass-right-1",
+      "kind": "part",
+      "triangles": 192
+    },
+    {
+      "name": "handle-right-1",
+      "kind": "part",
+      "triangles": 12
+    },
+    {
+      "name": "frame-right-1",
+      "kind": "part",
+      "triangles": 576
+    },
+    {
+      "name": "seat-front-right",
+      "kind": "part",
+      "triangles": 768
+    },
+    {
+      "name": "engine",
+      "kind": "part",
+      "triangles": 576
+    },
+    {
+      "name": "engine-bay",
+      "kind": "part",
+      "triangles": 384
+    },
+    {
+      "name": "cargo-liner",
+      "kind": "part",
+      "triangles": 576
+    },
+    {
+      "name": "steering-wheel",
+      "kind": "part",
+      "triangles": 368
+    },
+    {
+      "name": "wheel-left-front",
+      "kind": "part",
+      "triangles": 1308
+    },
+    {
+      "name": "rim-left-front",
+      "kind": "part",
+      "triangles": 636
+    },
+    {
+      "name": "wheel-left-rear",
+      "kind": "part",
+      "triangles": 1308
+    },
+    {
+      "name": "rim-left-rear",
+      "kind": "part",
+      "triangles": 636
+    },
+    {
+      "name": "wheel-right-front",
+      "kind": "part",
+      "triangles": 1308
+    },
+    {
+      "name": "rim-right-front",
+      "kind": "part",
+      "triangles": 636
+    },
+    {
+      "name": "wheel-right-rear",
+      "kind": "part",
+      "triangles": 1308
+    },
+    {
+      "name": "rim-right-rear",
+      "kind": "part",
+      "triangles": 636
+    },
+    {
+      "name": "headlights",
+      "kind": "part",
+      "triangles": 2432
+    },
+    {
+      "name": "tail-lamps",
+      "kind": "part",
+      "triangles": 576
+    },
+    {
+      "name": "grille",
+      "kind": "part",
+      "triangles": 1344
+    },
+    {
+      "name": "bumpers",
+      "kind": "part",
+      "triangles": 384
+    },
+    {
+      "name": "indicators",
+      "kind": "part",
+      "triangles": 768
+    },
+    {
+      "name": "window-gaskets",
+      "kind": "part",
+      "triangles": 576
+    }
+  ],
+  "unnamedMeshes": 0
+}

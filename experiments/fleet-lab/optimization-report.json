@@ -1,0 +1,16 @@
+{
+  "status": "prototype-only",
+  "cityIntegration": false,
+  "trianglesBefore": 38368,
+  "trianglesAfter": 25940,
+  "meshDrawsBefore": 201,
+  "meshDrawsAfter": 82,
+  "semanticParts": 54,
+  "initialTrafficDrawTarget": 45,
+  "trafficDrawTargetMet": false,
+  "remaining": [
+    "Review vehicle style with user before city integration.",
+    "Build and review other five vehicle families.",
+    "Distant traffic LOD and city/mobile profiling still required; 82 close-detail draws are not approved for every distant traffic car."
+  ]
+}

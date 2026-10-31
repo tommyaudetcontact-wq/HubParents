@@ -1,0 +1,14 @@
+{
+  "referenceAreaFraction": 0.6553939393939394,
+  "angles": [
+    {
+      "path": "experiments\\fleet-lab\\blockout-profile-04.png",
+      "areaFraction": 0.6243056849953401,
+      "ratio": 0.9525655448883957,
+      "degenerate": false
+    }
+  ],
+  "degenerate": false,
+  "collapseRatio": 0.15,
+  "note": "deterministic; zero token; a flat-plane-faking-a-volume collapses in silhouette area when orbited"
+}

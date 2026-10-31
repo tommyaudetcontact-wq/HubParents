@@ -1,0 +1,39 @@
+{
+  "score": 0.8,
+  "action": "continue",
+  "summary": "Form scope: inset paired square lamps, grille slats, defined hood/shoulder boundary, curved arch lips, rounded hardware and door-mounted trim. Real-time stylization remains visibly simpler than the rendered concept.",
+  "notes": "Front three-quarter and profile show correct lamp configuration and four-door silhouette. Hood shoulder and arch lip now carry separate normals. Current material lacks environment reflection, rims read too dark and glazing is too clear; defer those to material/lookdev. Underbay floor still visible at nose: shorten in final form closure.",
+  "features": [
+    {
+      "id": "silhouette",
+      "score": 0.8,
+      "visibleInPair": true,
+      "notes": "Three-box proportions and deck/cabin placement retained."
+    },
+    {
+      "id": "wheel-arch",
+      "score": 0.81,
+      "visibleInPair": true,
+      "notes": "Curved paint arch lips surround actual void; rims inset under tire edges."
+    },
+    {
+      "id": "cabin",
+      "score": 0.8,
+      "visibleInPair": true,
+      "notes": "Four window/door assemblies, fixed quarter and attached fittings."
+    },
+    {
+      "id": "front-rear-identity",
+      "score": 0.8,
+      "visibleInPair": true,
+      "notes": "Paired square headlamps, horizontal grille, narrow bumpers and separate rear lenses."
+    }
+  ],
+  "layers": {
+    "silhouetteProportion": 0.8,
+    "componentStructure": 0.83,
+    "formDetail": 0.8,
+    "materialSurface": 0.57,
+    "lightingCamera": 0.76
+  }
+}

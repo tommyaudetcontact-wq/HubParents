@@ -1,0 +1,22 @@
+{
+  "scope": "isolated fleet-lab only; no production or APK integration",
+  "automatedChecks": {
+    "sedanGeometryDamageRepair": "passed",
+    "sedanPhysicalFragments": "30 actual fragments fell, rotated, collided and settled",
+    "compactFormAssembly": "passed",
+    "fiveNativeFamiliesStructure": "passed",
+    "fourNativeFamilyFormGeometry": "passed"
+  },
+  "browserChecks": {
+    "galleryImages": "six of six decoded at 1536x1024",
+    "sedanSideDamage": "100 percent -> 11 debris; settle then repair -> 0 percent and 0 debris",
+    "viewport": "temporary override reset"
+  },
+  "pending": [
+    "native family final visual acceptance and opposite/rear views",
+    "native destruction registration, damage deformation and physical fragment tests",
+    "compact material palette gate",
+    "traffic LOD and mobile/city performance",
+    "user visual review before integration"
+  ]
+}

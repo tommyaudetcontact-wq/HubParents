@@ -1,0 +1,51 @@
+{
+  "verdict": "low-confidence",
+  "action": "probe",
+  "fidelity": 0.449,
+  "fidelityTarget": 0.85,
+  "hardGateFailures": [
+    "silhouette IoU 0.816 < 0.85"
+  ],
+  "maskWarnings": [],
+  "disagreementSpread": 0.9746,
+  "signals": {
+    "silhouetteIoU": 0.8158,
+    "scaleDelta": 0.0239,
+    "aspectRatioDelta": 0.0435,
+    "symmetryParity": 0.4743,
+    "phashSimilarity": 0.625,
+    "ssim": 0.4716,
+    "edgeOverlap": 0.3153,
+    "blowoutParity": 0.9746,
+    "flatRegionScore": 0.0,
+    "tonalParity": 0.363,
+    "objectness": 0.6189,
+    "hueZoneParity": 0.0
+  },
+  "specularWash": {
+    "satRatio": 1.185,
+    "hueDriftDeg": 4.1,
+    "towardCyan": true,
+    "flagged": false,
+    "advice": null
+  },
+  "reportOnlySignals": [
+    "hueZoneParity",
+    "specularWash"
+  ],
+  "reconstructionModeSuspected": true,
+  "weights": {
+    "proportion": 1.0,
+    "symmetry": 0.5,
+    "phash": 1.0,
+    "ssim": 1.5,
+    "edgeOverlap": 1.0,
+    "blowoutParity": 0.8,
+    "flatRegion": 0.8,
+    "tonalParity": 1.0,
+    "objectness": 1.5
+  },
+  "reference": "C:\\Users\\recto\\Documents\\Codex\\2026-10-15\\voic\\work\\BrawlAcademy3D\\experiments\\fleet-lab\\reference-regions\\canonical.png",
+  "render": "C:\\Users\\recto\\Documents\\Codex\\2026-10-15\\voic\\work\\BrawlAcademy3D\\experiments\\fleet-lab\\blockout-match-02.png",
+  "note": "deterministic ensemble; zero VLM/token. hueZoneParity is REPORT-ONLY (colour-aware, CIEDE2000) — not yet in the weighted fidelity; promote after corpus calibration. VLM layer (§3.4) runs only if this passes."
+}

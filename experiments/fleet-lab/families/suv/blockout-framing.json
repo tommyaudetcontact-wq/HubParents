@@ -1,0 +1,13 @@
+{
+  "reference": "C:\\Users\\recto\\Documents\\Codex\\2026-10-15\\voic\\work\\BrawlAcademy3D\\experiments\\fleet-lab\\families\\suv\\reference-regions\\canonical.png",
+  "screenshot": "C:\\Users\\recto\\Documents\\Codex\\2026-10-15\\voic\\work\\BrawlAcademy3D\\experiments\\fleet-lab\\families\\suv\\blockout-full.png",
+  "clip": {
+    "x": 375,
+    "y": 275,
+    "width": 630,
+    "height": 270,
+    "estimatedIoU": 0.8490813648293963,
+    "aspectDelta": 0.035714285714285685
+  },
+  "note": "Deterministic framing helper only; requires fresh browser capture and independent visual judgment."
+}

@@ -1,0 +1,12 @@
+{
+  "family": "sedan",
+  "yaw": 0.78,
+  "pitch": 0.1,
+  "fov": 20,
+  "distance": 10.5,
+  "lookY": 0.74,
+  "offsetX": 0,
+  "width": 1536,
+  "height": 1024,
+  "note": "Studio gallery framing only; not a calibrated reference view or new accepted review render."
+}

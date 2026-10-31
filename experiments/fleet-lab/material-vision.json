@@ -1,0 +1,39 @@
+{
+  "score": 0.77,
+  "action": "continue",
+  "summary": "Solid-color PBR approximation: teal paint, blue transparent glazing, matte rubber, metallic rims/bumpers and distinct lamp materials. Spoke occlusion repaired. Studio response is simpler than concept and lighting polish remains.",
+  "notes": "No image highlights were baked into albedo. Four solid PBR material families are distinct; cabin remains readable through glass. Teal calibrated darker to reference; still lacks the reference studio contrast and deep gloss, so material similarity .74, not photoreal reproduction. Geometry semantic features unchanged and pass independently.",
+  "features": [
+    {
+      "id": "silhouette",
+      "score": 0.8,
+      "visibleInPair": true,
+      "notes": "Retained geometry identity, no material-induced loss."
+    },
+    {
+      "id": "wheel-arch",
+      "score": 0.8,
+      "visibleInPair": true,
+      "notes": "Retained geometry identity, no material-induced loss."
+    },
+    {
+      "id": "cabin",
+      "score": 0.8,
+      "visibleInPair": true,
+      "notes": "Retained geometry identity, no material-induced loss."
+    },
+    {
+      "id": "front-rear-identity",
+      "score": 0.8,
+      "visibleInPair": true,
+      "notes": "Retained geometry identity, no material-induced loss."
+    }
+  ],
+  "layers": {
+    "silhouetteProportion": 0.8,
+    "componentStructure": 0.83,
+    "formDetail": 0.8,
+    "materialSurface": 0.74,
+    "lightingCamera": 0.7
+  }
+}

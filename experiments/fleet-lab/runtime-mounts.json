@@ -1,0 +1,2000 @@
+{
+  "chassis": {
+    "pivot": [
+      0,
+      0,
+      0
+    ],
+    "attachment": {
+      "parentId": "root",
+      "parentSocket": "root-to-chassis",
+      "localStart": [
+        0,
+        0.20000000298023224,
+        0
+      ],
+      "localEnd": [
+        0,
+        0.20000000298023224,
+        0
+      ],
+      "contactType": "overlap",
+      "gapTolerance": 0.012
+    },
+    "collider": {
+      "type": "box",
+      "center": [
+        0,
+        0.20000000298023224,
+        0
+      ],
+      "halfExtents": [
+        0.7279999852180481,
+        0,
+        1.9700000286102295
+      ],
+      "friction": 0.45
+    }
+  },
+  "front-fascia": {
+    "pivot": [
+      0,
+      0,
+      0
+    ],
+    "attachment": {
+      "parentId": "root",
+      "parentSocket": "root-to-front-fascia",
+      "localStart": [
+        0,
+        0.5299240946769714,
+        -2.184859275817871
+      ],
+      "localEnd": [
+        0,
+        0.5299240946769714,
+        -2.184859275817871
+      ],
+      "contactType": "overlap",
+      "gapTolerance": 0.012
+    },
+    "collider": {
+      "type": "box",
+      "center": [
+        0,
+        0.5299240946769714,
+        -2.184859275817871
+      ],
+      "halfExtents": [
+        0.8195042014122009,
+        0.27992355823516846,
+        0.015140771865844727
+      ],
+      "friction": 0.45
+    }
+  },
+  "rear-fascia": {
+    "pivot": [
+      0,
+      0,
+      0
+    ],
+    "attachment": {
+      "parentId": "root",
+      "parentSocket": "root-to-rear-fascia",
+      "localStart": [
+        0,
+        0.5299240946769714,
+        2.184859275817871
+      ],
+      "localEnd": [
+        0,
+        0.5299240946769714,
+        2.184859275817871
+      ],
+      "contactType": "overlap",
+      "gapTolerance": 0.012
+    },
+    "collider": {
+      "type": "box",
+      "center": [
+        0,
+        0.5299240946769714,
+        2.184859275817871
+      ],
+      "halfExtents": [
+        0.8195042014122009,
+        0.27992355823516846,
+        0.015140771865844727
+      ],
+      "friction": 0.45
+    }
+  },
+  "windshield": {
+    "pivot": [
+      0,
+      0,
+      0
+    ],
+    "attachment": {
+      "parentId": "root",
+      "parentSocket": "root-to-windshield",
+      "localStart": [
+        0,
+        1.1123893558979034,
+        -0.6299999952316284
+      ],
+      "localEnd": [
+        0,
+        1.1123893558979034,
+        -0.6299999952316284
+      ],
+      "contactType": "overlap",
+      "gapTolerance": 0.012
+    },
+    "collider": {
+      "type": "box",
+      "center": [
+        0,
+        1.1123893558979034,
+        -0.6299999952316284
+      ],
+      "halfExtents": [
+        0.9099866151809692,
+        0.3026106059551239,
+        0.10000002384185791
+      ],
+      "friction": 0.45
+    }
+  },
+  "rear-window": {
+    "pivot": [
+      0,
+      0,
+      0
+    ],
+    "attachment": {
+      "parentId": "root",
+      "parentSocket": "root-to-rear-window",
+      "localStart": [
+        0,
+        1.110107272863388,
+        1.1650000214576721
+      ],
+      "localEnd": [
+        0,
+        1.110107272863388,
+        1.1650000214576721
+      ],
+      "contactType": "overlap",
+      "gapTolerance": 0.012
+    },
+    "collider": {
+      "type": "box",
+      "center": [
+        0,
+        1.110107272863388,
+        1.1650000214576721
+      ],
+      "halfExtents": [
+        0.9081705212593079,
+        0.3048926889896393,
+        0.1850000023841858
+      ],
+      "friction": 0.45
+    }
+  },
+  "dashboard": {
+    "pivot": [
+      0,
+      0,
+      0
+    ],
+    "attachment": {
+      "parentId": "root",
+      "parentSocket": "root-to-dashboard",
+      "localStart": [
+        0,
+        0.7400000095367432,
+        -0.6499999761581421
+      ],
+      "localEnd": [
+        0,
+        0.7400000095367432,
+        -0.6499999761581421
+      ],
+      "contactType": "overlap",
+      "gapTolerance": 0.012
+    },
+    "collider": {
+      "type": "box",
+      "center": [
+        0,
+        0.7400000095367432,
+        -0.6499999761581421
+      ],
+      "halfExtents": [
+        0.8326500058174133,
+        0.07999998331069946,
+        0.12999999523162842
+      ],
+      "friction": 0.45
+    }
+  },
+  "seat-rear": {
+    "pivot": [
+      0,
+      0,
+      0
+    ],
+    "attachment": {
+      "parentId": "root",
+      "parentSocket": "root-to-seat-rear",
+      "localStart": [
+        0,
+        0.5300000011920929,
+        1.0499999821186066
+      ],
+      "localEnd": [
+        0,
+        0.5300000011920929,
+        1.0499999821186066
+      ],
+      "contactType": "overlap",
+      "gapTolerance": 0.012
+    },
+    "collider": {
+      "type": "box",
+      "center": [
+        0,
+        0.5300000011920929,
+        1.0499999821186066
+      ],
+      "halfExtents": [
+        0.7052500247955322,
+        0.14000001549720764,
+        0.22499999403953552
+      ],
+      "friction": 0.45
+    }
+  },
+  "roof": {
+    "pivot": [
+      0,
+      0,
+      0
+    ],
+    "attachment": {
+      "parentId": "root",
+      "parentSocket": "root-to-roof",
+      "localStart": [
+        0,
+        1.1160868108272552,
+        0.3100000023841858
+      ],
+      "localEnd": [
+        0,
+        1.1160868108272552,
+        0.3100000023841858
+      ],
+      "contactType": "overlap",
+      "gapTolerance": 0.012
+    },
+    "collider": {
+      "type": "box",
+      "center": [
+        0,
+        1.1160868108272552,
+        0.3100000023841858
+      ],
+      "halfExtents": [
+        0.9099942445755005,
+        0.31087222695350647,
+        1.0400000214576721
+      ],
+      "friction": 0.45
+    }
+  },
+  "door-left-0": {
+    "pivot": [
+      -0.9099866265694496,
+      0.6478230080260059,
+      -0.73
+    ],
+    "attachment": {
+      "parentId": "root",
+      "parentSocket": "root-to-door-left-0",
+      "localStart": [
+        -0.9099866265694496,
+        0.6478230080260059,
+        -0.73
+      ],
+      "localEnd": [
+        -0.8244000060747263,
+        0.78693166586292,
+        -0.26000001072883583
+      ],
+      "contactType": "hinge",
+      "gapTolerance": 0.012
+    },
+    "collider": {
+      "type": "box",
+      "center": [
+        0.08558662049472332,
+        0.13910865783691406,
+        0.46999998927116415
+      ],
+      "halfExtents": [
+        0.11460000462830067,
+        0.5849316716194153,
+        0.47000000834465006
+      ],
+      "friction": 0.45
+    }
+  },
+  "door-left-1": {
+    "pivot": [
+      -0.9099999993727881,
+      0.6479996513130081,
+      0.21000000000000008
+    ],
+    "attachment": {
+      "parentId": "root",
+      "parentSocket": "root-to-door-left-1",
+      "localStart": [
+        -0.9099999993727881,
+        0.6479996513130081,
+        0.21000000000000008
+      ],
+      "localEnd": [
+        -0.8259478818313557,
+        0.7869960587026488,
+        0.6512019215524196
+      ],
+      "contactType": "hinge",
+      "gapTolerance": 0.012
+    },
+    "collider": {
+      "type": "box",
+      "center": [
+        0.08405211754143238,
+        0.1389964073896407,
+        0.44120192155241955
+      ],
+      "halfExtents": [
+        0.11289912275969982,
+        0.5849960595369339,
+        0.4987980760633945
+      ],
+      "friction": 0.45
+    }
+  },
+  "door-right-0": {
+    "pivot": [
+      0.9099866265694496,
+      0.6478230080260059,
+      -0.73
+    ],
+    "attachment": {
+      "parentId": "root",
+      "parentSocket": "root-to-door-right-0",
+      "localStart": [
+        0.9099866265694496,
+        0.6478230080260059,
+        -0.73
+      ],
+      "localEnd": [
+        0.8244000060747263,
+        0.78693166586292,
+        -0.26000001072883583
+      ],
+      "contactType": "hinge",
+      "gapTolerance": 0.012
+    },
+    "collider": {
+      "type": "box",
+      "center": [
+        -0.08558662049472332,
+        0.13910865783691406,
+        0.46999998927116415
+      ],
+      "halfExtents": [
+        0.11460000462830067,
+        0.5849316716194153,
+        0.47000000834465006
+      ],
+      "friction": 0.45
+    }
+  },
+  "door-right-1": {
+    "pivot": [
+      0.9099999993727881,
+      0.6479996513130081,
+      0.21000000000000008
+    ],
+    "attachment": {
+      "parentId": "root",
+      "parentSocket": "root-to-door-right-1",
+      "localStart": [
+        0.9099999993727881,
+        0.6479996513130081,
+        0.21000000000000008
+      ],
+      "localEnd": [
+        0.8259478818313557,
+        0.7869960587026488,
+        0.6512019215524196
+      ],
+      "contactType": "hinge",
+      "gapTolerance": 0.012
+    },
+    "collider": {
+      "type": "box",
+      "center": [
+        -0.08405211754143238,
+        0.1389964073896407,
+        0.44120192155241955
+      ],
+      "halfExtents": [
+        0.11289912275969982,
+        0.5849960595369339,
+        0.4987980760633945
+      ],
+      "friction": 0.45
+    }
+  },
+  "hood": {
+    "pivot": [
+      0,
+      0.755,
+      -0.73
+    ],
+    "attachment": {
+      "parentId": "root",
+      "parentSocket": "root-to-hood",
+      "localStart": [
+        0,
+        0.755,
+        -0.73
+      ],
+      "localEnd": [
+        0,
+        0.8098893748223782,
+        -1.4650000238418577
+      ],
+      "contactType": "hinge",
+      "gapTolerance": 0.012
+    },
+    "collider": {
+      "type": "box",
+      "center": [
+        0,
+        0.05488937482237821,
+        -0.7350000238418577
+      ],
+      "halfExtents": [
+        0.7461890578269958,
+        0.05488937959074969,
+        0.7350000047683718
+      ],
+      "friction": 0.45
+    }
+  },
+  "trunk": {
+    "pivot": [
+      0,
+      0.8052146012935635,
+      1.35
+    ],
+    "attachment": {
+      "parentId": "root",
+      "parentSocket": "root-to-trunk",
+      "localStart": [
+        0,
+        0.8052146012935635,
+        1.35
+      ],
+      "localEnd": [
+        0,
+        0.8076072919223305,
+        1.7750000238418582
+      ],
+      "contactType": "hinge",
+      "gapTolerance": 0.012
+    },
+    "collider": {
+      "type": "box",
+      "center": [
+        0,
+        0.0023926906287670135,
+        0.4250000238418581
+      ],
+      "halfExtents": [
+        0.7446998357772827,
+        0.05260729789733887,
+        0.4249999999999998
+      ],
+      "friction": 0.45
+    }
+  },
+  "mirror-left": {
+    "pivot": [
+      -0.91,
+      0.93,
+      -0.6
+    ],
+    "attachment": {
+      "parentId": "root",
+      "parentSocket": "root-to-mirror-left",
+      "localStart": [
+        -0.91,
+        0.93,
+        -0.6
+      ],
+      "localEnd": [
+        -0.9850000011175872,
+        0.93,
+        -0.5965000003576278
+      ],
+      "contactType": "hinge",
+      "gapTolerance": 0.012
+    },
+    "collider": {
+      "type": "box",
+      "center": [
+        -0.0750000011175872,
+        0,
+        0.0034999996423721313
+      ],
+      "halfExtents": [
+        0.09500000067055231,
+        0.05000000074505806,
+        0.06849999725818634
+      ],
+      "friction": 0.45
+    }
+  },
+  "mirror-right": {
+    "pivot": [
+      0.91,
+      0.93,
+      -0.6
+    ],
+    "attachment": {
+      "parentId": "root",
+      "parentSocket": "root-to-mirror-right",
+      "localStart": [
+        0.91,
+        0.93,
+        -0.6
+      ],
+      "localEnd": [
+        0.9850000011175872,
+        0.93,
+        -0.5965000003576278
+      ],
+      "contactType": "hinge",
+      "gapTolerance": 0.012
+    },
+    "collider": {
+      "type": "box",
+      "center": [
+        0.0750000011175872,
+        0,
+        0.0034999996423721313
+      ],
+      "halfExtents": [
+        0.09500000067055231,
+        0.05000000074505806,
+        0.06849999725818634
+      ],
+      "friction": 0.45
+    }
+  },
+  "fender-left": {
+    "pivot": [
+      0,
+      0,
+      0
+    ],
+    "attachment": {
+      "parentId": "root",
+      "parentSocket": "root-to-fender-left",
+      "localStart": [
+        -0.7948340773582458,
+        0.5138981938362122,
+        0
+      ],
+      "localEnd": [
+        -0.7948340773582458,
+        0.5138981938362122,
+        0
+      ],
+      "contactType": "overlap",
+      "gapTolerance": 0.012
+    },
+    "collider": {
+      "type": "box",
+      "center": [
+        -0.7948340773582458,
+        0.5138981938362122,
+        0
+      ],
+      "halfExtents": [
+        0.12079709768295288,
+        0.3138805627822876,
+        2.193657875061035
+      ],
+      "friction": 0.45
+    }
+  },
+  "wheel-well-left": {
+    "pivot": [
+      0,
+      0,
+      0
+    ],
+    "attachment": {
+      "parentId": "root",
+      "parentSocket": "root-to-wheel-well-left",
+      "localStart": [
+        -0.754749983549118,
+        0.5610000193119049,
+        -0.004999995231628418
+      ],
+      "localEnd": [
+        -0.754749983549118,
+        0.5610000193119049,
+        -0.004999995231628418
+      ],
+      "contactType": "overlap",
+      "gapTolerance": 0.012
+    },
+    "collider": {
+      "type": "box",
+      "center": [
+        -0.754749983549118,
+        0.5610000193119049,
+        -0.004999995231628418
+      ],
+      "halfExtents": [
+        0.16324999928474426,
+        0.19600000977516174,
+        1.7669999599456787
+      ],
+      "friction": 0.45
+    }
+  },
+  "quarter-left": {
+    "pivot": [
+      0,
+      0,
+      0
+    ],
+    "attachment": {
+      "parentId": "root",
+      "parentSocket": "root-to-quarter-left",
+      "localStart": [
+        -0.8117795288562775,
+        1.0824353694915771,
+        1.030173122882843
+      ],
+      "localEnd": [
+        -0.8117795288562775,
+        1.0824353694915771,
+        1.030173122882843
+      ],
+      "contactType": "overlap",
+      "gapTolerance": 0.012
+    },
+    "collider": {
+      "type": "box",
+      "center": [
+        -0.8117795288562775,
+        1.0824353694915771,
+        1.030173122882843
+      ],
+      "halfExtents": [
+        0.09269949793815613,
+        0.2612569332122803,
+        0.16597431898117065
+      ],
+      "friction": 0.45
+    }
+  },
+  "glass-left-0": {
+    "pivot": [
+      0,
+      0,
+      0
+    ],
+    "attachment": {
+      "parentId": "door-left-0",
+      "parentSocket": "door-left-0-to-glass-left-0",
+      "localStart": [
+        0.09865443222224712,
+        0.44001828134059906,
+        0.471780052408576
+      ],
+      "localEnd": [
+        0.09865443222224712,
+        0.44001828134059906,
+        0.471780052408576
+      ],
+      "contactType": "overlap",
+      "gapTolerance": 0.012
+    },
+    "collider": {
+      "type": "box",
+      "center": [
+        0.09865443222224712,
+        0.44001828134059906,
+        0.471780052408576
+      ],
+      "halfExtents": [
+        0.09392991848289967,
+        0.264240100979805,
+        0.4295965526252985
+      ],
+      "friction": 0.45
+    }
+  },
+  "handle-left-0": {
+    "pivot": [
+      0,
+      0,
+      0
+    ],
+    "attachment": {
+      "parentId": "door-left-0",
+      "parentSocket": "door-left-0-to-handle-left-0",
+      "localStart": [
+        -0.018013376742601395,
+        0.042176988907158375,
+        0.7799999713897705
+      ],
+      "localEnd": [
+        -0.018013376742601395,
+        0.042176988907158375,
+        0.7799999713897705
+      ],
+      "contactType": "overlap",
+      "gapTolerance": 0.012
+    },
+    "collider": {
+      "type": "box",
+      "center": [
+        -0.018013376742601395,
+        0.042176988907158375,
+        0.7799999713897705
+      ],
+      "halfExtents": [
+        0.011000007390975952,
+        0.01749998237937689,
+        0.06499999761581421
+      ],
+      "friction": 0.45
+    }
+  },
+  "frame-left-0": {
+    "pivot": [
+      0,
+      0,
+      0
+    ],
+    "attachment": {
+      "parentId": "door-left-0",
+      "parentSocket": "door-left-0-to-frame-left-0",
+      "localStart": [
+        0.09808663837611675,
+        0.4429980367422104,
+        0.46999998927116415
+      ],
+      "localEnd": [
+        0.09808663837611675,
+        0.4429980367422104,
+        0.46999998927116415
+      ],
+      "contactType": "overlap",
+      "gapTolerance": 0.012
+    },
+    "collider": {
+      "type": "box",
+      "center": [
+        0.09808663837611675,
+        0.4429980367422104,
+        0.46999998927116415
+      ],
+      "halfExtents": [
+        0.10209998674690723,
+        0.28104229271411896,
+        0.47000000834465006
+      ],
+      "friction": 0.45
+    }
+  },
+  "glass-left-1": {
+    "pivot": [
+      0,
+      0,
+      0
+    ],
+    "attachment": {
+      "parentId": "door-left-1",
+      "parentSocket": "door-left-1-to-glass-left-1",
+      "localStart": [
+        0.09712010761722922,
+        0.43920227885246266,
+        0.43344777449965466
+      ],
+      "localEnd": [
+        0.09712010761722922,
+        0.43920227885246266,
+        0.43344777449965466
+      ],
+      "contactType": "overlap",
+      "gapTolerance": 0.012
+    },
+    "collider": {
+      "type": "box",
+      "center": [
+        0.09712010761722922,
+        0.43920227885246266,
+        0.43344777449965466
+      ],
+      "halfExtents": [
+        0.09238788345828652,
+        0.2651202976703643,
+        0.46148896589875216
+      ],
+      "friction": 0.45
+    }
+  },
+  "handle-left-1": {
+    "pivot": [
+      0,
+      0,
+      0
+    ],
+    "attachment": {
+      "parentId": "door-left-1",
+      "parentSocket": "door-left-1-to-handle-left-1",
+      "localStart": [
+        -0.017846998292952776,
+        0.04098542779684067,
+        0.7800000011920928
+      ],
+      "localEnd": [
+        -0.017846998292952776,
+        0.04098542779684067,
+        0.7800000011920928
+      ],
+      "contactType": "overlap",
+      "gapTolerance": 0.012
+    },
+    "collider": {
+      "type": "box",
+      "center": [
+        -0.017846998292952776,
+        0.04098542779684067,
+        0.7800000011920928
+      ],
+      "halfExtents": [
+        0.011000006925314665,
+        0.01750001311302185,
+        0.06499996781349177
+      ],
+      "friction": 0.45
+    }
+  },
+  "frame-left-1": {
+    "pivot": [
+      0,
+      0,
+      0
+    ],
+    "attachment": {
+      "parentId": "door-left-1",
+      "parentSocket": "door-left-1-to-frame-left-1",
+      "localStart": [
+        0.09647563239559531,
+        0.4419231414794921,
+        0.44120192155241955
+      ],
+      "localEnd": [
+        0.09647563239559531,
+        0.4419231414794921,
+        0.44120192155241955
+      ],
+      "contactType": "overlap",
+      "gapTolerance": 0.012
+    },
+    "collider": {
+      "type": "box",
+      "center": [
+        0.09647563239559531,
+        0.4419231414794921,
+        0.44120192155241955
+      ],
+      "halfExtents": [
+        0.10047560790553689,
+        0.28206932544708246,
+        0.4987980760633945
+      ],
+      "friction": 0.45
+    }
+  },
+  "seat-front-left": {
+    "pivot": [
+      0,
+      0,
+      0
+    ],
+    "attachment": {
+      "parentId": "root",
+      "parentSocket": "root-to-seat-front-left",
+      "localStart": [
+        -0.3912999853491783,
+        0.6350000277161598,
+        -0.07000000029802322
+      ],
+      "localEnd": [
+        -0.3912999853491783,
+        0.6350000277161598,
+        -0.07000000029802322
+      ],
+      "contactType": "overlap",
+      "gapTolerance": 0.012
+    },
+    "collider": {
+      "type": "box",
+      "center": [
+        -0.3912999853491783,
+        0.6350000277161598,
+        -0.07000000029802322
+      ],
+      "halfExtents": [
+        0.23999998718500137,
+        0.4350000247359276,
+        0.2499999925494194
+      ],
+      "friction": 0.45
+    }
+  },
+  "fender-right": {
+    "pivot": [
+      0,
+      0,
+      0
+    ],
+    "attachment": {
+      "parentId": "root",
+      "parentSocket": "root-to-fender-right",
+      "localStart": [
+        0.7948340773582458,
+        0.5138981938362122,
+        0
+      ],
+      "localEnd": [
+        0.7948340773582458,
+        0.5138981938362122,
+        0
+      ],
+      "contactType": "overlap",
+      "gapTolerance": 0.012
+    },
+    "collider": {
+      "type": "box",
+      "center": [
+        0.7948340773582458,
+        0.5138981938362122,
+        0
+      ],
+      "halfExtents": [
+        0.12079709768295288,
+        0.3138805627822876,
+        2.193657875061035
+      ],
+      "friction": 0.45
+    }
+  },
+  "wheel-well-right": {
+    "pivot": [
+      0,
+      0,
+      0
+    ],
+    "attachment": {
+      "parentId": "root",
+      "parentSocket": "root-to-wheel-well-right",
+      "localStart": [
+        0.754749983549118,
+        0.5610000193119049,
+        -0.004999995231628418
+      ],
+      "localEnd": [
+        0.754749983549118,
+        0.5610000193119049,
+        -0.004999995231628418
+      ],
+      "contactType": "overlap",
+      "gapTolerance": 0.012
+    },
+    "collider": {
+      "type": "box",
+      "center": [
+        0.754749983549118,
+        0.5610000193119049,
+        -0.004999995231628418
+      ],
+      "halfExtents": [
+        0.16324999928474426,
+        0.19600000977516174,
+        1.7669999599456787
+      ],
+      "friction": 0.45
+    }
+  },
+  "quarter-right": {
+    "pivot": [
+      0,
+      0,
+      0
+    ],
+    "attachment": {
+      "parentId": "root",
+      "parentSocket": "root-to-quarter-right",
+      "localStart": [
+        0.8117795288562775,
+        1.0824353694915771,
+        1.030173122882843
+      ],
+      "localEnd": [
+        0.8117795288562775,
+        1.0824353694915771,
+        1.030173122882843
+      ],
+      "contactType": "overlap",
+      "gapTolerance": 0.012
+    },
+    "collider": {
+      "type": "box",
+      "center": [
+        0.8117795288562775,
+        1.0824353694915771,
+        1.030173122882843
+      ],
+      "halfExtents": [
+        0.09269949793815613,
+        0.2612569332122803,
+        0.16597431898117065
+      ],
+      "friction": 0.45
+    }
+  },
+  "glass-right-0": {
+    "pivot": [
+      0,
+      0,
+      0
+    ],
+    "attachment": {
+      "parentId": "door-right-0",
+      "parentSocket": "door-right-0-to-glass-right-0",
+      "localStart": [
+        -0.09865443222224712,
+        0.44001828134059906,
+        0.471780052408576
+      ],
+      "localEnd": [
+        -0.09865443222224712,
+        0.44001828134059906,
+        0.471780052408576
+      ],
+      "contactType": "overlap",
+      "gapTolerance": 0.012
+    },
+    "collider": {
+      "type": "box",
+      "center": [
+        -0.09865443222224712,
+        0.44001828134059906,
+        0.471780052408576
+      ],
+      "halfExtents": [
+        0.09392991848289967,
+        0.264240100979805,
+        0.4295965526252985
+      ],
+      "friction": 0.45
+    }
+  },
+  "handle-right-0": {
+    "pivot": [
+      0,
+      0,
+      0
+    ],
+    "attachment": {
+      "parentId": "door-right-0",
+      "parentSocket": "door-right-0-to-handle-right-0",
+      "localStart": [
+        0.018013376742601395,
+        0.042176988907158375,
+        0.7799999713897705
+      ],
+      "localEnd": [
+        0.018013376742601395,
+        0.042176988907158375,
+        0.7799999713897705
+      ],
+      "contactType": "overlap",
+      "gapTolerance": 0.012
+    },
+    "collider": {
+      "type": "box",
+      "center": [
+        0.018013376742601395,
+        0.042176988907158375,
+        0.7799999713897705
+      ],
+      "halfExtents": [
+        0.011000007390975952,
+        0.01749998237937689,
+        0.06499999761581421
+      ],
+      "friction": 0.45
+    }
+  },
+  "frame-right-0": {
+    "pivot": [
+      0,
+      0,
+      0
+    ],
+    "attachment": {
+      "parentId": "door-right-0",
+      "parentSocket": "door-right-0-to-frame-right-0",
+      "localStart": [
+        -0.09808663837611675,
+        0.4429980367422104,
+        0.46999998927116415
+      ],
+      "localEnd": [
+        -0.09808663837611675,
+        0.4429980367422104,
+        0.46999998927116415
+      ],
+      "contactType": "overlap",
+      "gapTolerance": 0.012
+    },
+    "collider": {
+      "type": "box",
+      "center": [
+        -0.09808663837611675,
+        0.4429980367422104,
+        0.46999998927116415
+      ],
+      "halfExtents": [
+        0.10209998674690723,
+        0.28104229271411896,
+        0.47000000834465006
+      ],
+      "friction": 0.45
+    }
+  },
+  "glass-right-1": {
+    "pivot": [
+      0,
+      0,
+      0
+    ],
+    "attachment": {
+      "parentId": "door-right-1",
+      "parentSocket": "door-right-1-to-glass-right-1",
+      "localStart": [
+        -0.09712010761722922,
+        0.43920227885246266,
+        0.43344777449965466
+      ],
+      "localEnd": [
+        -0.09712010761722922,
+        0.43920227885246266,
+        0.43344777449965466
+      ],
+      "contactType": "overlap",
+      "gapTolerance": 0.012
+    },
+    "collider": {
+      "type": "box",
+      "center": [
+        -0.09712010761722922,
+        0.43920227885246266,
+        0.43344777449965466
+      ],
+      "halfExtents": [
+        0.09238788345828652,
+        0.2651202976703643,
+        0.46148896589875216
+      ],
+      "friction": 0.45
+    }
+  },
+  "handle-right-1": {
+    "pivot": [
+      0,
+      0,
+      0
+    ],
+    "attachment": {
+      "parentId": "door-right-1",
+      "parentSocket": "door-right-1-to-handle-right-1",
+      "localStart": [
+        0.017846998292952776,
+        0.04098542779684067,
+        0.7800000011920928
+      ],
+      "localEnd": [
+        0.017846998292952776,
+        0.04098542779684067,
+        0.7800000011920928
+      ],
+      "contactType": "overlap",
+      "gapTolerance": 0.012
+    },
+    "collider": {
+      "type": "box",
+      "center": [
+        0.017846998292952776,
+        0.04098542779684067,
+        0.7800000011920928
+      ],
+      "halfExtents": [
+        0.011000006925314665,
+        0.01750001311302185,
+        0.06499996781349177
+      ],
+      "friction": 0.45
+    }
+  },
+  "frame-right-1": {
+    "pivot": [
+      0,
+      0,
+      0
+    ],
+    "attachment": {
+      "parentId": "door-right-1",
+      "parentSocket": "door-right-1-to-frame-right-1",
+      "localStart": [
+        -0.09647563239559531,
+        0.4419231414794921,
+        0.44120192155241955
+      ],
+      "localEnd": [
+        -0.09647563239559531,
+        0.4419231414794921,
+        0.44120192155241955
+      ],
+      "contactType": "overlap",
+      "gapTolerance": 0.012
+    },
+    "collider": {
+      "type": "box",
+      "center": [
+        -0.09647563239559531,
+        0.4419231414794921,
+        0.44120192155241955
+      ],
+      "halfExtents": [
+        0.10047560790553689,
+        0.28206932544708246,
+        0.4987980760633945
+      ],
+      "friction": 0.45
+    }
+  },
+  "seat-front-right": {
+    "pivot": [
+      0,
+      0,
+      0
+    ],
+    "attachment": {
+      "parentId": "root",
+      "parentSocket": "root-to-seat-front-right",
+      "localStart": [
+        0.3912999853491783,
+        0.6350000277161598,
+        -0.07000000029802322
+      ],
+      "localEnd": [
+        0.3912999853491783,
+        0.6350000277161598,
+        -0.07000000029802322
+      ],
+      "contactType": "overlap",
+      "gapTolerance": 0.012
+    },
+    "collider": {
+      "type": "box",
+      "center": [
+        0.3912999853491783,
+        0.6350000277161598,
+        -0.07000000029802322
+      ],
+      "halfExtents": [
+        0.23999998718500137,
+        0.4350000247359276,
+        0.2499999925494194
+      ],
+      "friction": 0.45
+    }
+  },
+  "engine": {
+    "pivot": [
+      0,
+      0,
+      0
+    ],
+    "attachment": {
+      "parentId": "root",
+      "parentSocket": "root-to-engine",
+      "localStart": [
+        0.1553250104188919,
+        0.49000000953674316,
+        -1.3880000114440918
+      ],
+      "localEnd": [
+        0.1553250104188919,
+        0.49000000953674316,
+        -1.3880000114440918
+      ],
+      "contactType": "overlap",
+      "gapTolerance": 0.012
+    },
+    "collider": {
+      "type": "box",
+      "center": [
+        0.1553250104188919,
+        0.49000000953674316,
+        -1.3880000114440918
+      ],
+      "halfExtents": [
+        0.4510750025510788,
+        0.17000001668930054,
+        0.5180000066757202
+      ],
+      "friction": 0.45
+    }
+  },
+  "engine-bay": {
+    "pivot": [
+      0,
+      0,
+      0
+    ],
+    "attachment": {
+      "parentId": "root",
+      "parentSocket": "root-to-engine-bay",
+      "localStart": [
+        0,
+        0.5200000032782555,
+        -1.3874999582767487
+      ],
+      "localEnd": [
+        0,
+        0.5200000032782555,
+        -1.3874999582767487
+      ],
+      "contactType": "overlap",
+      "gapTolerance": 0.012
+    },
+    "collider": {
+      "type": "box",
+      "center": [
+        0,
+        0.5200000032782555,
+        -1.3874999582767487
+      ],
+      "halfExtents": [
+        0.8190000057220459,
+        0.2750000134110451,
+        0.692499965429306
+      ],
+      "friction": 0.45
+    }
+  },
+  "cargo-liner": {
+    "pivot": [
+      0,
+      0,
+      0
+    ],
+    "attachment": {
+      "parentId": "root",
+      "parentSocket": "root-to-cargo-liner",
+      "localStart": [
+        0,
+        0.4725000113248825,
+        1.7750000357627869
+      ],
+      "localEnd": [
+        0,
+        0.4725000113248825,
+        1.7750000357627869
+      ],
+      "contactType": "overlap",
+      "gapTolerance": 0.012
+    },
+    "collider": {
+      "type": "box",
+      "center": [
+        0,
+        0.4725000113248825,
+        1.7750000357627869
+      ],
+      "halfExtents": [
+        0.7818999886512756,
+        0.19750000536441803,
+        0.42500001192092896
+      ],
+      "friction": 0.45
+    }
+  },
+  "steering-wheel": {
+    "pivot": [
+      0,
+      0,
+      0
+    ],
+    "attachment": {
+      "parentId": "root",
+      "parentSocket": "root-to-steering-wheel",
+      "localStart": [
+        -0.3913,
+        0.85,
+        -0.5319910895540693
+      ],
+      "localEnd": [
+        -0.3913,
+        0.85,
+        -0.5319910895540693
+      ],
+      "contactType": "overlap",
+      "gapTolerance": 0.012
+    },
+    "collider": {
+      "type": "box",
+      "center": [
+        -0.3913,
+        0.85,
+        -0.5319910895540693
+      ],
+      "halfExtents": [
+        0.15800000727176666,
+        0.14842089546078507,
+        0.16706482055640434
+      ],
+      "friction": 0.45
+    }
+  },
+  "wheel-left-front": {
+    "pivot": [
+      -0.875,
+      0.365,
+      -1.38
+    ],
+    "attachment": {
+      "parentId": "root",
+      "parentSocket": "root-to-wheel-left-front",
+      "localStart": [
+        -0.875,
+        0.365,
+        -1.38
+      ],
+      "localEnd": [
+        -0.875,
+        0.365,
+        -1.38
+      ],
+      "contactType": "hinge",
+      "gapTolerance": 0.012
+    },
+    "collider": {
+      "type": "box",
+      "center": [
+        0,
+        0,
+        0
+      ],
+      "halfExtents": [
+        0.10999999940395355,
+        0.35350000858306885,
+        0.35350000858306885
+      ],
+      "friction": 0.45
+    }
+  },
+  "rim-left-front": {
+    "pivot": [
+      0,
+      0,
+      0
+    ],
+    "attachment": {
+      "parentId": "wheel-left-front",
+      "parentSocket": "wheel-left-front-to-rim-left-front",
+      "localStart": [
+        -0.003696151077747345,
+        0,
+        0
+      ],
+      "localEnd": [
+        -0.003696151077747345,
+        0,
+        0
+      ],
+      "contactType": "overlap",
+      "gapTolerance": 0.012
+    },
+    "collider": {
+      "type": "box",
+      "center": [
+        -0.003696151077747345,
+        0,
+        0
+      ],
+      "halfExtents": [
+        0.09869614988565445,
+        0.23600000143051147,
+        0.23600000143051147
+      ],
+      "friction": 0.45
+    }
+  },
+  "wheel-left-rear": {
+    "pivot": [
+      -0.875,
+      0.365,
+      1.37
+    ],
+    "attachment": {
+      "parentId": "root",
+      "parentSocket": "root-to-wheel-left-rear",
+      "localStart": [
+        -0.875,
+        0.365,
+        1.37
+      ],
+      "localEnd": [
+        -0.875,
+        0.365,
+        1.37
+      ],
+      "contactType": "hinge",
+      "gapTolerance": 0.012
+    },
+    "collider": {
+      "type": "box",
+      "center": [
+        0,
+        0,
+        0
+      ],
+      "halfExtents": [
+        0.10999999940395355,
+        0.35350000858306885,
+        0.35350000858306885
+      ],
+      "friction": 0.45
+    }
+  },
+  "rim-left-rear": {
+    "pivot": [
+      0,
+      0,
+      0
+    ],
+    "attachment": {
+      "parentId": "wheel-left-rear",
+      "parentSocket": "wheel-left-rear-to-rim-left-rear",
+      "localStart": [
+        -0.003696151077747345,
+        0,
+        0
+      ],
+      "localEnd": [
+        -0.003696151077747345,
+        0,
+        0
+      ],
+      "contactType": "overlap",
+      "gapTolerance": 0.012
+    },
+    "collider": {
+      "type": "box",
+      "center": [
+        -0.003696151077747345,
+        0,
+        0
+      ],
+      "halfExtents": [
+        0.09869614988565445,
+        0.23600000143051147,
+        0.23600000143051147
+      ],
+      "friction": 0.45
+    }
+  },
+  "wheel-right-front": {
+    "pivot": [
+      0.875,
+      0.365,
+      -1.38
+    ],
+    "attachment": {
+      "parentId": "root",
+      "parentSocket": "root-to-wheel-right-front",
+      "localStart": [
+        0.875,
+        0.365,
+        -1.38
+      ],
+      "localEnd": [
+        0.875,
+        0.365,
+        -1.38
+      ],
+      "contactType": "hinge",
+      "gapTolerance": 0.012
+    },
+    "collider": {
+      "type": "box",
+      "center": [
+        0,
+        0,
+        0
+      ],
+      "halfExtents": [
+        0.10999999940395355,
+        0.35350000858306885,
+        0.35350000858306885
+      ],
+      "friction": 0.45
+    }
+  },
+  "rim-right-front": {
+    "pivot": [
+      0,
+      0,
+      0
+    ],
+    "attachment": {
+      "parentId": "wheel-right-front",
+      "parentSocket": "wheel-right-front-to-rim-right-front",
+      "localStart": [
+        0.003696151077747345,
+        0,
+        0
+      ],
+      "localEnd": [
+        0.003696151077747345,
+        0,
+        0
+      ],
+      "contactType": "overlap",
+      "gapTolerance": 0.012
+    },
+    "collider": {
+      "type": "box",
+      "center": [
+        0.003696151077747345,
+        0,
+        0
+      ],
+      "halfExtents": [
+        0.09869614988565445,
+        0.23600000143051147,
+        0.23600000143051147
+      ],
+      "friction": 0.45
+    }
+  },
+  "wheel-right-rear": {
+    "pivot": [
+      0.875,
+      0.365,
+      1.37
+    ],
+    "attachment": {
+      "parentId": "root",
+      "parentSocket": "root-to-wheel-right-rear",
+      "localStart": [
+        0.875,
+        0.365,
+        1.37
+      ],
+      "localEnd": [
+        0.875,
+        0.365,
+        1.37
+      ],
+      "contactType": "hinge",
+      "gapTolerance": 0.012
+    },
+    "collider": {
+      "type": "box",
+      "center": [
+        0,
+        0,
+        0
+      ],
+      "halfExtents": [
+        0.10999999940395355,
+        0.35350000858306885,
+        0.35350000858306885
+      ],
+      "friction": 0.45
+    }
+  },
+  "rim-right-rear": {
+    "pivot": [
+      0,
+      0,
+      0
+    ],
+    "attachment": {
+      "parentId": "wheel-right-rear",
+      "parentSocket": "wheel-right-rear-to-rim-right-rear",
+      "localStart": [
+        0.003696151077747345,
+        0,
+        0
+      ],
+      "localEnd": [
+        0.003696151077747345,
+        0,
+        0
+      ],
+      "contactType": "overlap",
+      "gapTolerance": 0.012
+    },
+    "collider": {
+      "type": "box",
+      "center": [
+        0.003696151077747345,
+        0,
+        0
+      ],
+      "halfExtents": [
+        0.09869614988565445,
+        0.23600000143051147,
+        0.23600000143051147
+      ],
+      "friction": 0.45
+    }
+  },
+  "headlights": {
+    "pivot": [
+      0,
+      0,
+      0
+    ],
+    "attachment": {
+      "parentId": "root",
+      "parentSocket": "root-to-headlights",
+      "localStart": [
+        0,
+        0.625,
+        -2.2416800260543823
+      ],
+      "localEnd": [
+        0,
+        0.625,
+        -2.2416800260543823
+      ],
+      "contactType": "overlap",
+      "gapTolerance": 0.012
+    },
+    "collider": {
+      "type": "box",
+      "center": [
+        0,
+        0.625,
+        -2.2416800260543823
+      ],
+      "halfExtents": [
+        0.7875000238418579,
+        0.08499997854232788,
+        0.024680018424987793
+      ],
+      "friction": 0.45
+    }
+  },
+  "tail-lamps": {
+    "pivot": [
+      0,
+      0,
+      0
+    ],
+    "attachment": {
+      "parentId": "root",
+      "parentSocket": "root-to-tail-lamps",
+      "localStart": [
+        0,
+        0.625,
+        2.215499997138977
+      ],
+      "localEnd": [
+        0,
+        0.625,
+        2.215499997138977
+      ],
+      "contactType": "overlap",
+      "gapTolerance": 0.012
+    },
+    "collider": {
+      "type": "box",
+      "center": [
+        0,
+        0.625,
+        2.215499997138977
+      ],
+      "halfExtents": [
+        0.8190000057220459,
+        0.11000001430511475,
+        0.02799999713897705
+      ],
+      "friction": 0.45
+    }
+  },
+  "grille": {
+    "pivot": [
+      0,
+      0,
+      0
+    ],
+    "attachment": {
+      "parentId": "root",
+      "parentSocket": "root-to-grille",
+      "localStart": [
+        0,
+        0.5137500017881393,
+        -2.2177499532699585
+      ],
+      "localEnd": [
+        0,
+        0.5137500017881393,
+        -2.2177499532699585
+      ],
+      "contactType": "overlap",
+      "gapTolerance": 0.012
+    },
+    "collider": {
+      "type": "box",
+      "center": [
+        0,
+        0.5137500017881393,
+        -2.2177499532699585
+      ],
+      "halfExtents": [
+        0.8190000057220459,
+        0.2212500125169754,
+        0.030249953269958496
+      ],
+      "friction": 0.45
+    }
+  },
+  "bumpers": {
+    "pivot": [
+      0,
+      0,
+      0
+    ],
+    "attachment": {
+      "parentId": "root",
+      "parentSocket": "root-to-bumpers",
+      "localStart": [
+        0,
+        0.4299999922513962,
+        0
+      ],
+      "localEnd": [
+        0,
+        0.4299999922513962,
+        0
+      ],
+      "contactType": "overlap",
+      "gapTolerance": 0.012
+    },
+    "collider": {
+      "type": "box",
+      "center": [
+        0,
+        0.4299999922513962,
+        0
+      ],
+      "halfExtents": [
+        0.8190000057220459,
+        0.04999999701976776,
+        2.242500066757202
+      ],
+      "friction": 0.45
+    }
+  },
+  "indicators": {
+    "pivot": [
+      0,
+      0,
+      0
+    ],
+    "attachment": {
+      "parentId": "root",
+      "parentSocket": "root-to-indicators",
+      "localStart": [
+        0,
+        0.48874999582767487,
+        0.006000041961669922
+      ],
+      "localEnd": [
+        0,
+        0.48874999582767487,
+        0.006000041961669922
+      ],
+      "contactType": "overlap",
+      "gapTolerance": 0.012
+    },
+    "collider": {
+      "type": "box",
+      "center": [
+        0,
+        0.48874999582767487,
+        0.006000041961669922
+      ],
+      "halfExtents": [
+        0.7825000286102295,
+        0.19625000655651093,
+        2.246000051498413
+      ],
+      "friction": 0.45
+    }
+  },
+  "window-gaskets": {
+    "pivot": [
+      0,
+      0,
+      0
+    ],
+    "attachment": {
+      "parentId": "root",
+      "parentSocket": "root-to-window-gaskets",
+      "localStart": [
+        0,
+        1.110107272863388,
+        0.3099999725818634
+      ],
+      "localEnd": [
+        0,
+        1.110107272863388,
+        0.3099999725818634
+      ],
+      "contactType": "overlap",
+      "gapTolerance": 0.012
+    },
+    "collider": {
+      "type": "box",
+      "center": [
+        0,
+        1.110107272863388,
+        0.3099999725818634
+      ],
+      "halfExtents": [
+        0.9099866151809692,
+        0.3048926889896393,
+        1.0439999997615814
+      ],
+      "friction": 0.45
+    }
+  }
+}

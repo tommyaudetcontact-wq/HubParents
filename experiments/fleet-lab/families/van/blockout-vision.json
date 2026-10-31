@@ -1,0 +1,27 @@
+{
+  "score": 0.81,
+  "action": "continue",
+  "summary": "Closed panel van blockout retains tall solid cargo shell, short bonnet and small front-cab glazing area; detailing is intentionally absent.",
+  "notes": "Same-aspect actual render and isolated reference checked, with side evidence. Blockout scope only; curved transitions, window frames, opening panels, lights and cabin remain later requirements.",
+  "features": [
+    {
+      "id": "silhouette",
+      "score": 0.81,
+      "visibleInPair": true,
+      "notes": "Macro height, wheelbase and front/rear overhangs recognizable."
+    },
+    {
+      "id": "wheel-arch",
+      "score": 0.81,
+      "visibleInPair": true,
+      "notes": "Axle positions and real openings retained; liners required next stage."
+    }
+  ],
+  "layers": {
+    "silhouetteProportion": 0.81,
+    "componentStructure": 0.6,
+    "formDetail": 0.3,
+    "materialSurface": 0.3,
+    "lightingCamera": 0.8
+  }
+}

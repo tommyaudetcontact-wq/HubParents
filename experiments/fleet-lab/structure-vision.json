@@ -1,0 +1,33 @@
+{
+  "score": 0.81,
+  "action": "continue",
+  "summary": "Structural scope: four independent doors carry glazing, gaskets, handle and liner; fixed quarter panes, separate decks, four spinning wheel pivots and closed wells/cabin. Surface shape remains intentionally unfinished.",
+  "notes": "Compared front three-quarter and side. Four-door seams, frame attachment and closed wheel wells are present. Cabin has floor, seats, headrests, dash and wheel. Nose lacks lamps and sculpted shoulder, rims remain schematic, chassis edge protrudes: these are specific pending form tasks, not accepted final appearance.",
+  "features": [
+    {
+      "id": "silhouette",
+      "score": 0.8,
+      "visibleInPair": true,
+      "notes": "Three-box sedan; no proportion regression."
+    },
+    {
+      "id": "wheel-arch",
+      "score": 0.82,
+      "visibleInPair": true,
+      "notes": "Arch cutouts, well backs and inset wheel assemblies."
+    },
+    {
+      "id": "cabin",
+      "score": 0.81,
+      "visibleInPair": true,
+      "notes": "Four doors and fixed quarter panes follow shared analytic cabin surface; frames attached to their respective door groups."
+    }
+  ],
+  "layers": {
+    "silhouetteProportion": 0.8,
+    "componentStructure": 0.81,
+    "formDetail": 0.5,
+    "materialSurface": 0.55,
+    "lightingCamera": 0.76
+  }
+}

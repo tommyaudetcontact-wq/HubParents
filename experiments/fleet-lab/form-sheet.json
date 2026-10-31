@@ -1,0 +1,9 @@
+{
+  "comparisonImage": "C:\\Users\\recto\\Documents\\Codex\\2026-10-15\\voic\\work\\BrawlAcademy3D\\experiments\\fleet-lab\\form-comparison.png",
+  "referenceImage": "C:\\Users\\recto\\Documents\\Codex\\2026-10-15\\voic\\work\\BrawlAcademy3D\\experiments\\fleet-lab\\reference-regions\\canonical.png",
+  "renderScreenshot": "C:\\Users\\recto\\Documents\\Codex\\2026-10-15\\voic\\work\\BrawlAcademy3D\\experiments\\fleet-lab\\form-match.png",
+  "layout": "left=reference,right=render",
+  "panelWidth": 720,
+  "panelHeight": 300,
+  "note": "Send this image to AI vision for global, layer, and semantic feature scores; this script does not score."
+}

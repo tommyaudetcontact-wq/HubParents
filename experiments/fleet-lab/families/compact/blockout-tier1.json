@@ -1,0 +1,209 @@
+{
+  "passed": true,
+  "checks": {
+    "silhouetteIoU": 0.9259,
+    "aspectRatioDelta": 0.0289,
+    "scaleDelta": 0.01,
+    "bilateralSymmetryError": 0.1708,
+    "colorDelta": {
+      "checked": 47,
+      "maxDeltaE": 46.48,
+      "perComponent": [
+        {
+          "componentId": "root",
+          "deltaE": 8.03
+        },
+        {
+          "componentId": "chassis",
+          "deltaE": 2.19
+        },
+        {
+          "componentId": "hood",
+          "deltaE": 7.75
+        },
+        {
+          "componentId": "trunk",
+          "deltaE": 7.75
+        },
+        {
+          "componentId": "roof",
+          "deltaE": 7.75
+        },
+        {
+          "componentId": "front-fascia",
+          "deltaE": 7.75
+        },
+        {
+          "componentId": "rear-fascia",
+          "deltaE": 7.75
+        },
+        {
+          "componentId": "fender-left",
+          "deltaE": 7.75
+        },
+        {
+          "componentId": "wheel-well-left",
+          "deltaE": 2.19
+        },
+        {
+          "componentId": "door-left-0",
+          "deltaE": 7.75
+        },
+        {
+          "componentId": "glass-left-0",
+          "deltaE": 31.11
+        },
+        {
+          "componentId": "frame-left-0",
+          "deltaE": 7.75
+        },
+        {
+          "componentId": "handle-left-0",
+          "deltaE": 27.66
+        },
+        {
+          "componentId": "quarter-left",
+          "deltaE": 31.11
+        },
+        {
+          "componentId": "mirror-left",
+          "deltaE": 7.75
+        },
+        {
+          "componentId": "wheel-left-front",
+          "deltaE": 4.43
+        },
+        {
+          "componentId": "rim-left-front",
+          "deltaE": 27.66
+        },
+        {
+          "componentId": "wheel-left-rear",
+          "deltaE": 4.43
+        },
+        {
+          "componentId": "rim-left-rear",
+          "deltaE": 27.66
+        },
+        {
+          "componentId": "fender-right",
+          "deltaE": 7.75
+        },
+        {
+          "componentId": "wheel-well-right",
+          "deltaE": 2.19
+        },
+        {
+          "componentId": "door-right-0",
+          "deltaE": 7.75
+        },
+        {
+          "componentId": "glass-right-0",
+          "deltaE": 31.11
+        },
+        {
+          "componentId": "frame-right-0",
+          "deltaE": 7.75
+        },
+        {
+          "componentId": "handle-right-0",
+          "deltaE": 27.66
+        },
+        {
+          "componentId": "quarter-right",
+          "deltaE": 31.11
+        },
+        {
+          "componentId": "mirror-right",
+          "deltaE": 7.75
+        },
+        {
+          "componentId": "wheel-right-front",
+          "deltaE": 4.43
+        },
+        {
+          "componentId": "rim-right-front",
+          "deltaE": 27.66
+        },
+        {
+          "componentId": "wheel-right-rear",
+          "deltaE": 4.43
+        },
+        {
+          "componentId": "rim-right-rear",
+          "deltaE": 27.66
+        },
+        {
+          "componentId": "windshield",
+          "deltaE": 31.11
+        },
+        {
+          "componentId": "rear-window",
+          "deltaE": 31.11
+        },
+        {
+          "componentId": "engine-bay",
+          "deltaE": 2.19
+        },
+        {
+          "componentId": "engine",
+          "deltaE": 2.19
+        },
+        {
+          "componentId": "cargo-liner",
+          "deltaE": 2.19
+        },
+        {
+          "componentId": "dashboard",
+          "deltaE": 2.19
+        },
+        {
+          "componentId": "seat-front-left",
+          "deltaE": 2.19
+        },
+        {
+          "componentId": "seat-front-right",
+          "deltaE": 2.19
+        },
+        {
+          "componentId": "seat-rear",
+          "deltaE": 2.19
+        },
+        {
+          "componentId": "steering-wheel",
+          "deltaE": 2.19
+        },
+        {
+          "componentId": "grille",
+          "deltaE": 2.19
+        },
+        {
+          "componentId": "headlights",
+          "deltaE": 46.0
+        },
+        {
+          "componentId": "tail-lamps",
+          "deltaE": 5.28
+        },
+        {
+          "componentId": "indicators",
+          "deltaE": 46.48
+        },
+        {
+          "componentId": "bumpers",
+          "deltaE": 27.66
+        },
+        {
+          "componentId": "window-gaskets",
+          "deltaE": 4.43
+        }
+      ],
+      "gated": false
+    }
+  },
+  "failures": [],
+  "maskWarnings": [],
+  "renderHash": "e0dba1ae64f4a1b5",
+  "passId": "blockout",
+  "mapStrippedRender": "C:\\Users\\recto\\Documents\\Codex\\2026-10-15\\voic\\work\\BrawlAcademy3D\\experiments\\fleet-lab\\families\\compact\\blockout-match.png"
+}

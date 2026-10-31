@@ -1,0 +1,39 @@
+{
+  "score": 0.79,
+  "action": "continue",
+  "summary": "Surface scope: shallow reflector lenses, molded tire ribs and brake discs create real geometric local relief; clean uniform paint remains intentionally free of invented grime.",
+  "notes": "Compared front and profile: round reflectors visible within square housings, brake discs behind exposed spokes, molded ribs subtle at this scale. Fine concept reflection patterns remain approximate. No procedural noise added to clean paint.",
+  "features": [
+    {
+      "id": "silhouette",
+      "score": 0.8,
+      "visibleInPair": true,
+      "notes": "Retained geometry identity, no material-induced loss."
+    },
+    {
+      "id": "wheel-arch",
+      "score": 0.8,
+      "visibleInPair": true,
+      "notes": "Retained geometry identity, no material-induced loss."
+    },
+    {
+      "id": "cabin",
+      "score": 0.8,
+      "visibleInPair": true,
+      "notes": "Retained geometry identity, no material-induced loss."
+    },
+    {
+      "id": "front-rear-identity",
+      "score": 0.8,
+      "visibleInPair": true,
+      "notes": "Retained geometry identity, no material-induced loss."
+    }
+  ],
+  "layers": {
+    "silhouetteProportion": 0.8,
+    "componentStructure": 0.83,
+    "formDetail": 0.81,
+    "materialSurface": 0.75,
+    "lightingCamera": 0.7
+  }
+}

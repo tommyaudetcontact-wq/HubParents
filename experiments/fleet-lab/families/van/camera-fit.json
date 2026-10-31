@@ -1,0 +1,59 @@
+{
+  "family": "van",
+  "yaw": 0.7195021131381576,
+  "pitch": 0.042674782657206214,
+  "fov": 16.91430446929112,
+  "distance": 11.240363326774135,
+  "lookY": 0.9597886550712982,
+  "offsetX": 58.86238932191054,
+  "width": 1536,
+  "height": 1024,
+  "normalizedRms": 0.9832316918272312,
+  "projected": {
+    "box": [
+      79.18599119855656,
+      149.75809926882556,
+      1500.1956048200577,
+      879.0654019676883
+    ],
+    "centers": [
+      [
+        821.8931917587918,
+        751.6983335419991
+      ],
+      [
+        188.5171618025942,
+        673.5324288517033
+      ]
+    ],
+    "radii": [
+      130.14121175476134,
+      103.92921582708135
+    ]
+  },
+  "reference": {
+    "front": [
+      820,
+      738
+    ],
+    "rear": [
+      203,
+      666
+    ],
+    "radii": [
+      150,
+      113
+    ],
+    "width": 1536,
+    "height": 1024,
+    "bbox": [
+      59,
+      173,
+      1498,
+      893
+    ],
+    "confidence": 0.7,
+    "note": "Wheel landmarks estimated visually, +/- 15 pixels; alpha bbox measured from generated isolated reference. No claim of calibrated real camera."
+  },
+  "note": "Camera-only least-squares fit, not geometry deformation. Visually estimated wheel landmarks; requires browser comparison before acceptance."
+}

@@ -1,0 +1,2 @@
+STATUS pass=form-refinement completed=2 blocked=none next=forge/stage4_review/append_review.py C:\Users\recto\Documents\Codex\2026-10-15\voic\work\BrawlAcademy3D\experiments\fleet-lab\families\compact\sculpt-spec.json --pass-id form-refinement
+C:\Users\recto\Documents\Codex\2026-10-15\voic\work\BrawlAcademy3D\experiments\fleet-lab\families\compact\sculpt-spec.json

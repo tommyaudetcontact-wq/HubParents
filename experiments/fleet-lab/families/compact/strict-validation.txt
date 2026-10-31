@@ -1,0 +1,3 @@
+FAIL
+warning: quality: component 'rear-window' attachment.parentId 'root' does not match parent 'trunk'
+error: strict quality failure: component 'rear-window' attachment.parentId 'root' does not match parent 'trunk'
