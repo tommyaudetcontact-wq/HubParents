@@ -39,8 +39,8 @@
   const feet={};let compression=0;
   for(const [side,shift]of [['l',0],['r',.5]]){const u=(cycle+shift)%1,f=foot(u,jog),sole=root.BrawlRiffImage?.footSoles?.[side];if(sole?.length)f.z=.4-Math.min(...sole.map(([y,z])=>y*Math.cos(f.pitch)-z*Math.sin(f.pitch)))+f.lift;feet[side]=f;
    f.y=mix(rest[side+'f'][1],f.y,strength);f.z=mix(rest[side+'f'][2],f.z,strength);f.pitch*=strength;
-   // Reach correction is continuous through the walk/jog stance boundary.
-   {const hip=rotate(q.hip,rest[side+'l'],rest.hip,pelvisYaw),reach=length(rest,side+'l',side+'k')+length(rest,side+'k',side+'f')-.01,horizontal=(rest[side+'f'][0]-hip[0])**2+(f.y-hip[1])**2;compression=Math.max(compression,hip[2]-f.z-Math.sqrt(Math.max(0,reach*reach-horizontal)));}
+   // Keep a small knee bend: a nearly straight two-bone chain has an unstable angular derivative.
+   {const hip=rotate(q.hip,rest[side+'l'],rest.hip,pelvisYaw),reach=length(rest,side+'l',side+'k')+length(rest,side+'k',side+'f')-.7,horizontal=(rest[side+'f'][0]-hip[0])**2+(f.y-hip[1])**2;compression=Math.max(compression,hip[2]-f.z-Math.sqrt(Math.max(0,reach*reach-horizontal)));}
   }
   if(compression>0)for(const key of ['hip','chest','head'])q[key][2]-=compression;
   for(const [side,sign,shift]of [['l',-1,0],['r',1,.5]]){

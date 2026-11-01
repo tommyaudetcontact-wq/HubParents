@@ -1,0 +1,14 @@
+'use strict';
+// Bake the original painter order into disjoint convex ground polygons, without a texture atlas.
+(function(root){
+ const epsilon=1e-8;
+ function bounds(face){const p=face.points;if(face.line||face.texture||!p||p.length!==4||p.some(q=>!Number.isFinite(q.x)||!Number.isFinite(q.y)||Math.abs(q.z||0)>1e-7))return null;const x=Math.min(...p.map(q=>q.x)),r=Math.max(...p.map(q=>q.x)),y=Math.min(...p.map(q=>q.y)),b=Math.max(...p.map(q=>q.y));if(r<=x||b<=y||p.some(q=>!(q.x===x||q.x===r)||!(q.y===y||q.y===b)))return null;return {x,y,r,b,face};}
+ function subtract(a,b){const x=Math.max(a.x,b.x),r=Math.min(a.r,b.r),y=Math.max(a.y,b.y),bottom=Math.min(a.b,b.b);if(x>=r||y>=bottom)return [a];const out=[];if(a.y<y)out.push({...a,b:y});if(bottom<a.b)out.push({...a,y:bottom});if(a.x<x)out.push({...a,y,b:bottom,r:x});if(r<a.r)out.push({...a,x:r,y,b:bottom});return out;}
+ const area=p=>p.reduce((s,a,i)=>{const b=p[(i+1)%p.length];return s+a.x*b.y-b.x*a.y;},0)/2;
+ function polygon(face){const p=face.points;if(face.line||face.texture||!p||p.length<3||p.some(q=>!Number.isFinite(q.x)||!Number.isFinite(q.y)||Math.abs(q.z||0)>1e-7))return null;const sign=Math.sign(area(p));if(!sign)return null;for(let i=0;i<p.length;i++){const a=p[i],b=p[(i+1)%p.length],c=p[(i+2)%p.length];if(((b.x-a.x)*(c.y-b.y)-(b.y-a.y)*(c.x-b.x))*sign<-epsilon)return null;}return p.map(q=>({x:q.x,y:q.y}));}
+ function split(p,a,b,sign){const inside=[],outside=[],side=q=>((b.x-a.x)*(q.y-a.y)-(b.y-a.y)*(q.x-a.x))*sign;for(let i=0;i<p.length;i++){const u=p[i],v=p[(i+1)%p.length],du=side(u),dv=side(v);if(du>=-epsilon)inside.push(u);if(du<=epsilon)outside.push(u);if(du>epsilon&&dv<-epsilon||du<-epsilon&&dv>epsilon){const t=du/(du-dv),q={x:u.x+(v.x-u.x)*t,y:u.y+(v.y-u.y)*t};inside.push(q);outside.push(q);}}return [inside,outside];}
+ const box=p=>({x:Math.min(...p.map(q=>q.x)),r:Math.max(...p.map(q=>q.x)),y:Math.min(...p.map(q=>q.y)),b:Math.max(...p.map(q=>q.y))});
+ function cut(p,clip){let remainder=p;const out=[],sign=Math.sign(area(clip));for(let i=0;i<clip.length&&remainder.length>=3;i++){const [inside,outside]=split(remainder,clip[i],clip[(i+1)%clip.length],sign);if(outside.length>=3&&Math.abs(area(outside))>epsilon)out.push(outside);remainder=inside;}return out;}
+ function flatten(faces){let tiles=[];const other=[];for(const face of faces||[]){const p=polygon(face);if(!p){other.push(face);continue;}const r=box(p);tiles=tiles.flatMap(t=>{if(t.box.x>=r.r||t.box.r<=r.x||t.box.y>=r.b||t.box.b<=r.y)return [t];return cut(t.p,p).map(p=>({p,box:box(p),face:t.face}));});tiles.push({p,box:r,face});}return tiles.map(t=>({...t.face,ground:true,points:t.p.map(q=>({...q,z:-.05}))})).concat(other);}
+ const api={flatten,bounds,subtract,polygon,area};if(typeof module!=='undefined')module.exports=api;else root.CityThreeGround=api;
+})(typeof window==='undefined'?globalThis:window);

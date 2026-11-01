@@ -21,7 +21,7 @@
    if(large)plane.large.push(box);else for(let x=x0;x<=x1;x++)for(let y=y0;y<=y1;y++){const k=x+':'+y;if(!plane.cells.has(k))plane.cells.set(k,[]);plane.cells.get(k).push(box);}
    if(!box.rank)return face;
    let sign=1;const outward=face.surface?.normal;if(outward&&outward.reduce((s,v,i)=>s+v*n[i],0)<0)sign=-1;
-   const lift=Math.min(box.rank,32)*.04*sign;
+   const lift=box.rank*.04*sign;
    return {...face,points:p.map(q=>({...q,x:q.x+n[0]*lift,y:q.y+n[1]*lift,z:q.z+n[2]*lift}))};
   });
  }
