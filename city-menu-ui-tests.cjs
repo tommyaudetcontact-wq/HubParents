@@ -5,7 +5,7 @@ const modal={open:true,querySelector:()=>page?{dataset:{hubPage:page}}:null};
 const sc={BrawlCore:C,App:{profile:()=>({id:'ui'}),popup:h=>html=h,closeModal:()=>{modal.open=false;closed++;},catalogOpen:()=>catalog,backCityCatalog:()=>{catalog=false;backCatalogue++;}},CityNetwork:{room:()=>null},document:{getElementById:id=>id==='modal'?modal:null,addEventListener:(n,f)=>(events[n]??=[]).push(f)}};sc.window=sc;vm.createContext(sc);
 vm.runInContext(fs.readFileSync('city-navigation.js','utf8'),sc);vm.runInContext(fs.readFileSync('city-ui.js','utf8'),sc);
 sc.CityNavigation.mount({stop(){}});sc.App.popup=h=>{html=h;page=/<section[^>]+data-hub-page="([^"]+)"/.exec(h)?.[1]||null;};
-sc.CityNavigation.menu('sports');assert(sc.CityUI.back());assert.equal(page,'activities');assert(sc.CityUI.back());assert.equal(page,'home');assert.equal(sc.CityUI.back(),false,'At root, native/gamepad back may close the menu');
+sc.CityNavigation.menu('home');assert(html.includes('Mes véhicules'));assert(html.includes('data-nav-action="garage"'));sc.CityNavigation.menu('sports');assert(sc.CityUI.back());assert.equal(page,'activities');assert(sc.CityUI.back());assert.equal(page,'home');assert.equal(sc.CityUI.back(),false,'At root, native/gamepad back may close the menu');
 page=null;catalog=true;assert(sc.CityUI.back());assert.equal(closed,1,'A product dialog returns to its catalogue without losing the city');assert(catalog);
 modal.open=false;assert(sc.CityUI.back());assert.equal(backCatalogue,1,'Native back navigates the catalogue before leaving it');
 for(const category of ['vehicles','style','furniture','cards','companions'])assert(sc.CityUI.catalogHome().includes('data-arg="shop/'+category+'"'));

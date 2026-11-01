@@ -10,8 +10,8 @@ window.CityNavigation=(()=>{
  function soundsEnabled(){return window.CityAudio?.enabled()??soundOn;}
  function toggleSounds(){soundOn=!soundsEnabled();window.CityAudio?.setEnabled(soundOn);try{window.localStorage?.setItem(soundKey,soundOn?'on':'off');}catch{}return soundOn;}
  const pages={
-  home:['Ma ville','Choisis une catégorie','⌂',null,['city','house','activities','work','friends','settings']],
-  city:['Explorer','Se repérer et se déplacer','⌖','home',[['map','Carte de la ville','Lieux, commerces et joueurs','⌖'],['residential','Quartier résidentiel','Maisons et voisins','⌂'],['garage','Mon garage','Choisir, peindre et améliorer','▣'],['spawn','Réapparition','Poser ou retrouver ton point','⚑'],['recover','Débloquer','Remettre ton véhicule sur la route','↻']]],
+  home:['Ma ville','Choisis une catégorie','⌂',null,['city',['garage','Mes véhicules','Choisir parmi mes véhicules achetés','🚗'],'house','activities','work','friends','settings']],
+  city:['Explorer','Se repérer et se déplacer','⌖','home',[['map','Carte de la ville','Lieux, commerces et joueurs','⌖'],['residential','Quartier résidentiel','Maisons et voisins','⌂'],['garage','Mes véhicules','Choisir, peindre et améliorer','🚗'],['spawn','Réapparition','Poser ou retrouver ton point','⚑'],['recover','Débloquer','Remettre ton véhicule sur la route','↻']]],
   house:['Maison et style','Construire, meubler et personnaliser','⌂','home',[['home','Ma maison','Terrain, construction et meubles','⌂'],['shop','Boutiques','Tout le catalogue et les véhicules','🛍'],['wardrobe','Mon personnage','Visage, vêtements et skins','👤'],['inventory','Mon inventaire','Armes et jouets du mode libre','📦']]],
   activities:['Activités','Quel genre de partie ?','▶','home',['relax','sports','ride','combat']],
   relax:['Détente','Seul ou avec tes amis','✦','activities',[['bracelet','Atelier bracelets','Reproduire, gagner et revendre','📿'],['trampoline','Trampoline','Saltos et réceptions','↟'],['bowling','Bowling','Trois manches','●']]],
